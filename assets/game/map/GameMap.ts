@@ -1,17 +1,13 @@
 import {Application, Container} from 'pixi.js';
-import {HexGrid} from './HexGrid.ts';
-import {HexPopup} from './HexPopup.ts';
-import {preloadTerrainTextures} from './TerrainTextures.ts';
-import {CameraController} from './CameraController.ts';
-import {InteractionController} from './InteractionController.ts';
-import {PlayerManager} from '../player/PlayerManager.ts';
-import {DebugRenderer} from './DebugRenderer.ts';
-import {SelectionManager} from './SelectionManager.ts';
-import {SelectableHex} from './SelectableHex.ts';
-import {SelectablePlayer} from '../player/SelectablePlayer.ts';
-import {SelectionPanel} from '../ui/SelectionPanel.ts';
-import type {MapConfig} from './types.ts';
-import type {PlayerData} from '../player/types.ts';
+import {HexGrid} from './HexGrid';
+import {HexPopup} from './HexPopup';
+import {preloadTerrainTextures} from './TerrainTextures';
+import {CameraController} from './CameraController';
+import {InteractionController} from './InteractionController';
+import {PlayerManager} from '../player/PlayerManager';
+import {DebugRenderer} from './DebugRenderer';
+import type {MapConfig} from './types';
+import type {PlayerData} from '../player/types';
 
 /**
  * GameMap class manages the main game map with hexagonal tiles
@@ -35,8 +31,10 @@ export class GameMap {
   private interactionController!: InteractionController;
   private playerManager!: PlayerManager;
   private debugRenderer!: DebugRenderer;
-  private selectionManager!: SelectionManager;
-  private selectionPanel!: SelectionPanel;
+
+  // Callback functions for external handling
+  public onHexClick?: (row: number, col: number, terrainData: any) => void;
+  public onPlayerClick?: (playerData: PlayerData) => void;
 
   /**
    * Creates a new GameMap instance
@@ -47,7 +45,6 @@ export class GameMap {
   constructor(element: HTMLElement, config: MapConfig) {
     this.element = element;
     this.config = config;
-    this.init();
   }
 
   /**
@@ -67,19 +64,30 @@ export class GameMap {
    * Creates application with full screen dimensions and responsive design
    */
   async setupPixiApp(): Promise<void> {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    try {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
 
-    this.app = new Application();
-    await this.app.init({
-      background: GameMap.BACKGROUND_COLOR,
-      width: viewportWidth,
-      height: viewportHeight,
-      antialias: true
-    });
+      this.app = new Application();
+      await this.app.init({
+        background: GameMap.BACKGROUND_COLOR,
+        width: viewportWidth,
+        height: viewportHeight,
+        antialias: true
+      });
 
-    this.element.appendChild(this.app.canvas);
-    this.setupResizeHandler();
+      // Check if canvas is available before accessing it
+      if (this.app.canvas) {
+        this.element.appendChild(this.app.canvas);
+        this.setupResizeHandler();
+      } else {
+        console.error('PIXI Application canvas is not available');
+        throw new Error('Failed to create PIXI canvas');
+      }
+    } catch (error) {
+      console.error('Error setting up PIXI application:', error);
+      throw error;
+    }
   }
 
   /**
@@ -150,31 +158,24 @@ export class GameMap {
       this.worldContainer,
       this.config
     );
-
-    // Initialize selection manager
-    this.selectionManager = new SelectionManager();
-
-    // Initialize selection panel
-    this.selectionPanel = new SelectionPanel();
-    
-    // Connect selection manager to selection panel
-    this.selectionManager.onSelectionChange((data) => {
-      this.selectionPanel.onSelectionChange(data);
-    });
-    
-    // Handle clear selection events from panel
-    this.selectionPanel.getElement().addEventListener('clearSelection', () => {
-      this.selectionManager.clearSelection();
-    });
     
     // Setup player click handling
     this.hexGrid.on('playerclick', (event: any) => {
-      this.handlePlayerClick(event.playerData);
+      if (this.onPlayerClick) {
+        this.onPlayerClick(event.playerData);
+      }
     });
     
     // Setup hex click handling
     this.hexGrid.on('hexclick', (event: any) => {
-      this.onHexClick(event.row, event.col);
+      if (this.onHexClick) {
+        this.onHexClick(event.row, event.col, event.terrainData);
+      }
+      
+      // Emit custom event for game controller to handle player movement
+      this.element.dispatchEvent(new CustomEvent('hexclick', {
+        detail: { row: event.row, col: event.col }
+      }));
     });
   }
 
@@ -233,41 +234,6 @@ export class GameMap {
   getPlayer() {
     return this.playerManager.getPlayer();
   } 
-
-  /**
-   * Handles hex tile click events
-   * @param row - Row coordinate of clicked hex
-   * @param col - Column coordinate of clicked hex
-   */
-  onHexClick(row: number, col: number): void {
-    // Get terrain data for the clicked hex
-    const terrainData = this.config.mapData[row]?.[col];
-    
-    if (terrainData) {
-      // Create selectable hex object
-      const selectableHex = new SelectableHex(row, col, terrainData);
-      
-      // Select the hex
-      this.selectionManager.select(selectableHex);
-    }
-    
-    // Emit custom event for game controller to handle player movement
-    this.element.dispatchEvent(new CustomEvent('hexclick', {
-      detail: { row, col }
-    }));
-  }
-
-  /**
-   * Handles player click events
-   * @param playerData - Player data from the clicked player
-   */
-  private handlePlayerClick(playerData: any): void {
-    // Create selectable player object
-    const selectablePlayer = new SelectablePlayer(playerData);
-    
-    // Select the player
-    this.selectionManager.select(selectablePlayer);
-  }
 
   /**
    * Gets the current dragging state from interaction controller

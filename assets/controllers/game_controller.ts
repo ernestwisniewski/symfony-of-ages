@@ -1,7 +1,7 @@
 // controllers/game_controller.ts
 import {Controller} from '@hotwired/stimulus'
-import {GameMap} from '../map/GameMap.ts'
-import type { PlayerData } from '../player/types.ts'
+import {GameManager} from '../game/GameManager.ts'
+import type { PlayerData } from '../game/player/types.ts'
 
 /**
  * Interface for map configuration received from the server
@@ -50,7 +50,7 @@ interface ApiResponse {
 }
 
 /**
- * Interface for GameMap constructor options
+ * Interface for GameManager constructor options
  */
 interface GameMapOptions {
   cols: number;
@@ -62,6 +62,7 @@ interface GameMapOptions {
 /**
  * Stimulus controller for managing the hexagonal game map with player
  * Handles initialization, data loading, player creation, and movement
+ * Uses GameManager for better separation of concerns
  */
 export default class extends Controller<HTMLElement> {
   /**
@@ -74,8 +75,8 @@ export default class extends Controller<HTMLElement> {
   // Value type declarations for TypeScript
   declare readonly mapUrlValue: string;
 
-  // Game map and player instances
-  private gameMap: GameMap | null = null;
+  // Game manager instance
+  private gameManager: GameManager | null = null;
   private player: PlayerData | null = null;
 
   /**
@@ -94,7 +95,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   /**
-   * Initialize the game map
+   * Initialize the game map using GameManager
    */
   private async initializeGame(): Promise<void> {
     const response: Response = await fetch(this.mapUrlValue);
@@ -110,7 +111,8 @@ export default class extends Controller<HTMLElement> {
       mapData: responseData.data
     };
 
-    this.gameMap = new GameMap(this.element, options);
+    this.gameManager = new GameManager(this.element, options);
+    await this.gameManager.init();
     
     // Add event listener for hex clicks to handle player movement
     this.element.addEventListener('hexclick', (event: any) => {
@@ -141,8 +143,8 @@ export default class extends Controller<HTMLElement> {
         this.player = result.player;
         
         // Add player to game map
-        if (this.gameMap) {
-          this.gameMap.addPlayer(this.player);
+        if (this.gameManager) {
+          this.gameManager.addPlayer(this.player);
         }
       } else {
         console.error('Failed to create player:', result.message);
@@ -215,8 +217,8 @@ export default class extends Controller<HTMLElement> {
         this.player = result.player;
         
         // Update game map - this will center camera on player
-        if (this.gameMap) {
-          this.gameMap.updatePlayerPosition(this.player);
+        if (this.gameManager) {
+          this.gameManager.updatePlayerPosition(this.player);
         }
       }
     } catch (error) {
@@ -228,10 +230,10 @@ export default class extends Controller<HTMLElement> {
    * Stimulus disconnect lifecycle method
    */
   disconnect(): void {
-    if (this.gameMap?.app) {
-      this.gameMap.app.destroy(true);
+    if (this.gameManager) {
+      this.gameManager.destroy();
     }
-    this.gameMap = null;
+    this.gameManager = null;
     this.player = null;
   }
 }

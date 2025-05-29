@@ -1,12 +1,12 @@
 import {Assets} from 'pixi.js';
 
 // Terrain texture imports for Vite asset handling
-import plainsImg from '../images/terrain/plains.png';
-import forestImg from '../images/terrain/forest.png';
-import mountainImg from '../images/terrain/mountain.png';
-import waterImg from '../images/terrain/water.png';
-import desertImg from '../images/terrain/desert.png';
-import swampImg from '../images/terrain/swamp.png';
+import plainsImg from '../../images/terrain/plains.png';
+import forestImg from '../../images/terrain/forest.png';
+import mountainImg from '../../images/terrain/mountain.png';
+import waterImg from '../../images/terrain/water.png';
+import desertImg from '../../images/terrain/desert.png';
+import swampImg from '../../images/terrain/swamp.png';
 
 /**
  * Interface for terrain texture configuration

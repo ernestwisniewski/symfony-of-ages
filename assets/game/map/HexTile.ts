@@ -8,7 +8,7 @@ import {getTerrainTexture} from './TerrainTextures.ts';
 interface HexTileConfig {
   size: number;
   position: { x: number; y: number };
-  hoverShadow: any[];
+  hoverEffect: any[];
   terrainData: any;
 }
 
@@ -45,7 +45,7 @@ export class HexTile extends Graphics {
   private static readonly DEFAULT_TERRAIN_COLOR = 0xF8F8F8;
   
   private size: number;
-  private hoverShadow: any[];
+  private hoverEffect: any[];
   private terrainData: any;
   private terrainTexture: Texture | null = null;
   private defaultState: DefaultState;
@@ -55,10 +55,10 @@ export class HexTile extends Graphics {
    *
    * @param config - Configuration object for the hex tile
    */
-  constructor({size, position, hoverShadow, terrainData}: HexTileConfig) {
+  constructor({size, position, hoverEffect, terrainData}: HexTileConfig) {
     super();
     this.size = size;
-    this.hoverShadow = hoverShadow;
+    this.hoverEffect = hoverEffect;
     this.terrainData = terrainData;
 
     // Get base color from terrain properties for fallback
@@ -257,7 +257,7 @@ export class HexTile extends Graphics {
    * Applies hover visual effects and shadow filters
    */
   private onHoverStart(): void {
-    this.filters = this.hoverShadow;
+    this.filters = this.hoverEffect;
     this.draw(true);
   }
 

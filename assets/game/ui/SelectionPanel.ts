@@ -1,4 +1,4 @@
-import type { SelectionData } from '../map/SelectionManager.ts';
+import type { SelectionData } from 'tionManager.ts';
 
 /**
  * SelectionPanel handles the UI display for selected objects

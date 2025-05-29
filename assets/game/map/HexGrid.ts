@@ -1,8 +1,8 @@
-import {Container, ColorMatrixFilter} from 'pixi.js';
-import {DropShadowFilter} from '@pixi/filter-drop-shadow';
+import {Container} from 'pixi.js';
 import {HexTile} from './HexTile.ts';
 import {HexGeometry} from './HexGeometry.ts';
 import {HexPopup} from './HexPopup.ts';
+import {HexRenderer} from './HexRenderer.ts';
 
 /**
  * Interface for hex grid configuration
@@ -17,25 +17,15 @@ interface HexGridConfig {
 /**
  * HexGrid class manages a collection of hexagonal tiles arranged in a grid
  * Extends PIXI.Container to provide a complete hex grid with interactions and popup system
- * Handles tile creation, positioning, hover effects, and popup management
+ * Handles tile creation, positioning, and coordinates game events
  */
 export class HexGrid extends Container {
-  // Shadow effect configuration constants
-  private static readonly SHADOW_COLOR = 0x000000;
-  private static readonly SHADOW_ALPHA = 0.4;
-  private static readonly SHADOW_BLUR = 8;
-  private static readonly SHADOW_DISTANCE = 6;
-  private static readonly SHADOW_OFFSET_X = 3;
-  private static readonly SHADOW_OFFSET_Y = 3;
-  private static readonly SHADOW_QUALITY = 5;
-  private static readonly SHADOW_RESOLUTION = 2;
-  private static readonly BRIGHTNESS_MULTIPLIER = 1.15;
   private static readonly ISOMETRIC_Y_SCALE = 0.8;
   
   private config: HexGridConfig;
   public popup: HexPopup | null = null; // Will be set by GameMap
   private geometry: HexGeometry;
-  private readonly hoverShadow: any[];
+  private readonly hoverEffect: any[];
 
   /**
    * Creates a new HexGrid instance with tiles and interaction system
@@ -46,37 +36,9 @@ export class HexGrid extends Container {
     super();
     this.config = config;
     this.geometry = new HexGeometry(config.size);
-    this.hoverShadow = this.createHoverShadow();
+    this.hoverEffect = HexRenderer.createHoverEffect();
     this.buildGrid();
     this.setupPosition(); // Initialize grid position and scale
-  }
-
-  /**
-   * Creates a combined filter for hex hover effect with shadow and brightness
-   * Combines drop shadow and brightness filters for enhanced visual feedback
-   *
-   * @returns Array of PIXI filters to apply for hover effects
-   */
-  private createHoverShadow(): any[] {
-    // Create drop shadow filter
-    const shadowFilter = new DropShadowFilter({
-      color: HexGrid.SHADOW_COLOR,
-      alpha: HexGrid.SHADOW_ALPHA,           // More transparent shadow
-      blur: HexGrid.SHADOW_BLUR,
-      distance: HexGrid.SHADOW_DISTANCE,
-      offset: { x: HexGrid.SHADOW_OFFSET_X, y: HexGrid.SHADOW_OFFSET_Y },
-      quality: HexGrid.SHADOW_QUALITY
-    });
-
-    // Set resolution using the modern approach
-    shadowFilter.resolution = HexGrid.SHADOW_RESOLUTION;
-
-    // Create brightness filter for better visibility
-    const brightnessFilter = new ColorMatrixFilter();
-    brightnessFilter.brightness(HexGrid.BRIGHTNESS_MULTIPLIER, false);
-
-    // Return array of filters to apply both effects
-    return [shadowFilter, brightnessFilter];
   }
 
   /**
@@ -100,7 +62,7 @@ export class HexGrid extends Container {
         const hex = new HexTile({
           size: this.config.size,
           position,
-          hoverShadow: this.hoverShadow,
+          hoverEffect: this.hoverEffect,
           terrainData: terrainDataWithCoords
         });
 
