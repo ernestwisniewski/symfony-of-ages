@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Enum;
+namespace App\Domain\Player\Enum;
 
 /**
  * TerrainType enum defining all available terrain types for the hexagonal map

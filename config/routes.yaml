@@ -1,5 +1,17 @@
-controllers:
+map_controllers:
     resource:
         path: ../src/Application/Map/Controller
         namespace: App\Application\Map\Controller
     type: attribute
+
+game_controllers:
+    resource:
+        path: ../src/Application/Game/Controller
+        namespace: App\Application\Game\Controller
+    type: attribute
+
+player_controllers:
+    resource:
+        path: ../src/Application/Player/Controller
+        namespace: App\Application\Player\Controller
+    type: attribute 

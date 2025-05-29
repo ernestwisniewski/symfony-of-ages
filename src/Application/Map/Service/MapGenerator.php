@@ -2,7 +2,7 @@
 
 namespace App\Application\Map\Service;
 
-use App\Domain\Enum\TerrainType;
+use App\Domain\Player\Enum\TerrainType;
 
 /**
  * MapGenerator service for creating realistic hexagonal map data
