@@ -53,8 +53,6 @@ export class Player {
         this.createPlayerCircle();
         this.createDebugCrossMarker();
         this.setupSpriteInteractivity();
-        
-        console.log(`Player sprite created with hex size: ${this.hexSize}`);
     }
 
     /**
@@ -110,18 +108,29 @@ export class Player {
     private setupSpriteInteractivity(): void {
         this.sprite.eventMode = 'static';
         this.sprite.cursor = 'pointer';
+        
+        // Add click event
+        this.sprite.on('click', () => {
+            this.sprite.emit('playerclick', { playerData: this.data });
+        });
+        
+        // Add hover events for visual feedback
+        this.sprite.on('pointerover', () => {
+            this.sprite.scale.set(1.1);
+        });
+        
+        this.sprite.on('pointerout', () => {
+            this.sprite.scale.set(1.0);
+        });
     }
 
     /**
      * Update player position on the hex grid
      */
     updatePosition(position: { row: number; col: number }): void {
-        console.log(`Player updating position to hex (${position.row}, ${position.col})`);
-        
         this.data.position = position;
         
         const worldPos = this.hexGeometry.calculatePosition(position.row, position.col);
-        console.log(`Calculated world position: (${worldPos.x}, ${worldPos.y}) for hex (${position.row}, ${position.col})`);
         
         // Validate the calculated position
         if (this.isValidWorldPosition(worldPos)) {
@@ -135,7 +144,6 @@ export class Player {
      */
     private isValidWorldPosition(worldPos: { x: number, y: number }): boolean {
         if (isNaN(worldPos.x) || isNaN(worldPos.y)) {
-            console.error(`Invalid world position calculated: (${worldPos.x}, ${worldPos.y}) for hex (${this.data.position.row}, ${this.data.position.col})`);
             return false;
         }
         return true;
@@ -149,9 +157,6 @@ export class Player {
         // The HexGrid's pivot and scaling will be handled by the parent container
         this.sprite.x = worldPos.x;
         this.sprite.y = worldPos.y; // Remove the 0.8 scaling - let HexGrid handle it
-        
-        console.log(`Player sprite positioned at: (${this.sprite.x}, ${this.sprite.y}) using raw world coordinates`);
-        console.log(`HexGeometry details: width=${this.hexGeometry['width']}, height=${this.hexGeometry['height']}, stepX=${this.hexGeometry['stepX']}, stepY=${this.hexGeometry['stepY']}`);
     }
 
     /**

@@ -234,7 +234,7 @@ export class HexTile extends Graphics {
 
     this.on('pointerover', () => {
       // Check if map is not currently being dragged before triggering hover
-      const gameMap = (this.parent as any)?.parent;
+      const gameMap = this.parent?.parent?.parent as any;
       if (!gameMap || !gameMap.isDragging) {
         this.onHoverStart();
         this.emit('hexhover', {
@@ -276,7 +276,7 @@ export class HexTile extends Graphics {
    */
   private onClick(): void {
     // Check if map is not currently being dragged before triggering click
-    const gameMap = (this.parent as any)?.parent;
+    const gameMap = this.parent?.parent?.parent as any;
     if (!gameMap || !gameMap.isDragging) {
       this.emit('hexclick', {
         data: this.terrainData,

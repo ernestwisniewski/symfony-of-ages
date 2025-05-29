@@ -112,10 +112,12 @@ export default class extends Controller<HTMLElement> {
 
     this.gameMap = new GameMap(this.element, options);
     
-    // Override the onHexClick method to handle player movement
-    this.gameMap.onHexClick = this.handleHexClick.bind(this);
-    
-    console.log('Game map initialized successfully');
+    // Add event listener for hex clicks to handle player movement
+    this.element.addEventListener('hexclick', (event: any) => {
+      if (event.detail && event.detail.row !== undefined && event.detail.col !== undefined) {
+        this.handlePlayerMovement(event.detail.row, event.detail.col);
+      }
+    });
   }
 
   /**
@@ -142,8 +144,6 @@ export default class extends Controller<HTMLElement> {
         if (this.gameMap) {
           this.gameMap.addPlayer(this.player);
         }
-        
-        console.log('Player created:', result.message);
       } else {
         console.error('Failed to create player:', result.message);
       }
@@ -155,14 +155,12 @@ export default class extends Controller<HTMLElement> {
   /**
    * Handle hex tile clicks for player movement
    */
-  private async handleHexClick(row: number, col: number): Promise<void> {
+  private async handlePlayerMovement(row: number, col: number): Promise<void> {
     if (!this.player) {
-      console.log('No player available');
       return;
     }
 
     if (this.player.movementPoints <= 0) {
-      console.log('No movement points remaining');
       return;
     }
 
@@ -171,11 +169,9 @@ export default class extends Controller<HTMLElement> {
     const distance = this.calculateHexDistance(currentPos.row, currentPos.col, row, col);
     
     if (distance > 1) {
-      console.log('Can only move to adjacent hexes');
       return;
     }
 
-    console.log(`Attempting to move from (${currentPos.row}, ${currentPos.col}) to (${row}, ${col})`);
     await this.movePlayer(row, col);
   }
 
@@ -216,20 +212,12 @@ export default class extends Controller<HTMLElement> {
       
       if (result.success && result.player) {
         // Update local player data
-        const oldPosition = this.player ? this.player.position : null;
         this.player = result.player;
-        
-        console.log(`Player moved from (${oldPosition?.row}, ${oldPosition?.col}) to (${this.player.position.row}, ${this.player.position.col})`);
-        console.log(`Movement points: ${this.player.movementPoints}/${this.player.maxMovementPoints}`);
         
         // Update game map - this will center camera on player
         if (this.gameMap) {
           this.gameMap.updatePlayerPosition(this.player);
         }
-        
-        console.log('Player moved successfully:', result.message);
-      } else {
-        console.log('Movement failed:', result.message);
       }
     } catch (error) {
       console.error('Error moving player:', error);

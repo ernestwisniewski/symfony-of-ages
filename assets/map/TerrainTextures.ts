@@ -43,22 +43,15 @@ const TERRAIN_TEXTURES: TerrainTextureConfig = {
  * @returns Promise that resolves when all textures are loaded
  */
 export async function preloadTerrainTextures(): Promise<void> {
-  const texturePromises: Promise<void>[] = [];
+  const loadPromises = Object.entries(TERRAIN_TEXTURES).map(async ([terrainType, texturePath]) => {
+    try {
+      await Assets.load(texturePath);
+    } catch (error) {
+      console.warn(`Failed to load texture for ${terrainType}:`, error);
+    }
+  });
 
-  for (const [terrainType, texturePath] of Object.entries(TERRAIN_TEXTURES)) {
-    const promise = Assets.load(texturePath)
-      .then(() => {
-        // Texture loaded successfully
-        console.log(`Loaded texture for ${terrainType}:`, texturePath);
-      })
-      .catch((error: Error) => {
-        console.warn(`Failed to load texture for ${terrainType}:`, error);
-      });
-
-    texturePromises.push(promise);
-  }
-
-  await Promise.all(texturePromises);
+  await Promise.all(loadPromises);
 }
 
 /**

@@ -86,18 +86,22 @@ export class HexGrid extends Container {
   private buildGrid(): void {
     const hexes: HexTile[] = [];
 
-    console.log(`Building grid: ${this.config.rows} x ${this.config.cols} hexes`);
-
     for (let r = 0; r < this.config.rows; r++) {
       for (let c = 0; c < this.config.cols; c++) {
         const position = this.geometry.calculatePosition(r, c);
         const terrainData = this.config.mapData[r][c];
 
+        // Add coordinates to terrain data for easier access
+        const terrainDataWithCoords = {
+          ...terrainData,
+          coordinates: { row: r, col: c }
+        };
+
         const hex = new HexTile({
           size: this.config.size,
           position,
           hoverShadow: this.hoverShadow,
-          terrainData
+          terrainData: terrainDataWithCoords
         });
 
         this.setupHexInteraction(hex);
@@ -105,13 +109,10 @@ export class HexGrid extends Container {
       }
     }
 
-    console.log(`Created ${hexes.length} hex tiles, adding to container...`);
     this.addChild(...hexes);
-    console.log(`Container now has ${this.children.length} children`);
     
     // Force bounds recalculation after adding children
-    const testBounds = this.getBounds();
-    console.log(`Bounds after adding children: x=${testBounds.x}, y=${testBounds.y}, w=${testBounds.width}, h=${testBounds.height}`);
+    this.getBounds();
   }
 
   /**
@@ -122,7 +123,7 @@ export class HexGrid extends Container {
    */
   private setupHexInteraction(hex: HexTile): void {
     hex.on('hexhover', (event: any) => {
-      const gameMap = this.parent as any;
+      const gameMap = this.parent?.parent as any;
       if (gameMap && !gameMap.isDragging && this.popup) {
         this.popup.show(event.data);
       }
@@ -135,18 +136,20 @@ export class HexGrid extends Container {
     });
 
     hex.on('hexclick', (event: any) => {
-      const gameMap = this.parent as any;
+      const gameMap = this.parent?.parent as any;
+      
       if (gameMap && !gameMap.isDragging) {
         // Show popup if available
         if (this.popup) {
           this.popup.show(event.data);
         }
         
-        // Pass click to GameMap with coordinates
-        if (gameMap.onHexClick && event.data.terrainData) {
-          // Extract row and col from terrain data or calculate from position
-          const { row, col } = this.getHexCoordinates(event.data);
-          gameMap.onHexClick(row, col);
+        // Extract coordinates and emit event for GameMap to handle
+        if (event.data) {
+          const { row, col } = this.getHexCoordinates(event);
+          
+          // Emit event that GameMap can listen to
+          this.emit('hexclick', { row, col, terrainData: event.data });
         }
       }
     });
@@ -159,10 +162,12 @@ export class HexGrid extends Container {
    */
   private getHexCoordinates(eventData: any): { row: number; col: number } {
     // Try to get coordinates from terrain data first
-    if (eventData.terrainData && eventData.terrainData.coordinates) {
+    // HexTile emits with { data: terrainData, position: ... }
+    const terrainData = eventData.data;
+    if (terrainData && terrainData.coordinates) {
       return {
-        row: eventData.terrainData.coordinates.row,
-        col: eventData.terrainData.coordinates.col
+        row: terrainData.coordinates.row,
+        col: terrainData.coordinates.col
       };
     }
     
@@ -180,16 +185,12 @@ export class HexGrid extends Container {
    */
   private setupPosition(): void {
     const bounds = this.getBounds();
-    console.log('HexGrid setupPosition - raw bounds:', bounds);
     
     const centerPosition = this.calculateGridCenter(bounds);
     this.pivot.set(centerPosition.x, centerPosition.y);
     
     // Apply isometric scaling for visual perspective
     this.scale.y = HexGrid.ISOMETRIC_Y_SCALE;
-    
-    console.log(`HexGrid setupPosition - pivot set to: (${this.pivot.x}, ${this.pivot.y})`);
-    console.log(`HexGrid setupPosition - scale set to: (${this.scale.x}, ${this.scale.y})`);
   }
 
   /**
@@ -214,16 +215,11 @@ export class HexGrid extends Container {
    * Calculates center manually when bounds are empty
    */
   private calculateCenterManually(): { x: number, y: number } {
-    console.log('Bounds are empty, calculating center manually...');
-    
     const cornerPositions = this.getCornerPositions();
     const actualBounds = this.calculateActualBounds(cornerPositions);
     
     const centerX = (actualBounds.minX + actualBounds.maxX) / 2;
     const centerY = (actualBounds.minY + actualBounds.maxY) / 2;
-    
-    console.log(`Manual calculation: bounds from (${actualBounds.minX}, ${actualBounds.minY}) to (${actualBounds.maxX}, ${actualBounds.maxY})`);
-    console.log(`Manual center: (${centerX}, ${centerY})`);
     
     return { x: centerX, y: centerY };
   }
@@ -271,7 +267,6 @@ export class HexGrid extends Container {
   private calculateCenterFromBounds(bounds: any): { x: number, y: number } {
     const centerX = bounds.x + (bounds.width / 2);
     const centerY = bounds.y + (bounds.height / 2);
-    console.log(`Using getBounds center: (${centerX}, ${centerY})`);
     return { x: centerX, y: centerY };
   }
 }

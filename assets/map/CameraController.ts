@@ -48,7 +48,7 @@ export class CameraController {
     const initialScale = targetHexScreenWidth / hexWidth;
 
     const clampedInitialScale = Math.max(this.minScale, Math.min(this.maxScale, initialScale));
-
+    
     this.worldContainer.scale.x = clampedInitialScale;
     this.worldContainer.scale.y = clampedInitialScale * CameraController.ISOMETRIC_Y_SCALE;
   }
@@ -77,8 +77,6 @@ export class CameraController {
     this.minScale = Math.max(minZoomFromHexSize, CameraController.ABSOLUTE_MIN_SCALE);
     this.maxScale = Math.min(maxZoomFromHexSize, CameraController.ABSOLUTE_MAX_SCALE);
     this.maxScale = Math.max(this.maxScale, this.minScale * 2);
-
-    console.log(`Zoom limits: min=${this.minScale.toFixed(3)}, max=${this.maxScale.toFixed(3)}`);
   }
 
   /**
@@ -111,8 +109,6 @@ export class CameraController {
     this.worldContainer.position.x = cameraPosition.x;
     this.worldContainer.position.y = cameraPosition.y;
     
-    console.log(`Camera positioned at (${this.worldContainer.position.x}, ${this.worldContainer.position.y}), screen center: (${cameraPosition.centerX}, ${cameraPosition.centerY})`);
-    
     this.isCenteringOnPlayer = false;
   }
 
@@ -123,11 +119,9 @@ export class CameraController {
     const playerWorldSize = this.config.size * CameraController.PLAYER_RADIUS_RATIO;
     const optimalScale = CameraController.TARGET_PLAYER_SCREEN_SIZE / playerWorldSize;
     const clampedScale = Math.max(this.minScale, Math.min(this.maxScale, optimalScale));
-
+    
     this.worldContainer.scale.x = clampedScale;
     this.worldContainer.scale.y = clampedScale * CameraController.ISOMETRIC_Y_SCALE;
-
-    console.log(`Optimal zoom set: ${clampedScale} (target: ${optimalScale})`);
   }
 
   /**
@@ -189,8 +183,6 @@ export class CameraController {
     const screenWidth = this.app.screen.width;
     const screenHeight = this.app.screen.height;
     
-    console.log(`Camera constraint: scale=${scale.toFixed(3)}, margin=${adaptiveMargin.toFixed(1)}, mapSize=(${mapScreenWidth.toFixed(0)}, ${mapScreenHeight.toFixed(0)}), screen=(${screenWidth}, ${screenHeight})`);
-    
     const currentPosition = {
       x: this.worldContainer.position.x,
       y: this.worldContainer.position.y
@@ -222,8 +214,6 @@ export class CameraController {
       maxY: screenHeight - adaptiveMargin + (mapScreenHeight / 2)
     };
     
-    console.log(`World bounds: X(${bounds.minX.toFixed(0)} to ${bounds.maxX.toFixed(0)}), Y(${bounds.minY.toFixed(0)} to ${bounds.maxY.toFixed(0)}), current=(${currentPosition.x.toFixed(0)}, ${currentPosition.y.toFixed(0)})`);
-    
     let newX = currentPosition.x;
     let newY = currentPosition.y;
     
@@ -240,10 +230,8 @@ export class CameraController {
 
   private constrainAxisPosition(current: number, min: number, max: number, axis: string): number {
     if (current < min) {
-      console.log(`Constraining ${axis} left: ${current.toFixed(0)} -> ${min.toFixed(0)}`);
       return min;
     } else if (current > max) {
-      console.log(`Constraining ${axis} right: ${current.toFixed(0)} -> ${max.toFixed(0)}`);
       return max;
     }
     return current;

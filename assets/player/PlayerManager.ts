@@ -22,21 +22,25 @@ export class PlayerManager {
   }
 
   /**
-   * Adds a player to the game map
+   * Adds a player to the map
+   * @param playerData - Player data from backend
    */
   addPlayer(playerData: PlayerData): void {
-    if (this.player) {
-      this.removePlayer();
-    }
+    // Remove existing player if any
+    this.removePlayer();
 
+    // Create new player sprite
     this.player = new Player(playerData, this.config.size);
     this.hexGrid.addChild(this.player.sprite);
-    
+
+    // Setup player click handling
+    this.player.sprite.on('playerclick', (event: any) => {
+      this.hexGrid.emit('playerclick', event);
+    });
+
     // Set optimal zoom for player visibility and center camera
     this.cameraController.setOptimalPlayerZoom();
     this.centerCameraOnPlayer();
-    
-    console.log(`Player added at position (${playerData.position.row}, ${playerData.position.col})`);
   }
 
   /**
@@ -92,10 +96,6 @@ export class PlayerManager {
     // Player is now inside hexGrid, so we need to account for hexGrid's transform
     const playerWorldX = hexGridWorldX + (playerSprite.x - this.hexGrid.pivot.x) * this.hexGrid.scale.x;
     const playerWorldY = hexGridWorldY + (playerSprite.y - this.hexGrid.pivot.y) * this.hexGrid.scale.y;
-    
-    console.log(`Centering camera on player at local position (${playerSprite.x}, ${playerSprite.y})`);
-    console.log(`HexGrid position: (${hexGridWorldX}, ${hexGridWorldY}), pivot: (${this.hexGrid.pivot.x}, ${this.hexGrid.pivot.y}), scale: (${this.hexGrid.scale.x}, ${this.hexGrid.scale.y})`);
-    console.log(`Player world position: (${playerWorldX}, ${playerWorldY})`);
     
     return { x: playerWorldX, y: playerWorldY };
   }

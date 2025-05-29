@@ -17,58 +17,41 @@ export class DebugRenderer {
 
   private worldContainer: Container;
   private config: MapConfig;
+  private hexGeometry: HexGeometry;
 
   constructor(worldContainer: Container, config: MapConfig) {
     this.worldContainer = worldContainer;
     this.config = config;
+    this.hexGeometry = new HexGeometry(this.config.size);
   }
 
   /**
-   * Adds debug markers to visualize grid positioning
+   * Add debug markers to the map
    */
   addDebugMarkers(): void {
-    this.addZeroHexMarker();
-    this.addCenterHexMarker();
-  }
+    // Mark hex (0,0) position
+    const zeroPos = this.hexGeometry.calculatePosition(0, 0);
+    const zeroMarker = this.createMarker(0xFF0000, 10); // Red marker
+    zeroMarker.position.set(zeroPos.x, zeroPos.y);
+    this.worldContainer.addChild(zeroMarker);
 
-  /**
-   * Adds a debug marker at hex position (0,0)
-   */
-  private addZeroHexMarker(): void {
-    const hexGeometry = new HexGeometry(this.config.size);
-    const zeroPos = hexGeometry.calculatePosition(0, 0);
-    
-    const marker = this.createDebugMarker(DebugRenderer.DEBUG_HEX_ZERO_COLOR);
-    marker.position.set(zeroPos.x, zeroPos.y);
-    this.worldContainer.addChild(marker);
-    
-    console.log(`Debug: hex(0,0) marker placed at world position (${zeroPos.x}, ${zeroPos.y})`);
-  }
-
-  /**
-   * Adds a debug marker at the center hex position
-   */
-  private addCenterHexMarker(): void {
-    const hexGeometry = new HexGeometry(this.config.size);
+    // Mark center hex position
     const centerRow = Math.floor(this.config.rows / 2);
     const centerCol = Math.floor(this.config.cols / 2);
-    const centerPos = hexGeometry.calculatePosition(centerRow, centerCol);
-    
-    const marker = this.createDebugMarker(DebugRenderer.DEBUG_HEX_CENTER_COLOR);
-    marker.position.set(centerPos.x, centerPos.y);
-    this.worldContainer.addChild(marker);
-    
-    console.log(`Debug: hex(${centerRow},${centerCol}) marker placed at world position (${centerPos.x}, ${centerPos.y})`);
+    const centerPos = this.hexGeometry.calculatePosition(centerRow, centerCol);
+    const centerMarker = this.createMarker(0x00FF00, 8); // Green marker
+    centerMarker.position.set(centerPos.x, centerPos.y);
+    this.worldContainer.addChild(centerMarker);
   }
 
   /**
    * Creates a debug marker with specified color
    */
-  private createDebugMarker(color: number): Container {
+  private createMarker(color: number, radius: number): Container {
     const marker = new Container();
     const graphics = new Graphics();
     
-    graphics.circle(0, 0, DebugRenderer.DEBUG_MARKER_RADIUS);
+    graphics.circle(0, 0, radius);
     graphics.fill({ color: color, alpha: DebugRenderer.DEBUG_MARKER_ALPHA });
     graphics.moveTo(-DebugRenderer.DEBUG_MARKER_SIZE, 0);
     graphics.lineTo(DebugRenderer.DEBUG_MARKER_SIZE, 0);

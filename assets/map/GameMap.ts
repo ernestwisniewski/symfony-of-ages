@@ -6,6 +6,10 @@ import {CameraController} from './CameraController.ts';
 import {InteractionController} from './InteractionController.ts';
 import {PlayerManager} from '../player/PlayerManager.ts';
 import {DebugRenderer} from './DebugRenderer.ts';
+import {SelectionManager} from './SelectionManager.ts';
+import {SelectableHex} from './SelectableHex.ts';
+import {SelectablePlayer} from '../player/SelectablePlayer.ts';
+import {SelectionPanel} from '../ui/SelectionPanel.ts';
 import type {MapConfig} from './types.ts';
 import type {PlayerData} from '../player/types.ts';
 
@@ -31,6 +35,8 @@ export class GameMap {
   private interactionController!: InteractionController;
   private playerManager!: PlayerManager;
   private debugRenderer!: DebugRenderer;
+  private selectionManager!: SelectionManager;
+  private selectionPanel!: SelectionPanel;
 
   /**
    * Creates a new GameMap instance
@@ -104,8 +110,6 @@ export class GameMap {
     this.hexGrid = new HexGrid(this.config);
     this.worldContainer.addChild(this.hexGrid);
 
-    console.log(`HexGrid created with config: rows=${this.config.rows}, cols=${this.config.cols}, size=${this.config.size}`);
-
     // Create popup in UI container (always on top, fixed to viewport)
     this.popup = new HexPopup();
     this.popup.setApp(this.app);
@@ -146,6 +150,32 @@ export class GameMap {
       this.worldContainer,
       this.config
     );
+
+    // Initialize selection manager
+    this.selectionManager = new SelectionManager();
+
+    // Initialize selection panel
+    this.selectionPanel = new SelectionPanel();
+    
+    // Connect selection manager to selection panel
+    this.selectionManager.onSelectionChange((data) => {
+      this.selectionPanel.onSelectionChange(data);
+    });
+    
+    // Handle clear selection events from panel
+    this.selectionPanel.getElement().addEventListener('clearSelection', () => {
+      this.selectionManager.clearSelection();
+    });
+    
+    // Setup player click handling
+    this.hexGrid.on('playerclick', (event: any) => {
+      this.handlePlayerClick(event.playerData);
+    });
+    
+    // Setup hex click handling
+    this.hexGrid.on('hexclick', (event: any) => {
+      this.onHexClick(event.row, event.col);
+    });
   }
 
   /**
@@ -202,7 +232,7 @@ export class GameMap {
    */
   getPlayer() {
     return this.playerManager.getPlayer();
-  }
+  } 
 
   /**
    * Handles hex tile click events
@@ -210,7 +240,33 @@ export class GameMap {
    * @param col - Column coordinate of clicked hex
    */
   onHexClick(row: number, col: number): void {
-    console.log(`Hex clicked: (${row}, ${col})`);
+    // Get terrain data for the clicked hex
+    const terrainData = this.config.mapData[row]?.[col];
+    
+    if (terrainData) {
+      // Create selectable hex object
+      const selectableHex = new SelectableHex(row, col, terrainData);
+      
+      // Select the hex
+      this.selectionManager.select(selectableHex);
+    }
+    
+    // Emit custom event for game controller to handle player movement
+    this.element.dispatchEvent(new CustomEvent('hexclick', {
+      detail: { row, col }
+    }));
+  }
+
+  /**
+   * Handles player click events
+   * @param playerData - Player data from the clicked player
+   */
+  private handlePlayerClick(playerData: any): void {
+    // Create selectable player object
+    const selectablePlayer = new SelectablePlayer(playerData);
+    
+    // Select the player
+    this.selectionManager.select(selectablePlayer);
   }
 
   /**
