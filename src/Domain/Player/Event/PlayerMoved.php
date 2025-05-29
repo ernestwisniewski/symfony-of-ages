@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Game\Event;
+namespace App\Domain\Player\Event;
 
 use App\Domain\Game\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;

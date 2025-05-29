@@ -2,9 +2,9 @@
 
 namespace App\Domain\Player\Entity;
 
-use App\Domain\Game\Event\PlayerMoved;
 use App\Domain\Game\ValueObject\MovementPoints;
 use App\Domain\Game\ValueObject\PlayerId;
+use App\Domain\Player\Event\PlayerMoved;
 use App\Domain\Player\ValueObject\Position;
 use InvalidArgumentException;
 
@@ -97,7 +97,7 @@ class Player
         $this->position = $newPosition;
         $this->movementPoints = $this->movementPoints->spend($movementCost);
 
-        // Publish domain event
+        // Publish domain eventx
         $this->recordDomainEvent(new PlayerMoved(
             $this->id,
             $previousPosition,

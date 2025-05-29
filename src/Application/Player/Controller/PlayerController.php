@@ -53,6 +53,12 @@ class PlayerController extends AbstractController
     public function createPlayer(Request $request, SessionInterface $session): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        
+        // Validate JSON input
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return $this->createErrorResponse('Invalid JSON: ' . json_last_error_msg(), 400);
+        }
+        
         $playerName = $data['name'] ?? 'Player';
 
         // Generate map data once and store in session for consistency
@@ -145,6 +151,12 @@ class PlayerController extends AbstractController
 
         try {
             $data = json_decode($request->getContent(), true);
+            
+            // Validate JSON input
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return $this->createErrorResponse('Invalid JSON: ' . json_last_error_msg(), 400);
+            }
+            
             $mapData = $this->getOrGenerateMapData($session);
             $player = Player::fromArray($playerData);
             $targetPosition = new Position($data['row'], $data['col']);
@@ -283,6 +295,11 @@ class PlayerController extends AbstractController
     public function validatePosition(Request $request, SessionInterface $session): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        
+        // Validate JSON input
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return $this->createErrorResponse('Invalid JSON: ' . json_last_error_msg(), 400);
+        }
 
         if (!isset($data['row']) || !isset($data['col'])) {
             return $this->createErrorResponse('Row and column coordinates are required', 400);
