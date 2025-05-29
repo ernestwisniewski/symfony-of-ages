@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Symfony of Ages{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div id="game-container"
+         {{ stimulus_controller('game') }}
+         data-game-map-url-value="{{ path('api_map_data') }}">
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
