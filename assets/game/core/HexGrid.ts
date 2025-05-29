@@ -1,7 +1,18 @@
 import {Container, ColorMatrixFilter} from 'pixi.js';
 import {DropShadowFilter} from '@pixi/filter-drop-shadow';
-import {HexTile} from './HexTile.js';
-import {HexGeometry} from './HexGeometry.js';
+import {HexTile} from './HexTile.ts';
+import {HexGeometry} from './HexGeometry.ts';
+import {HexPopup} from './HexPopup.ts';
+
+/**
+ * Interface for hex grid configuration
+ */
+interface HexGridConfig {
+  size: number;
+  rows: number;
+  cols: number;
+  mapData: any[][];
+}
 
 /**
  * HexGrid class manages a collection of hexagonal tiles arranged in a grid
@@ -9,19 +20,19 @@ import {HexGeometry} from './HexGeometry.js';
  * Handles tile creation, positioning, hover effects, and popup management
  */
 export class HexGrid extends Container {
+  private config: HexGridConfig;
+  public popup: HexPopup | null = null; // Will be set by GameMap
+  private geometry: HexGeometry;
+  private hoverShadow: any[];
+
   /**
    * Creates a new HexGrid instance with tiles and interaction system
    *
-   * @param {Object} config - Configuration object for the hex grid
-   * @param {number} config.size - Size (radius) of individual hexagons
-   * @param {number} config.rows - Number of rows in the grid
-   * @param {number} config.cols - Number of columns in the grid
-   * @param {Array} config.mapData - 2D array containing terrain data for each hex tile
+   * @param config - Configuration object for the hex grid
    */
-  constructor(config) {
+  constructor(config: HexGridConfig) {
     super();
     this.config = config;
-    this.popup = null; // Will be set by GameMap
     this.geometry = new HexGeometry(config.size);
     this.hoverShadow = this.createHoverShadow();
     this.buildGrid();
@@ -32,9 +43,9 @@ export class HexGrid extends Container {
    * Creates a combined filter for hex hover effect with shadow and brightness
    * Combines drop shadow and brightness filters for enhanced visual feedback
    *
-   * @returns {Array} Array of PIXI filters to apply for hover effects
+   * @returns Array of PIXI filters to apply for hover effects
    */
-  createHoverShadow() {
+  private createHoverShadow(): any[] {
     // Create drop shadow filter
     const shadowFilter = new DropShadowFilter({
       color: 0x000000,
@@ -60,8 +71,8 @@ export class HexGrid extends Container {
    * Builds the hex grid by creating and positioning individual hex tiles
    * Creates HexTile instances for each position in the grid and sets up their interactions
    */
-  buildGrid() {
-    const hexes = [];
+  private buildGrid(): void {
+    const hexes: HexTile[] = [];
 
     for (let r = 0; r < this.config.rows; r++) {
       for (let c = 0; c < this.config.cols; c++) {
@@ -87,23 +98,25 @@ export class HexGrid extends Container {
    * Sets up hover and click interactions for a hex tile
    * Configures event handlers for showing/hiding popups and handling user interactions
    *
-   * @param {HexTile} hex - The hex tile to set up interactions for
+   * @param hex - The hex tile to set up interactions for
    */
-  setupHexInteraction(hex) {
-    hex.on('hexhover', (event) => {
-      const gameMap = this.parent;
-      if (gameMap && !gameMap.isDragging) {
+  private setupHexInteraction(hex: HexTile): void {
+    hex.on('hexhover', (event: any) => {
+      const gameMap = this.parent as any;
+      if (gameMap && !gameMap.isDragging && this.popup) {
         this.popup.show(event.data);
       }
     });
 
     hex.on('hexhoverend', () => {
-      this.popup.hide();
+      if (this.popup) {
+        this.popup.hide();
+      }
     });
 
-    hex.on('hexclick', (event) => {
-      const gameMap = this.parent;
-      if (gameMap && !gameMap.isDragging) {
+    hex.on('hexclick', (event: any) => {
+      const gameMap = this.parent as any;
+      if (gameMap && !gameMap.isDragging && this.popup) {
         this.popup.show(event.data);
       }
     });
@@ -113,7 +126,7 @@ export class HexGrid extends Container {
    * Sets up the grid's pivot point and applies isometric scaling
    * Configures the grid for proper centering and applies visual perspective
    */
-  setupPosition() {
+  private setupPosition(): void {
     const bounds = this.getBounds();
     this.pivot.set(bounds.width / 2, bounds.height / 2);
     this.scale.y = 0.8; // Apply isometric scaling
@@ -122,19 +135,19 @@ export class HexGrid extends Container {
   /**
    * Updates the grid position to center it on the screen
    *
-   * @param {number} screenWidth - Width of the screen/viewport
-   * @param {number} screenHeight - Height of the screen/viewport
+   * @param screenWidth - Width of the screen/viewport
+   * @param screenHeight - Height of the screen/viewport
    */
-  updatePosition(screenWidth, screenHeight) {
+  updatePosition(screenWidth: number, screenHeight: number): void {
     this.position.set(screenWidth / 2, screenHeight / 2);
   }
 
   /**
    * Gets the position of the center hex in world coordinates
    *
-   * @returns {Object} Position object with x and y coordinates of the center hex
+   * @returns Position object with x and y coordinates of the center hex
    */
-  getCenterHexPosition() {
+  getCenterHexPosition(): { x: number; y: number } {
     const centerRow = Math.floor(this.config.rows / 2);
     const centerCol = Math.floor(this.config.cols / 2);
     return this.geometry.calculatePosition(centerRow, centerCol);

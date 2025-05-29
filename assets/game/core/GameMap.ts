@@ -1,7 +1,35 @@
-import {Application, Container, Assets} from 'pixi.js';
-import {HexGrid} from './HexGrid.js';
-import {HexPopup} from './HexPopup.js';
-import {getAllTerrainTextures} from './TerrainTextures.js';
+import { Application, Container, Assets, FederatedPointerEvent } from 'pixi.js';
+import { HexGrid } from './HexGrid.ts';
+import { HexPopup } from './HexPopup.ts';
+import { preloadTerrainTextures } from './TerrainTextures.ts';
+
+/**
+ * Interface for map configuration
+ */
+interface MapConfig {
+  rows: number;
+  cols: number;
+  size: number;
+  mapData: any[][];
+}
+
+/**
+ * Interface for map boundaries
+ */
+interface MapBounds {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+}
+
+/**
+ * Interface for position coordinates
+ */
+interface Position {
+  x: number;
+  y: number;
+}
 
 /**
  * GameMap class manages the main game map with hexagonal tiles
@@ -9,33 +37,37 @@ import {getAllTerrainTextures} from './TerrainTextures.js';
  * Provides Civilization-style map navigation with drag and zoom functionality
  */
 export class GameMap {
+  public app!: Application;
+  private element: HTMLElement;
+  private config: MapConfig;
+  private isDragging: boolean = false;
+  private lastPosition: Position | null = null;
+  private scrollSpeed: number = 2;
+  private worldContainer!: Container;
+  private uiContainer!: Container;
+  private hexGrid!: HexGrid;
+  private popup!: HexPopup;
+  private mapBounds!: MapBounds;
+  private minScale!: number;
+  private maxScale!: number;
+
   /**
    * Creates a new GameMap instance
    *
-   * @param {HTMLElement} element - DOM element to attach the game canvas to
-   * @param {Object} config - Configuration object for the map
-   * @param {number} config.rows - Number of rows in the hex grid
-   * @param {number} config.cols - Number of columns in the hex grid
-   * @param {number} config.hexSize - Size (radius) of individual hexagons
-   * @param {Array} config.mapData - 2D array containing terrain data for each hex
+   * @param element - DOM element to attach the game canvas to
+   * @param config - Configuration object for the map
    */
-  constructor(element, config) {
+  constructor(element: HTMLElement, config: MapConfig) {
     this.element = element;
     this.config = config;
-    this.isDragging = false;
-    this.lastPosition = null;
-    this.scrollSpeed = 2;
     this.init();
   }
 
   /**
    * Initializes the game map with all necessary components
    * Sets up PIXI application, preloads textures, creates hex grid, and configures interactions
-   *
-   * @async
-   * @returns {Promise<void>}
    */
-  async init() {
+  async init(): Promise<void> {
     await this.setupPixiApp();
     await this.preloadTextures();
     this.createHexGrid();
@@ -47,11 +79,8 @@ export class GameMap {
   /**
    * Sets up the PIXI.js application with full browser viewport
    * Creates application with full screen dimensions and responsive design
-   *
-   * @async
-   * @returns {Promise<void>}
    */
-  async setupPixiApp() {
+  async setupPixiApp(): Promise<void> {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
@@ -71,7 +100,7 @@ export class GameMap {
    * Sets up the window resize handler for responsive design
    * Uses full browser dimensions and adjusts map scaling accordingly
    */
-  setupResizeHandler() {
+  private setupResizeHandler(): void {
     window.addEventListener('resize', () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -90,7 +119,7 @@ export class GameMap {
    * Creates and initializes the hex grid and UI layers
    * Adds the hex grid to a world container and UI elements to a separate UI container
    */
-  createHexGrid() {
+  private createHexGrid(): void {
     // Create world container for map elements (affected by camera)
     this.worldContainer = new Container();
     this.app.stage.addChild(this.worldContainer);
@@ -119,7 +148,7 @@ export class GameMap {
    * Sets the initial view with appropriate zoom based on hex visibility
    * Positions the camera at the center of the map with reasonable zoom level
    */
-  setInitialView() {
+  private setInitialView(): void {
     // Calculate center hex position
     const centerRow = Math.floor(this.config.rows / 2);
     const centerCol = Math.floor(this.config.cols / 2);
@@ -148,7 +177,7 @@ export class GameMap {
    * Centers the map in the viewport
    * Positions the world container at the center of the screen
    */
-  centerMap() {
+  private centerMap(): void {
     this.worldContainer.position.x = this.app.screen.width / 2;
     this.worldContainer.position.y = this.app.screen.height / 2;
   }
@@ -157,7 +186,7 @@ export class GameMap {
    * Calculates the map boundaries for camera constraints
    * Determines the limits for camera movement based on current scale and map size
    */
-  calculateMapBoundaries() {
+  private calculateMapBoundaries(): void {
     const bounds = this.hexGrid.getBounds();
     const scale = this.worldContainer.scale.x;
 
@@ -177,7 +206,7 @@ export class GameMap {
    * Adjusts the scale to fit the viewport while maintaining aspect ratio
    * Calculates minimum and maximum scale values based on hex size consistency
    */
-  adjustScaleToFitViewport() {
+  private adjustScaleToFitViewport(): void {
     const bounds = this.hexGrid.getBounds();
     const viewportWidth = this.app.screen.width;
     const viewportHeight = this.app.screen.height;
@@ -212,7 +241,7 @@ export class GameMap {
    * Constrains the camera to stay within map boundaries
    * Prevents the camera from moving outside the calculated map bounds
    */
-  constrainCamera() {
+  private constrainCamera() {
     const bounds = this.hexGrid.getBounds();
     const scale = this.worldContainer.scale.x;
 
@@ -233,7 +262,7 @@ export class GameMap {
    * Sets up user interaction handlers for dragging and zooming
    * Configures both drag and zoom interaction systems
    */
-  setupInteraction() {
+  private setupInteraction() {
     this.setupDragHandlers();
     this.setupZoomHandler();
   }
@@ -242,7 +271,7 @@ export class GameMap {
    * Sets up drag interaction handlers
    * Configures mouse/touch events for map panning functionality
    */
-  setupDragHandlers() {
+  private setupDragHandlers() {
     this.app.stage.eventMode = 'static';
     this.app.stage.cursor = 'grab';
 
@@ -257,7 +286,7 @@ export class GameMap {
    * Sets up zoom interaction handler with passive event listener
    * Configures mouse wheel events for map zooming functionality
    */
-  setupZoomHandler() {
+  private setupZoomHandler() {
     this.app.canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       this.handleZoom(e);
@@ -270,7 +299,7 @@ export class GameMap {
    *
    * @param {WheelEvent} e - The wheel event containing scroll direction and position
    */
-  handleZoom(e) {
+  private handleZoom(e: WheelEvent) {
     const direction = e.deltaY > 0 ? -1 : 1;
     const factor = 0.1;
     const currentScale = this.worldContainer.scale.x;
@@ -296,7 +325,6 @@ export class GameMap {
       this.calculateMapBoundaries();
       this.constrainCamera();
     }
-
   }
 
   /**
@@ -305,7 +333,7 @@ export class GameMap {
    *
    * @param {PIXI.FederatedPointerEvent} event - The pointer event containing position data
    */
-  onDragStart(event) {
+  private onDragStart(event: FederatedPointerEvent) {
     this.isDragging = true;
     this.lastPosition = event.global.clone();
     this.app.stage.cursor = 'grabbing';
@@ -315,7 +343,7 @@ export class GameMap {
    * Handles the end of a drag operation
    * Stops map dragging and restores normal cursor
    */
-  onDragEnd() {
+  private onDragEnd() {
     this.isDragging = false;
     this.lastPosition = null;
     this.app.stage.cursor = 'grab';
@@ -327,7 +355,7 @@ export class GameMap {
    *
    * @param {PIXI.FederatedPointerEvent} event - The pointer event containing current position
    */
-  onDragMove(event) {
+  private onDragMove(event: FederatedPointerEvent) {
     if (!this.isDragging || !this.lastPosition) return;
 
     const newPosition = event.global;
@@ -344,18 +372,11 @@ export class GameMap {
   /**
    * Preloads all terrain textures before creating the map
    * Uses Vite-imported texture URLs for proper asset versioning
-   *
-   * @async
-   * @returns {Promise<void>}
    */
-  async preloadTextures() {
+  async preloadTextures(): Promise<void> {
     try {
-      // Get all terrain textures from the import system
-      const textureUrls = getAllTerrainTextures();
-
-      // Preload all textures
-      await Assets.load(textureUrls);
-
+      // Preload all terrain textures
+      await preloadTerrainTextures();
     } catch (error) {
       console.warn('Failed to preload some textures:', error);
     }

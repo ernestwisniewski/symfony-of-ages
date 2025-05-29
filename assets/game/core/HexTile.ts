@@ -1,30 +1,50 @@
 import {Graphics, Texture, Assets} from 'pixi.js';
 import {Color} from 'pixi.js';
-import {getTerrainTexture} from './TerrainTextures.js';
+import {getTerrainTexture} from './TerrainTextures.ts';
+
+/**
+ * Interface for hex tile configuration
+ */
+interface HexTileConfig {
+  size: number;
+  position: { x: number; y: number };
+  hoverShadow: any[];
+  terrainData: any;
+}
+
+/**
+ * Interface for default state configuration
+ */
+interface DefaultState {
+  fillColor: number;
+  edgeColor: number;
+  strokeWidth: number;
+  innerStrokeWidth: number;
+  strokeAlpha: number;
+  innerAlpha: number;
+}
 
 /**
  * HexTile class representing a single hexagonal tile on the game map
  * Extends PIXI.Graphics to provide interactive hexagonal terrain tiles with textures
  */
 export class HexTile extends Graphics {
+  private size: number;
+  private hoverShadow: any[];
+  private terrainData: any;
+  private terrainTexture: Texture | null = null;
+  private defaultState: DefaultState;
+
   /**
    * Creates a new HexTile instance
    *
-   * @param {Object} config - Configuration object for the hex tile
-   * @param {number} config.size - Size (radius) of the hexagon
-   * @param {Object} config.position - Position object with x and y coordinates
-   * @param {number} config.position.x - X coordinate for tile positioning
-   * @param {number} config.position.y - Y coordinate for tile positioning
-   * @param {Object} config.hoverShadow - Shadow filter for hover effects
-   * @param {Object} config.terrainData - Terrain data object containing type and properties
-   * @param {string} config.terrainData.type - Type of terrain (plains, forest, mountain, etc.)
+   * @param config - Configuration object for the hex tile
    */
-  constructor({size, position, hoverShadow, terrainData}) {
+  constructor({size, position, hoverShadow, terrainData}: HexTileConfig) {
     super();
     this.size = size;
     this.hoverShadow = hoverShadow;
     this.terrainData = terrainData;
-    this.texture = null;
 
     // Get base color from terrain properties for fallback
     const terrainColor = terrainData.properties?.color || 0xF8F8F8;
@@ -47,11 +67,11 @@ export class HexTile extends Graphics {
   /**
    * Blends a terrain color with white for very subtle color hints
    *
-   * @param {number} terrainColor - The terrain color from properties
-   * @param {number} intensity - How much of the terrain color to mix (0.0 to 1.0)
-   * @returns {number} The blended color as a hex number
+   * @param terrainColor - The terrain color from properties
+   * @param intensity - How much of the terrain color to mix (0.0 to 1.0)
+   * @returns The blended color as a hex number
    */
-  blendWithWhite(terrainColor, intensity) {
+  private blendWithWhite(terrainColor: number, intensity: number): number {
     // Extract RGB components from terrain color
     const r = (terrainColor >> 16) & 0xFF;
     const g = (terrainColor >> 8) & 0xFF;
@@ -69,14 +89,14 @@ export class HexTile extends Graphics {
 
   /**
    * Loads the terrain texture for this hex tile
-   * Uses the TerrainTextures system for Vite-managed assets
+   * Uses the TerrainTextures system with Vite-managed assets
    */
-  async loadTexture() {
+  private async loadTexture(): Promise<void> {
     try {
       const textureUrl = getTerrainTexture(this.terrainData.type);
       if (textureUrl) {
         // Load texture using the Vite-managed URL
-        this.texture = await Assets.load(textureUrl);
+        this.terrainTexture = await Assets.load(textureUrl);
         this.draw(); // Redraw with texture
       } else {
         console.warn(`No texture found for terrain type: ${this.terrainData.type}`);
@@ -92,9 +112,9 @@ export class HexTile extends Graphics {
    * Draws the hexagonal tile with optional hover state and terrain texture
    * Creates a double-layered hex with outer edge and inner detail, using texture if available
    *
-   * @param {boolean} [isHovered=false] - Whether the tile is currently being hovered
+   * @param isHovered - Whether the tile is currently being hovered
    */
-  draw(isHovered = false) {
+  private draw(isHovered: boolean = false): void {
     this.clear();
 
     const points = this.getPoints();
@@ -118,10 +138,10 @@ export class HexTile extends Graphics {
     this.stroke();
 
     // Fill with texture or fallback color
-    if (this.texture) {
+    if (this.terrainTexture) {
       // Use texture fill
       this.fill({
-        texture: this.texture,
+        texture: this.terrainTexture,
         alpha: isHovered ? 0.9 : 1.0 // More subtle transparency when hovered
       });
     } else {
@@ -153,11 +173,11 @@ export class HexTile extends Graphics {
   /**
    * Calculates the points for drawing a hexagon
    *
-   * @param {number} [scale=1] - Scale factor for the hexagon size (1 = full size, 0.92 = inner hex)
-   * @returns {number[]} Array of x,y coordinates for the hexagon vertices
+   * @param scale - Scale factor for the hexagon size (1 = full size, 0.92 = inner hex)
+   * @returns Array of x,y coordinates for the hexagon vertices
    */
-  getPoints(scale = 1) {
-    const points = [];
+  private getPoints(scale: number = 1): number[] {
+    const points: number[] = [];
     for (let i = 0; i < 6; i++) {
       const angle = (60 * i + 30) * Math.PI / 180;
       points.push(
@@ -172,13 +192,13 @@ export class HexTile extends Graphics {
    * Sets up interactive event handlers for the hex tile
    * Handles mouse hover, click events and prevents interaction during map dragging
    */
-  setupInteractivity() {
+  private setupInteractivity(): void {
     this.eventMode = 'static';
     this.cursor = 'pointer';
 
     this.on('pointerover', () => {
       // Check if map is not currently being dragged before triggering hover
-      const gameMap = this.parent?.parent;
+      const gameMap = (this.parent as any)?.parent;
       if (!gameMap || !gameMap.isDragging) {
         this.onHoverStart();
         this.emit('hexhover', {
@@ -198,28 +218,34 @@ export class HexTile extends Graphics {
 
   /**
    * Handles the start of hover interaction
-   * Redraws the tile with hover styling
+   * Applies hover visual effects and shadow filters
    */
-  onHoverStart() {
+  private onHoverStart(): void {
+    this.filters = this.hoverShadow;
     this.draw(true);
   }
 
   /**
    * Handles the end of hover interaction
-   * Redraws the tile with normal styling
+   * Removes hover visual effects and returns to normal state
    */
-  onHoverEnd() {
+  private onHoverEnd(): void {
+    this.filters = [];
     this.draw(false);
   }
 
   /**
    * Handles click events on the hex tile
-   * Emits a hexclick event with terrain data and position
+   * Emits click event with terrain data for parent components to handle
    */
-  onClick() {
-    this.emit('hexclick', {
-      data: this.terrainData,
-      position: this.getGlobalPosition()
-    });
+  private onClick(): void {
+    // Check if map is not currently being dragged before triggering click
+    const gameMap = (this.parent as any)?.parent;
+    if (!gameMap || !gameMap.isDragging) {
+      this.emit('hexclick', {
+        data: this.terrainData,
+        position: this.getGlobalPosition()
+      });
+    }
   }
 }

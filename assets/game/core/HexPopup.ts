@@ -1,10 +1,28 @@
-import { Container, Graphics, Text, Color } from 'pixi.js';
+import { Container, Graphics, Text, Application } from 'pixi.js';
+import { Color } from 'pixi.js';
+
+/**
+ * Interface for terrain data
+ */
+interface TerrainData {
+  type: string;
+  name: string;
+  properties: {
+    movement: number;
+    defense: number;
+    resources: number;
+  };
+}
 
 /**
  * HexPopup class for displaying terrain information in a thin bottom bar
  * Extends PIXI.Container to provide a compact information panel at bottom center of screen
  */
 export class HexPopup extends Container {
+  private background!: Graphics;
+  private content!: Text;
+  private app: Application | null = null;
+
   /**
    * Creates a new HexPopup instance
    * Initializes the popup with background and text components as a bottom bar
@@ -12,7 +30,6 @@ export class HexPopup extends Container {
   constructor() {
     super();
     this.visible = false;
-    this.app = null; // Will be set by GameMap
     this.setupBackground();
     this.setupText();
   }
@@ -20,9 +37,9 @@ export class HexPopup extends Container {
   /**
    * Sets the PIXI application reference for screen dimensions
    * 
-   * @param {Application} app - PIXI Application instance
+   * @param app - PIXI Application instance
    */
-  setApp(app) {
+  setApp(app: Application): void {
     this.app = app;
   }
 
@@ -30,7 +47,7 @@ export class HexPopup extends Container {
    * Sets up the background graphics for the popup bar
    * Creates a Graphics object that will be used for the thin bottom bar background
    */
-  setupBackground() {
+  private setupBackground(): void {
     this.background = new Graphics();
     this.addChild(this.background);
   }
@@ -39,7 +56,7 @@ export class HexPopup extends Container {
    * Sets up the text component for displaying popup content
    * Creates a Text object with predefined styling for terrain information in horizontal layout
    */
-  setupText() {
+  private setupText(): void {
     this.content = new Text({
       text: '',
       style: {
@@ -56,9 +73,9 @@ export class HexPopup extends Container {
   /**
    * Shows the popup with terrain data as a thin bottom bar
    *
-   * @param {Object} data - Terrain data object containing type, name, and properties
+   * @param data - Terrain data object containing type, name, and properties
    */
-  show(data) {
+  show(data: TerrainData): void {
     // Format text in horizontal layout for the bottom bar
     this.content.text = this.formatTerrainInfoHorizontal(data);
 
@@ -96,10 +113,10 @@ export class HexPopup extends Container {
    * Updates the popup position to bottom center of screen
    * Called when showing the popup and when screen is resized
    * 
-   * @param {number} barWidth - Width of the popup bar
-   * @param {number} barHeight - Height of the popup bar
+   * @param barWidth - Width of the popup bar
+   * @param barHeight - Height of the popup bar
    */
-  updatePosition(barWidth = 400, barHeight = 50) {
+  updatePosition(barWidth: number = 400, barHeight: number = 50): void {
     // Use app reference directly for screen dimensions
     if (this.app && this.app.screen) {
       const margin = 20;
@@ -113,23 +130,17 @@ export class HexPopup extends Container {
   /**
    * Hides the popup by setting its visibility to false
    */
-  hide() {
+  hide(): void {
     this.visible = false;
   }
 
   /**
    * Formats terrain data into a compact horizontal string for the bottom bar
    *
-   * @param {Object} data - Terrain data object
-   * @param {string} data.type - Type of terrain (e.g., 'plains', 'forest')
-   * @param {string} data.name - Display name of terrain
-   * @param {Object} data.properties - Terrain properties object
-   * @param {number} data.properties.movement - Movement cost for this terrain
-   * @param {number} data.properties.defense - Defense bonus for this terrain
-   * @param {number} data.properties.resources - Resource value for this terrain
-   * @returns {string} Formatted compact string containing terrain information
+   * @param data - Terrain data object
+   * @returns Formatted compact string containing terrain information
    */
-  formatTerrainInfoHorizontal(data) {
+  private formatTerrainInfoHorizontal(data: TerrainData): string {
     const name = data.name || data.type;
     const props = data.properties || {};
     
