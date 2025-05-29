@@ -23,7 +23,7 @@ export class HexGrid extends Container {
   private config: HexGridConfig;
   public popup: HexPopup | null = null; // Will be set by GameMap
   private geometry: HexGeometry;
-  private hoverShadow: any[];
+  private readonly hoverShadow: any[];
 
   /**
    * Creates a new HexGrid instance with tiles and interaction system
@@ -130,26 +130,5 @@ export class HexGrid extends Container {
     const bounds = this.getBounds();
     this.pivot.set(bounds.width / 2, bounds.height / 2);
     this.scale.y = 0.8; // Apply isometric scaling
-  }
-
-  /**
-   * Updates the grid position to center it on the screen
-   *
-   * @param screenWidth - Width of the screen/viewport
-   * @param screenHeight - Height of the screen/viewport
-   */
-  updatePosition(screenWidth: number, screenHeight: number): void {
-    this.position.set(screenWidth / 2, screenHeight / 2);
-  }
-
-  /**
-   * Gets the position of the center hex in world coordinates
-   *
-   * @returns Position object with x and y coordinates of the center hex
-   */
-  getCenterHexPosition(): { x: number; y: number } {
-    const centerRow = Math.floor(this.config.rows / 2);
-    const centerCol = Math.floor(this.config.cols / 2);
-    return this.geometry.calculatePosition(centerRow, centerCol);
   }
 }

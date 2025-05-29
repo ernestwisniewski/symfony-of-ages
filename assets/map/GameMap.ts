@@ -1,7 +1,7 @@
-import { Application, Container, Assets, FederatedPointerEvent } from 'pixi.js';
-import { HexGrid } from './HexGrid.ts';
-import { HexPopup } from './HexPopup.ts';
-import { preloadTerrainTextures } from './TerrainTextures.ts';
+import {Application, Container, FederatedPointerEvent} from 'pixi.js';
+import {HexGrid} from './HexGrid.ts';
+import {HexPopup} from './HexPopup.ts';
+import {preloadTerrainTextures} from './TerrainTextures.ts';
 
 /**
  * Interface for map configuration
@@ -11,16 +11,6 @@ interface MapConfig {
   cols: number;
   size: number;
   mapData: any[][];
-}
-
-/**
- * Interface for map boundaries
- */
-interface MapBounds {
-  minX: number;
-  maxX: number;
-  minY: number;
-  maxY: number;
 }
 
 /**
@@ -39,7 +29,7 @@ interface Position {
 export class GameMap {
   public app!: Application;
   private element: HTMLElement;
-  private config: MapConfig;
+  private readonly config: MapConfig;
   private isDragging: boolean = false;
   private lastPosition: Position | null = null;
   private scrollSpeed: number = 2;
@@ -47,7 +37,6 @@ export class GameMap {
   private uiContainer!: Container;
   private hexGrid!: HexGrid;
   private popup!: HexPopup;
-  private mapBounds!: MapBounds;
   private minScale!: number;
   private maxScale!: number;
 
@@ -72,7 +61,6 @@ export class GameMap {
     await this.preloadTextures();
     this.createHexGrid();
     this.setupInteraction();
-    this.calculateMapBoundaries();
     this.setInitialView(); // Set initial zoomed view
   }
 
@@ -106,7 +94,6 @@ export class GameMap {
       const height = window.innerHeight;
       this.app.renderer.resize(width, height);
       this.adjustScaleToFitViewport();
-      this.calculateMapBoundaries();
       this.centerMap();
       // Update popup position after resize
       if (this.popup && this.popup.visible) {
@@ -149,10 +136,6 @@ export class GameMap {
    * Positions the camera at the center of the map with reasonable zoom level
    */
   private setInitialView(): void {
-    // Calculate center hex position
-    const centerRow = Math.floor(this.config.rows / 2);
-    const centerCol = Math.floor(this.config.cols / 2);
-
     // Set initial zoom to show a reasonable number of hexes on screen
     // Target: show about 8-12 hexes across the screen width
     const hexWidth = this.config.size * Math.sqrt(3);
@@ -168,9 +151,6 @@ export class GameMap {
 
     // Center the view
     this.centerMap();
-
-    // Update boundaries after setting initial zoom
-    this.calculateMapBoundaries();
   }
 
   /**
@@ -183,33 +163,11 @@ export class GameMap {
   }
 
   /**
-   * Calculates the map boundaries for camera constraints
-   * Determines the limits for camera movement based on current scale and map size
-   */
-  private calculateMapBoundaries(): void {
-    const bounds = this.hexGrid.getBounds();
-    const scale = this.worldContainer.scale.x;
-
-    // Calculate boundaries considering pivot point and isometric scaling
-    const effectiveWidth = bounds.width * scale;
-    const effectiveHeight = bounds.height * scale * 0.8;
-
-    this.mapBounds = {
-      minX: this.app.screen.width / 2 - effectiveWidth / 2,
-      maxX: this.app.screen.width / 2 + effectiveWidth / 2,
-      minY: this.app.screen.height / 2 - effectiveHeight / 2,
-      maxY: this.app.screen.height / 2 + effectiveHeight / 2
-    };
-  }
-
-  /**
    * Adjusts the scale to fit the viewport while maintaining aspect ratio
    * Calculates minimum and maximum scale values based on hex size consistency
    */
   private adjustScaleToFitViewport(): void {
-    const bounds = this.hexGrid.getBounds();
     const viewportWidth = this.app.screen.width;
-    const viewportHeight = this.app.screen.height;
 
     // Calculate hex dimensions
     const hexWidth = this.config.size * Math.sqrt(3); // Actual hex width in pixels
@@ -290,7 +248,7 @@ export class GameMap {
     this.app.canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       this.handleZoom(e);
-    }, { passive: false });
+    }, {passive: false});
   }
 
   /**
@@ -322,7 +280,6 @@ export class GameMap {
       this.worldContainer.position.x = mousePosition.x - gridPos.x * newScale;
       this.worldContainer.position.y = mousePosition.y - gridPos.y * newScale;
 
-      this.calculateMapBoundaries();
       this.constrainCamera();
     }
   }

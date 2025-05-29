@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Enum;
+namespace App\Domain\Enum;
 
 /**
  * TerrainType enum defining all available terrain types for the hexagonal map
- * 
+ *
  * Each terrain type has associated properties including visual color,
  * movement cost, defense bonus, and resource value. These properties
  * affect gameplay mechanics and visual representation in the game.
@@ -13,30 +13,30 @@ enum TerrainType: string
 {
     /** @var string Plains terrain - basic grassland with moderate properties */
     case PLAINS = 'plains';
-    
+
     /** @var string Forest terrain - wooded areas with high defense and resources */
     case FOREST = 'forest';
-    
+
     /** @var string Mountain terrain - elevated areas with highest defense and resources */
     case MOUNTAIN = 'mountain';
-    
+
     /** @var string Water terrain - impassable water bodies */
     case WATER = 'water';
-    
+
     /** @var string Desert terrain - arid areas with low resources */
     case DESERT = 'desert';
-    
+
     /** @var string Swamp terrain - marshy areas with high movement cost */
     case SWAMP = 'swamp';
 
     /**
      * Gets the properties associated with this terrain type
-     * 
+     *
      * Returns an array containing all gameplay and visual properties
      * for the terrain type. Properties include name for display,
-     * color for rendering, movement cost for pathfinding, defense 
+     * color for rendering, movement cost for pathfinding, defense
      * bonus for combat, and resource value for economy.
-     * 
+     *
      * @return array Associative array containing:
      *               - 'name': string display name for the terrain
      *               - 'color': int hexadecimal color value for rendering
@@ -91,4 +91,4 @@ enum TerrainType: string
             ]
         };
     }
-} 
+}

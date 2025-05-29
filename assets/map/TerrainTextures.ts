@@ -1,12 +1,12 @@
-import { Assets, Texture } from 'pixi.js';
+import {Assets} from 'pixi.js';
 
 // Terrain texture imports for Vite asset handling
-import plainsImg from '../../images/terrain/plains.png';
-import forestImg from '../../images/terrain/forest.png';
-import mountainImg from '../../images/terrain/mountain.png';
-import waterImg from '../../images/terrain/water.png';
-import desertImg from '../../images/terrain/desert.png';
-import swampImg from '../../images/terrain/swamp.png';
+import plainsImg from '../images/terrain/plains.png';
+import forestImg from '../images/terrain/forest.png';
+import mountainImg from '../images/terrain/mountain.png';
+import waterImg from '../images/terrain/water.png';
+import desertImg from '../images/terrain/desert.png';
+import swampImg from '../images/terrain/swamp.png';
 
 /**
  * Interface for terrain texture configuration
@@ -47,40 +47,18 @@ export async function preloadTerrainTextures(): Promise<void> {
 
   for (const [terrainType, texturePath] of Object.entries(TERRAIN_TEXTURES)) {
     const promise = Assets.load(texturePath)
-      .then((texture: Texture) => {
+      .then(() => {
         // Texture loaded successfully
         console.log(`Loaded texture for ${terrainType}:`, texturePath);
       })
       .catch((error: Error) => {
         console.warn(`Failed to load texture for ${terrainType}:`, error);
       });
-    
+
     texturePromises.push(promise);
   }
 
   await Promise.all(texturePromises);
-}
-
-/**
- * Gets all available terrain textures from the asset cache
- * Returns a map of terrain types to their loaded textures
- * Provides fallback to solid color textures for terrain types without texture files
- *
- * @returns Object mapping terrain types to their textures
- */
-export function getAllTerrainTextures(): Record<string, Texture | null> {
-  const textures: Record<string, Texture | null> = {};
-
-  for (const terrainType of Object.keys(TERRAIN_TEXTURES)) {
-    try {
-      textures[terrainType] = Assets.cache.get(TERRAIN_TEXTURES[terrainType]) || null;
-    } catch (error) {
-      console.warn(`Texture not found for ${terrainType}, using solid color fallback`);
-      textures[terrainType] = null;
-    }
-  }
-
-  return textures;
 }
 
 /**

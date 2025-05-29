@@ -1,6 +1,6 @@
 // controllers/hex_map_controller.js
 import {Controller} from '@hotwired/stimulus'
-import {GameMap} from '../game/core/GameMap.ts'
+import {GameMap} from '../map/GameMap.ts'
 
 /**
  * Interface for map configuration received from the server
