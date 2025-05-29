@@ -5,59 +5,52 @@ namespace App\Application\Map\Service;
 use App\Domain\Player\Enum\TerrainType;
 
 /**
- * MapGenerator service for creating realistic hexagonal map data
+ * MapGenerator service serves as a facade for map generation operations
  *
- * Generates 2D arrays of terrain data using weighted probabilities and clustering
- * algorithms to create natural-looking terrain formations. Supports multiple
- * generation passes for realistic terrain distribution and geographic features.
+ * Orchestrates between specialized map generation services to provide a unified interface
+ * for map creation. Delegates responsibilities to focused services following SOLID
+ * principles while providing domain-focused high-level operations.
  */
 class MapGenerator
 {
-    /** @var array Weighted probabilities for base terrain generation */
-    private const array TERRAIN_WEIGHTS = [
-        TerrainType::PLAINS->value => 35,    // Most common - basic grassland
-        TerrainType::FOREST->value => 25,    // Common - wooded areas
-        TerrainType::MOUNTAIN->value => 15,  // Moderate - elevated terrain
-        TerrainType::WATER->value => 10,     // Moderate - rivers and lakes
-        TerrainType::DESERT->value => 10,    // Moderate - arid regions
-        TerrainType::SWAMP->value => 5       // Rare - marshy areas
-    ];
+    /** @var int Default clustering iterations for map generation */
+    private const int DEFAULT_CLUSTERING_ITERATIONS = 2;
 
-    /** @var array Clustering probabilities for terrain types to appear near themselves */
-    private const array TERRAIN_CLUSTERS = [
-        TerrainType::WATER->value => 0.7,    // High clustering - water bodies
-        TerrainType::FOREST->value => 0.6,   // Good clustering - forest patches
-        TerrainType::DESERT->value => 0.6,   // Good clustering - desert regions
-        TerrainType::MOUNTAIN->value => 0.5, // Moderate clustering - mountain ranges
-        TerrainType::SWAMP->value => 0.4,    // Low clustering - scattered swamps
-        TerrainType::PLAINS->value => 0.3    // Minimal clustering - fills gaps
-    ];
+    /** @var int Enhanced clustering iterations for competitive maps */
+    private const int COMPETITIVE_CLUSTERING_ITERATIONS = 3;
 
-    /** @var array Terrain compatibility matrix for neighbor preferences */
-    private const array TERRAIN_COMPATIBILITY = [
-        TerrainType::WATER->value => [
-            TerrainType::SWAMP->value => 0.8,   // Swamps near water
-            TerrainType::PLAINS->value => 0.6,  // Plains near water
-            TerrainType::FOREST->value => 0.4,  // Some forests near water
-        ],
-        TerrainType::MOUNTAIN->value => [
-            TerrainType::FOREST->value => 0.7,  // Forests on mountain slopes
-            TerrainType::PLAINS->value => 0.5,  // Plains at mountain base
-            TerrainType::DESERT->value => 0.3,  // Some desert mountains
-        ],
-        TerrainType::FOREST->value => [
-            TerrainType::PLAINS->value => 0.8,  // Forest edges blend to plains
-            TerrainType::SWAMP->value => 0.4,   // Some swampy forests
-        ],
-        TerrainType::DESERT->value => [
-            TerrainType::PLAINS->value => 0.6,  // Desert transitions to plains
-            TerrainType::MOUNTAIN->value => 0.4, // Desert mountains
-        ],
-        TerrainType::SWAMP->value => [
-            TerrainType::WATER->value => 0.9,   // Swamps love water
-            TerrainType::FOREST->value => 0.5,  // Swampy forests
-        ]
-    ];
+    /** @var int Default minimum cluster size for validation */
+    private const int DEFAULT_MIN_CLUSTER_SIZE = 3;
+
+    /** @var int Minimum cluster size for competitive maps */
+    private const int COMPETITIVE_MIN_CLUSTER_SIZE = 4;
+
+    /** @var float Strategic balance score threshold */
+    private const float STRATEGIC_BALANCE_THRESHOLD = 0.7;
+
+    /** @var int Maximum terrain dominance percentage */
+    private const int MAX_TERRAIN_DOMINANCE = 60;
+
+    /** @var int Target mobility percentage for competitive maps */
+    private const int TARGET_MOBILITY_PERCENTAGE = 50;
+
+    /** @var int Maximum expected players for balancing calculations */
+    private const int MAX_EXPECTED_PLAYERS = 4;
+
+    /** @var float Dominance penalty multiplier */
+    private const float DOMINANCE_PENALTY = 0.5;
+
+    /** @var int Maximum possible terrain distribution deviation */
+    private const int MAX_DEVIATION = 200;
+
+    public function __construct(
+        private readonly BaseTerrainGenerationService $baseTerrainService,
+        private readonly TerrainClusteringService     $clusteringService,
+        private readonly TerrainSmoothingService      $smoothingService,
+        private readonly MapValidationService         $validationService,
+    )
+    {
+    }
 
     /**
      * Generates a realistic map with weighted terrain distribution and clustering
@@ -75,274 +68,337 @@ class MapGenerator
      */
     public function generateMap(int $rows, int $cols): array
     {
-        $map = [];
-
         // Phase 1: Initialize map with weighted random terrain
-        for ($row = 0; $row < $rows; $row++) {
-            $map[$row] = [];
-            for ($col = 0; $col < $cols; $col++) {
-                $terrainType = $this->getWeightedRandomTerrain();
-                $map[$row][$col] = $this->createTerrainTile($terrainType, $row, $col);
-            }
-        }
+        $map = $this->baseTerrainService->generateBaseMap($rows, $cols);
 
         // Phase 2: Apply clustering to create terrain formations
-        $map = $this->applyClustering($map, $rows, $cols, 2);
+        $map = $this->clusteringService->applyClustering($map, $rows, $cols, self::DEFAULT_CLUSTERING_ITERATIONS);
 
         // Phase 3: Apply compatibility smoothing for natural transitions
-        $map = $this->applyCompatibilitySmoothing($map, $rows, $cols);
+        $map = $this->smoothingService->applyCompatibilitySmoothing($map, $rows, $cols);
 
         // Phase 4: Final polish pass to fix isolated tiles
-        return $this->polishMap($map, $rows, $cols);
-    }
+        $map = $this->validationService->polishMap($map, $rows, $cols);
 
-    /**
-     * Selects a terrain type based on weighted probabilities
-     *
-     * @return TerrainType Randomly selected terrain type based on weights
-     */
-    private function getWeightedRandomTerrain(): TerrainType
-    {
-        $totalWeight = array_sum(self::TERRAIN_WEIGHTS);
-        $random = mt_rand(1, $totalWeight);
-        $currentWeight = 0;
-
-        foreach (self::TERRAIN_WEIGHTS as $terrainValue => $weight) {
-            $currentWeight += $weight;
-            if ($random <= $currentWeight) {
-                return TerrainType::from($terrainValue);
-            }
-        }
-
-        // Fallback to plains if something goes wrong
-        return TerrainType::PLAINS;
-    }
-
-    /**
-     * Creates a terrain tile data structure
-     *
-     * @param TerrainType $terrainType The terrain type for this tile
-     * @param int $row Row coordinate
-     * @param int $col Column coordinate
-     *
-     * @return array Complete tile data structure
-     */
-    private function createTerrainTile(TerrainType $terrainType, int $row, int $col): array
-    {
-        $properties = $terrainType->getProperties();
-
-        return [
-            'type' => $terrainType->value,
-            'name' => $properties['name'],
-            'properties' => $properties,
-            'coordinates' => [
-                'row' => $row,
-                'col' => $col
-            ]
-        ];
-    }
-
-    /**
-     * Applies clustering algorithm to create realistic terrain formations
-     *
-     * @param array $map Current map state
-     * @param int $rows Number of rows
-     * @param int $cols Number of columns
-     * @param int $iterations Number of clustering passes
-     *
-     * @return array Map with clustering applied
-     */
-    private function applyClustering(array $map, int $rows, int $cols, int $iterations = 2): array
-    {
-        for ($iteration = 0; $iteration < $iterations; $iteration++) {
-            $newMap = $map;
-
-            for ($row = 0; $row < $rows; $row++) {
-                for ($col = 0; $col < $cols; $col++) {
-                    $currentTerrain = $map[$row][$col]['type'];
-                    $neighbors = $this->getNeighbors($map, $row, $col, $rows, $cols);
-
-                    // Check if we should cluster this terrain type
-                    if (isset(self::TERRAIN_CLUSTERS[$currentTerrain])) {
-                        $clusterChance = self::TERRAIN_CLUSTERS[$currentTerrain];
-                        $sameTerrainCount = 0;
-                        $totalNeighbors = count($neighbors);
-
-                        foreach ($neighbors as $neighbor) {
-                            if ($neighbor['type'] === $currentTerrain) {
-                                $sameTerrainCount++;
-                            }
-                        }
-
-                        // If this terrain should cluster and we have few same neighbors
-                        if ($totalNeighbors > 0 && $sameTerrainCount < 2) {
-                            $shouldCluster = mt_rand(1, 100) <= ($clusterChance * 100);
-
-                            if ($shouldCluster && $totalNeighbors > 0) {
-                                // Find a neighbor of the same type to spread to
-                                foreach ($neighbors as $neighbor) {
-                                    if ($neighbor['type'] === $currentTerrain) {
-                                        continue; // Already same type
-                                    }
-
-                                    // Random chance to convert neighbor
-                                    if (mt_rand(1, 100) <= 30) {
-                                        $terrainType = TerrainType::from($currentTerrain);
-                                        $newMap[$neighbor['coordinates']['row']][$neighbor['coordinates']['col']] =
-                                            $this->createTerrainTile($terrainType, $neighbor['coordinates']['row'], $neighbor['coordinates']['col']);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            $map = $newMap;
-        }
+        // Phase 5: Ensure map playability
+        $map = $this->validationService->ensurePassableTerrain($map, $rows, $cols);
 
         return $map;
     }
 
     /**
-     * Applies compatibility smoothing for natural terrain transitions
+     * Generates a map with enhanced validation and balancing
      *
-     * @param array $map Current map state
-     * @param int $rows Number of rows
-     * @param int $cols Number of columns
-     *
-     * @return array Map with compatibility smoothing applied
+     * @param int $rows Number of rows in the map grid
+     * @param int $cols Number of columns in the map grid
+     * @param array $options Generation options (clustering iterations, validation level, etc.)
+     * @return array Complete map generation result with statistics
      */
-    private function applyCompatibilitySmoothing(array $map, int $rows, int $cols): array
+    public function generateBalancedMap(int $rows, int $cols, array $options = []): array
     {
-        $newMap = $map;
+        $clusteringIterations = $options['clustering_iterations'] ?? self::DEFAULT_CLUSTERING_ITERATIONS;
+        $enableSmallClusterFix = $options['fix_small_clusters'] ?? true;
+        $minClusterSize = $options['min_cluster_size'] ?? self::DEFAULT_MIN_CLUSTER_SIZE;
 
-        for ($row = 0; $row < $rows; $row++) {
-            for ($col = 0; $col < $cols; $col++) {
-                $currentTerrain = $map[$row][$col]['type'];
-                $neighbors = $this->getNeighbors($map, $row, $col, $rows, $cols);
+        // Generate base map
+        $map = $this->baseTerrainService->generateBaseMap($rows, $cols);
 
-                // Check compatibility with neighbors
-                if (isset(self::TERRAIN_COMPATIBILITY[$currentTerrain])) {
-                    $compatibilities = self::TERRAIN_COMPATIBILITY[$currentTerrain];
+        // Apply clustering with custom iterations
+        $map = $this->clusteringService->applyClustering($map, $rows, $cols, $clusteringIterations);
 
-                    foreach ($neighbors as $neighbor) {
-                        $neighborTerrain = $neighbor['type'];
+        // Apply smoothing
+        $map = $this->smoothingService->applyCompatibilitySmoothing($map, $rows, $cols);
 
-                        // If this terrain type is compatible with current
-                        if (isset($compatibilities[$neighborTerrain])) {
-                            $compatibilityChance = $compatibilities[$neighborTerrain];
-
-                            if (mt_rand(1, 100) <= ($compatibilityChance * 100)) {
-                                $terrainType = TerrainType::from($neighborTerrain);
-                                $newMap[$row][$col] = $this->createTerrainTile($terrainType, $row, $col);
-                                break; // Only one conversion per tile
-                            }
-                        }
-                    }
-                }
-            }
+        // Fix small clusters if enabled
+        if ($enableSmallClusterFix) {
+            $map = $this->validationService->fixSmallClusters($map, $rows, $cols, $minClusterSize);
         }
 
-        return $newMap;
+        // Final polish
+        $map = $this->validationService->polishMap($map, $rows, $cols);
+
+        // Ensure playability
+        $map = $this->validationService->ensurePassableTerrain($map, $rows, $cols);
+
+        // Validate map balance
+        $validation = $this->validationService->validateMapBalance($map, $rows, $cols);
+
+        return [
+            'map' => $map,
+            'validation' => $validation,
+            'statistics' => $this->validationService->calculateTerrainStatistics($map, $rows, $cols)
+        ];
     }
 
     /**
-     * Final polish pass to fix isolated tiles and improve overall map quality
+     * Generates a map optimized for competitive gameplay
      *
-     * @param array $map Current map state
-     * @param int $rows Number of rows
-     * @param int $cols Number of columns
+     * Creates a balanced map with specific requirements for player vs player scenarios:
+     * - Ensures adequate movement paths
+     * - Balances defensive and offensive terrain
+     * - Provides strategic resource distribution
      *
-     * @return array Polished final map
+     * @param int $rows Number of rows in the map grid
+     * @param int $cols Number of columns in the map grid
+     * @param int $expectedPlayers Number of expected players
+     * @return array Competitively balanced map with analysis
      */
-    private function polishMap(array $map, int $rows, int $cols): array
+    public function generateCompetitiveMap(int $rows, int $cols, int $expectedPlayers = 2): array
     {
-        $newMap = $map;
+        $options = [
+            'clustering_iterations' => self::COMPETITIVE_CLUSTERING_ITERATIONS,
+            'fix_small_clusters' => true,
+            'min_cluster_size' => self::COMPETITIVE_MIN_CLUSTER_SIZE
+        ];
 
-        for ($row = 0; $row < $rows; $row++) {
-            for ($col = 0; $col < $cols; $col++) {
-                $currentTerrain = $map[$row][$col]['type'];
-                $neighbors = $this->getNeighbors($map, $row, $col, $rows, $cols);
+        $result = $this->generateBalancedMap($rows, $cols, $options);
 
-                // Count terrain types in neighborhood
-                $terrainCounts = [];
-                foreach ($neighbors as $neighbor) {
-                    $terrainType = $neighbor['type'];
-                    $terrainCounts[$terrainType] = ($terrainCounts[$terrainType] ?? 0) + 1;
-                }
+        // Additional competitive validation
+        $competitiveAnalysis = $this->analyzeCompetitiveBalance($result['map'], $rows, $cols, $expectedPlayers);
 
-                // If this tile is isolated (no same terrain neighbors)
-                if (!isset($terrainCounts[$currentTerrain]) || $terrainCounts[$currentTerrain] === 0) {
-                    // Convert to most common neighbor terrain type
-                    if (!empty($terrainCounts)) {
-                        $mostCommonTerrain = array_keys($terrainCounts, max($terrainCounts))[0];
-                        $terrainType = TerrainType::from($mostCommonTerrain);
-                        $newMap[$row][$col] = $this->createTerrainTile($terrainType, $row, $col);
-                    }
-                }
-            }
-        }
-
-        return $newMap;
+        return [
+            'map' => $result['map'],
+            'validation' => $result['validation'],
+            'statistics' => $result['statistics'],
+            'competitive_analysis' => $competitiveAnalysis
+        ];
     }
 
     /**
-     * Gets neighboring tiles for a given position using hexagonal grid logic
+     * Generates a map with specific terrain emphasis
      *
-     * @param array $map Current map state
-     * @param int $row Current row
-     * @param int $col Current column
-     * @param int $maxRows Total rows in map
-     * @param int $maxCols Total columns in map
+     * Creates a map that emphasizes certain terrain types while maintaining balance.
+     * Useful for themed scenarios or specific gameplay mechanics.
      *
-     * @return array Array of neighboring tile data
+     * @param int $rows Number of rows in the map grid
+     * @param int $cols Number of columns in the map grid
+     * @param array $terrainEmphasis Terrain types to emphasize with multipliers
+     * @return array Themed map with terrain analysis
      */
-    private function getNeighbors(array $map, int $row, int $col, int $maxRows, int $maxCols): array
+    public function generateThemedMap(int $rows, int $cols, array $terrainEmphasis = []): array
     {
-        $neighbors = [];
+        // TODO: Future implementation would modify terrain weights before generation
+        // For now, use standard generation with post-processing analysis
 
-        // Hexagonal neighbors (6 directions)
-        $directions = $this->getHexDirections($row);
+        $map = $this->generateMap($rows, $cols);
+        $statistics = $this->getTerrainStatistics($map, $rows, $cols);
 
-        foreach ($directions as $direction) {
-            $newRow = $row + $direction[0];
-            $newCol = $col + $direction[1];
+        return [
+            'map' => $map,
+            'statistics' => $statistics,
+            'theme_analysis' => $this->analyzeThemeCompliance($statistics, $terrainEmphasis)
+        ];
+    }
 
-            // Check bounds
-            if ($newRow >= 0 && $newRow < $maxRows && $newCol >= 0 && $newCol < $maxCols) {
-                $neighbors[] = $map[$newRow][$newCol];
-            }
-        }
+    // Domain-focused convenience methods
 
-        return $neighbors;
+    /**
+     * Gets terrain generation statistics for analysis
+     */
+    public function getTerrainStatistics(array $map, int $rows, int $cols): array
+    {
+        return $this->validationService->calculateTerrainStatistics($map, $rows, $cols);
     }
 
     /**
-     * Gets direction vectors for hexagonal neighbors
-     *
-     * @param int $row Current row (needed for odd/even row offset)
-     *
-     * @return array Array of [row_offset, col_offset] direction vectors
+     * Validates map for game balance
      */
-    private function getHexDirections(int $row): array
+    public function validateMap(array $map, int $rows, int $cols): array
     {
-        // Hexagonal grid directions depend on whether row is odd or even
-        if ($row % 2 === 0) {
-            // Even row
-            return [
-                [-1, -1], [-1, 0],  // Top-left, Top-right
-                [0, -1],  [0, 1],   // Left, Right
-                [1, -1],  [1, 0]    // Bottom-left, Bottom-right
+        return $this->validationService->validateMapBalance($map, $rows, $cols);
+    }
+
+    /**
+     * Analyzes map for strategic elements
+     */
+    public function analyzeStrategicElements(array $map, int $rows, int $cols): array
+    {
+        $statistics = $this->getTerrainStatistics($map, $rows, $cols);
+
+        return [
+            'defensive_terrain_percentage' => $this->calculateDefensiveTerrainPercentage($statistics),
+            'movement_restriction_percentage' => $this->calculateMovementRestrictionPercentage($statistics),
+            'resource_terrain_percentage' => $this->calculateResourceTerrainPercentage($statistics),
+            'mobility_terrain_percentage' => $statistics[TerrainType::PLAINS->value] ?? 0,
+            'strategic_balance_score' => $this->calculateStrategicBalanceScore($statistics)
+        ];
+    }
+
+    /**
+     * Gets terrain clustering configuration for external analysis
+     */
+    public function getClusteringConfiguration(): array
+    {
+        return $this->clusteringService->getClusteringConfiguration();
+    }
+
+    /**
+     * Gets terrain compatibility matrix for external analysis
+     */
+    public function getCompatibilityMatrix(): array
+    {
+        return $this->smoothingService->getCompatibilityMatrix();
+    }
+
+    /**
+     * Gets terrain generation weights for external analysis
+     */
+    public function getTerrainWeights(): array
+    {
+        return $this->baseTerrainService->getTerrainWeights();
+    }
+
+    /**
+     * Provides recommendations for map improvement
+     */
+    public function getMapImprovementRecommendations(array $map, int $rows, int $cols): array
+    {
+        $validation = $this->validateMap($map, $rows, $cols);
+        $strategicAnalysis = $this->analyzeStrategicElements($map, $rows, $cols);
+
+        $recommendations = [];
+
+        if (!$validation['isValid']) {
+            $recommendations['balance_issues'] = $validation['suggestions'];
+        }
+
+        if ($strategicAnalysis['strategic_balance_score'] < self::STRATEGIC_BALANCE_THRESHOLD) {
+            $recommendations['strategic_improvements'] = [
+                'Consider more diverse terrain distribution',
+                'Add more defensive terrain for strategic depth',
+                'Ensure adequate movement corridors'
             ];
-        } else {
-            // Odd row
-            return [
-                [-1, 0],  [-1, 1],  // Top-left, Top-right
-                [0, -1],  [0, 1],   // Left, Right
-                [1, 0],   [1, 1]    // Bottom-left, Bottom-right
+        }
+
+        return $recommendations;
+    }
+
+    // Private helper methods
+
+    /**
+     * Calculates defensive terrain percentage
+     */
+    private function calculateDefensiveTerrainPercentage(array $statistics): float
+    {
+        return ($statistics[TerrainType::MOUNTAIN->value] ?? 0) +
+            ($statistics[TerrainType::FOREST->value] ?? 0);
+    }
+
+    /**
+     * Calculates movement restriction terrain percentage
+     */
+    private function calculateMovementRestrictionPercentage(array $statistics): float
+    {
+        return ($statistics[TerrainType::WATER->value] ?? 0) +
+            ($statistics[TerrainType::SWAMP->value] ?? 0);
+    }
+
+    /**
+     * Calculates resource terrain percentage
+     */
+    private function calculateResourceTerrainPercentage(array $statistics): float
+    {
+        return ($statistics[TerrainType::FOREST->value] ?? 0) +
+            ($statistics[TerrainType::MOUNTAIN->value] ?? 0);
+    }
+
+    /**
+     * Analyzes competitive balance for multiplayer scenarios
+     */
+    private function analyzeCompetitiveBalance(array $map, int $rows, int $cols, int $expectedPlayers): array
+    {
+        $statistics = $this->getTerrainStatistics($map, $rows, $cols);
+        $strategicAnalysis = $this->analyzeStrategicElements($map, $rows, $cols);
+
+        return [
+            'player_balance_score' => $this->calculatePlayerBalanceScore($statistics, $expectedPlayers),
+            'strategic_depth_score' => $strategicAnalysis['strategic_balance_score'],
+            'terrain_variety_score' => $this->calculateTerrainVarietyScore($statistics),
+            'movement_freedom_score' => $strategicAnalysis['mobility_terrain_percentage'] / 100,
+            'overall_competitive_score' => $this->calculateOverallCompetitiveScore($statistics, $strategicAnalysis)
+        ];
+    }
+
+    /**
+     * Analyzes theme compliance for themed maps
+     */
+    private function analyzeThemeCompliance(array $statistics, array $terrainEmphasis): array
+    {
+        $compliance = [];
+
+        foreach ($terrainEmphasis as $terrain => $expectedPercentage) {
+            $actualPercentage = $statistics[$terrain] ?? 0;
+            $compliance[$terrain] = [
+                'expected' => $expectedPercentage,
+                'actual' => $actualPercentage,
+                'compliance_score' => min(1.0, $actualPercentage / max(1, $expectedPercentage))
             ];
         }
+
+        return $compliance;
+    }
+
+    /**
+     * Calculates strategic balance score (0.0 to 1.0)
+     */
+    private function calculateStrategicBalanceScore(array $statistics): float
+    {
+        // Ideal percentages for strategic balance
+        $idealBalance = [
+            TerrainType::PLAINS->value => 35,
+            TerrainType::FOREST->value => 25,
+            TerrainType::MOUNTAIN->value => 15,
+            TerrainType::WATER->value => 10,
+            TerrainType::DESERT->value => 10,
+            TerrainType::SWAMP->value => 5
+        ];
+
+        $totalDeviation = 0;
+        foreach ($idealBalance as $terrain => $idealPercentage) {
+            $actualPercentage = $statistics[$terrain] ?? 0;
+            $totalDeviation += abs($idealPercentage - $actualPercentage);
+        }
+
+        // Convert deviation to score (lower deviation = higher score)
+        return max(0, 1 - ($totalDeviation / self::MAX_DEVIATION));
+    }
+
+    /**
+     * Calculates player balance score for multiplayer
+     */
+    private function calculatePlayerBalanceScore(array $statistics, int $expectedPlayers): float
+    {
+        // More players need more mobility and resources
+        $mobilityWeight = min(1.0, $expectedPlayers / self::MAX_EXPECTED_PLAYERS);
+        $mobilityScore = ($statistics[TerrainType::PLAINS->value] ?? 0) / self::TARGET_MOBILITY_PERCENTAGE;
+
+        return min(1.0, $mobilityScore * $mobilityWeight + (1 - $mobilityWeight) * 0.7);
+    }
+
+    /**
+     * Calculates terrain variety score
+     */
+    private function calculateTerrainVarietyScore(array $statistics): float
+    {
+        $terrainTypes = count($statistics);
+        $maxVariety = count(TerrainType::cases());
+
+        // Penalize if any terrain type dominates too much
+        $maxPercentage = max($statistics);
+        $dominancePenalty = $maxPercentage > self::MAX_TERRAIN_DOMINANCE ? self::DOMINANCE_PENALTY : 1.0;
+
+        return ($terrainTypes / $maxVariety) * $dominancePenalty;
+    }
+
+    /**
+     * Calculates overall competitive score
+     */
+    private function calculateOverallCompetitiveScore(array $statistics, array $strategicAnalysis): float
+    {
+        $balanceScore = $this->calculateStrategicBalanceScore($statistics);
+        $varietyScore = $this->calculateTerrainVarietyScore($statistics);
+        $mobilityScore = $strategicAnalysis['mobility_terrain_percentage'] / self::TARGET_MOBILITY_PERCENTAGE;
+
+        return ($balanceScore + $varietyScore + min(1.0, $mobilityScore)) / 3;
     }
 }

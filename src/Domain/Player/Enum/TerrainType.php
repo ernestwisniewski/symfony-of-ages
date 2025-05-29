@@ -46,7 +46,7 @@ enum TerrainType: string
      */
     public function getProperties(): array
     {
-        return match($this) {
+        return match ($this) {
             self::PLAINS => [
                 'name' => 'Plains',
                 'color' => 0x90EE90,  // Light green

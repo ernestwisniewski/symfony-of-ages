@@ -43,8 +43,8 @@ class Position
      */
     public function isValidForMap(int $maxRows, int $maxCols): bool
     {
-        return $this->row >= 0 && $this->row < $maxRows && 
-               $this->col >= 0 && $this->col < $maxCols;
+        return $this->row >= 0 && $this->row < $maxRows &&
+            $this->col >= 0 && $this->col < $maxCols;
     }
 
     /**
@@ -55,7 +55,7 @@ class Position
         // Hexagonal distance calculation
         $dx = $this->col - $other->col;
         $dy = $this->row - $other->row;
-        
+
         // Adjust for hexagonal coordinate system
         if (($this->row % 2) !== ($other->row % 2)) {
             if ($this->row % 2 === 0) {
@@ -64,7 +64,7 @@ class Position
                 $dx -= 0.5;
             }
         }
-        
+
         return max(abs($dx), abs($dy), abs($dx + $dy));
     }
 
@@ -91,4 +91,4 @@ class Position
     {
         return "({$this->row}, {$this->col})";
     }
-} 
+}

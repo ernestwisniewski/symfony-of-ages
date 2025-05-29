@@ -29,6 +29,21 @@ interface DefaultState {
  * Extends PIXI.Graphics to provide interactive hexagonal terrain tiles with textures
  */
 export class HexTile extends Graphics {
+  // Visual configuration constants
+  private static readonly COLOR_BLEND_INTENSITY = 0.05;
+  private static readonly EDGE_COLOR = 0xE0E0E0;
+  private static readonly STROKE_WIDTH = 2;
+  private static readonly INNER_STROKE_WIDTH = 1;
+  private static readonly STROKE_ALPHA = 0.7;
+  private static readonly INNER_ALPHA = 0.3;
+  private static readonly INNER_HEX_SCALE = 0.92;
+  private static readonly HOVER_TEXTURE_ALPHA = 0.9;
+  private static readonly HOVER_MULTIPLIER = 0.96;
+  private static readonly HEX_ANGLE_OFFSET = 30;
+  private static readonly HEX_ANGLE_STEP = 60;
+  private static readonly HEX_VERTEX_COUNT = 6;
+  private static readonly DEFAULT_TERRAIN_COLOR = 0xF8F8F8;
+  
   private size: number;
   private hoverShadow: any[];
   private terrainData: any;
@@ -47,16 +62,16 @@ export class HexTile extends Graphics {
     this.terrainData = terrainData;
 
     // Get base color from terrain properties for fallback
-    const terrainColor = terrainData.properties?.color || 0xF8F8F8;
-    const baseColor = this.blendWithWhite(terrainColor, 0.05); // Very subtle 5% terrain color
+    const terrainColor = terrainData.properties?.color || HexTile.DEFAULT_TERRAIN_COLOR;
+    const baseColor = this.blendWithWhite(terrainColor, HexTile.COLOR_BLEND_INTENSITY);
 
     this.defaultState = {
       fillColor: baseColor,
-      edgeColor: 0xE0E0E0,    // Slightly darker for edges
-      strokeWidth: 2,
-      innerStrokeWidth: 1,
-      strokeAlpha: 0.7,       // Semi-transparent outer border
-      innerAlpha: 0.3         // More transparent inner border
+      edgeColor: HexTile.EDGE_COLOR,
+      strokeWidth: HexTile.STROKE_WIDTH,
+      innerStrokeWidth: HexTile.INNER_STROKE_WIDTH,
+      strokeAlpha: HexTile.STROKE_ALPHA,
+      innerAlpha: HexTile.INNER_ALPHA
     };
 
     this.loadTexture();
@@ -118,16 +133,37 @@ export class HexTile extends Graphics {
     this.clear();
 
     const points = this.getPoints();
-    const innerPoints = this.getPoints(0.92);
+    const innerPoints = this.getPoints(HexTile.INNER_HEX_SCALE);
 
-    // Draw outer edge (darker)
+    this.drawOuterHex(points, isHovered);
+    this.drawInnerHex(innerPoints);
+  }
+
+  /**
+   * Draws the outer hexagon with stroke and fill
+   */
+  private drawOuterHex(points: number[], isHovered: boolean): void {
+    this.drawHexOutline(points, this.defaultState.strokeWidth, this.defaultState.strokeAlpha);
+    this.fillHex(isHovered);
+  }
+
+  /**
+   * Draws the inner hexagon with lighter stroke
+   */
+  private drawInnerHex(innerPoints: number[]): void {
+    this.drawHexOutline(innerPoints, this.defaultState.innerStrokeWidth, this.defaultState.innerAlpha);
+  }
+
+  /**
+   * Draws hexagon outline with specified stroke properties
+   */
+  private drawHexOutline(points: number[], strokeWidth: number, strokeAlpha: number): void {
     this.setStrokeStyle({
-      width: this.defaultState.strokeWidth,
+      width: strokeWidth,
       color: this.defaultState.edgeColor,
-      alpha: this.defaultState.strokeAlpha
+      alpha: strokeAlpha
     });
 
-    // Draw main hex outline
     this.beginPath();
     this.moveTo(points[0], points[1]);
     for (let i = 2; i < points.length; i += 2) {
@@ -136,38 +172,38 @@ export class HexTile extends Graphics {
     this.lineTo(points[0], points[1]);
     this.closePath();
     this.stroke();
+  }
 
-    // Fill with texture or fallback color
+  /**
+   * Fills the hexagon with texture or color
+   */
+  private fillHex(isHovered: boolean): void {
     if (this.terrainTexture) {
-      // Use texture fill
-      this.fill({
-        texture: this.terrainTexture,
-        alpha: isHovered ? 0.9 : 1.0 // More subtle transparency when hovered
-      });
+      this.fillWithTexture(isHovered);
     } else {
-      // Fill with base color - darker when hovered
-      const fillColor = isHovered
-        ? new Color(this.defaultState.fillColor).multiply([0.96, 0.96, 0.96]).toNumber() // Darker when hovered
-        : this.defaultState.fillColor;
-
-      this.fill({ color: fillColor });
+      this.fillWithColor(isHovered);
     }
+  }
 
-    // Draw inner hex (same style whether hovered or not)
-    this.setStrokeStyle({
-      width: this.defaultState.innerStrokeWidth,
-      color: this.defaultState.edgeColor,
-      alpha: this.defaultState.innerAlpha
+  /**
+   * Fills hexagon with terrain texture
+   */
+  private fillWithTexture(isHovered: boolean): void {
+    this.fill({
+      texture: this.terrainTexture!,
+      alpha: isHovered ? HexTile.HOVER_TEXTURE_ALPHA : 1.0
     });
+  }
 
-    this.beginPath();
-    this.moveTo(innerPoints[0], innerPoints[1]);
-    for (let i = 2; i < innerPoints.length; i += 2) {
-      this.lineTo(innerPoints[i], innerPoints[i + 1]);
-    }
-    this.lineTo(innerPoints[0], innerPoints[1]);
-    this.closePath();
-    this.stroke();
+  /**
+   * Fills hexagon with solid color (fallback when no texture available)
+   */
+  private fillWithColor(isHovered: boolean): void {
+    const fillColor = isHovered
+      ? new Color(this.defaultState.fillColor).multiply([HexTile.HOVER_MULTIPLIER, HexTile.HOVER_MULTIPLIER, HexTile.HOVER_MULTIPLIER]).toNumber()
+      : this.defaultState.fillColor;
+
+    this.fill({ color: fillColor });
   }
 
   /**
@@ -178,8 +214,8 @@ export class HexTile extends Graphics {
    */
   private getPoints(scale: number = 1): number[] {
     const points: number[] = [];
-    for (let i = 0; i < 6; i++) {
-      const angle = (60 * i + 30) * Math.PI / 180;
+    for (let i = 0; i < HexTile.HEX_VERTEX_COUNT; i++) {
+      const angle = (HexTile.HEX_ANGLE_STEP * i + HexTile.HEX_ANGLE_OFFSET) * Math.PI / 180;
       points.push(
         this.size * scale * Math.cos(angle),
         this.size * scale * Math.sin(angle)

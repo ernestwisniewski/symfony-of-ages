@@ -12,6 +12,8 @@ interface Position {
  * Uses flat-top hexagon orientation with offset coordinate system
  */
 export class HexGeometry {
+  private static readonly HEX_HEIGHT_STEP_RATIO = 0.75;
+
   private readonly width: number;
   private readonly height: number;
   private readonly stepX: number;
@@ -27,7 +29,7 @@ export class HexGeometry {
     this.width = Math.sqrt(3) * size; // hex width (flat-top)
     this.height = 2 * size; // hex height
     this.stepX = this.width;
-    this.stepY = this.height * 0.75;
+    this.stepY = this.height * HexGeometry.HEX_HEIGHT_STEP_RATIO;
     this.shiftX = this.stepX / 2;
   }
 

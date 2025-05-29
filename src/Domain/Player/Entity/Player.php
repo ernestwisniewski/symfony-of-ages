@@ -2,40 +2,45 @@
 
 namespace App\Domain\Player\Entity;
 
+use App\Domain\Game\Event\PlayerMoved;
+use App\Domain\Game\ValueObject\MovementPoints;
+use App\Domain\Game\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;
+use InvalidArgumentException;
 
 /**
- * Player entity representing a game player on the hexagonal map
+ * Player entity - Aggregate Root for player-related operations
  *
- * Encapsulates player state including current position, movement capabilities,
- * and core game mechanics. Follows domain-driven design principles with
- * business logic contained within the entity.
+ * Encapsulates player state and business logic following DDD principles.
+ * Maintains invariants, publishes domain events, and provides rich behavior.
  */
 class Player
 {
-    private string $id;
+    private PlayerId $id;
     private Position $position;
-    private int $movementPoints;
-    private int $maxMovementPoints;
+    private MovementPoints $movementPoints;
     private string $name;
     private int $color;
+    private array $domainEvents = [];
 
     public function __construct(
-        string $id,
+        PlayerId $id,
         Position $position,
-        string $name,
-        int $maxMovementPoints = 3,
-        int $color = 0xFF6B6B
-    ) {
+        string   $name,
+        int      $maxMovementPoints = 3,
+        int      $color = 0xFF6B6B
+    )
+    {
+        $this->validateName($name);
+
         $this->id = $id;
         $this->position = $position;
         $this->name = $name;
-        $this->maxMovementPoints = $maxMovementPoints;
-        $this->movementPoints = $maxMovementPoints;
+        $this->movementPoints = MovementPoints::createFull($maxMovementPoints);
         $this->color = $color;
     }
 
-    public function getId(): string
+    public function getId(): PlayerId
     {
         return $this->id;
     }
@@ -57,16 +62,24 @@ class Player
 
     public function getMovementPoints(): int
     {
-        return $this->movementPoints;
+        return $this->movementPoints->getCurrent();
     }
 
     public function getMaxMovementPoints(): int
     {
-        return $this->maxMovementPoints;
+        return $this->movementPoints->getMaximum();
+    }
+
+    public function getMovementPointsValueObject(): MovementPoints
+    {
+        return $this->movementPoints;
     }
 
     /**
      * Attempts to move player to a new position
+     *
+     * Uses domain logic to validate and execute movement,
+     * publishes domain events for external systems.
      *
      * @param Position $newPosition Target position
      * @param int $movementCost Cost of the movement
@@ -74,30 +87,86 @@ class Player
      */
     public function moveTo(Position $newPosition, int $movementCost): bool
     {
-        if ($this->movementPoints < $movementCost) {
+        if (!$this->movementPoints->canSpend($movementCost)) {
             return false;
         }
 
+        $previousPosition = $this->position;
+
+        // Execute movement
         $this->position = $newPosition;
-        $this->movementPoints -= $movementCost;
-        
+        $this->movementPoints = $this->movementPoints->spend($movementCost);
+
+        // Publish domain event
+        $this->recordDomainEvent(new PlayerMoved(
+            $this->id,
+            $previousPosition,
+            $newPosition,
+            $movementCost
+        ));
+
         return true;
     }
 
     /**
-     * Checks if player can move to given position with specified cost
+     * Checks if player can move with specified cost
      */
     public function canMoveTo(int $movementCost): bool
     {
-        return $this->movementPoints >= $movementCost;
+        return $this->movementPoints->canSpend($movementCost);
     }
 
     /**
-     * Restores movement points to maximum (start of new turn)
+     * Starts a new turn - restores movement points
      */
     public function startNewTurn(): void
     {
-        $this->movementPoints = $this->maxMovementPoints;
+        $this->movementPoints = $this->movementPoints->restore();
+    }
+
+    /**
+     * Checks if player can continue their turn
+     */
+    public function canContinueTurn(): bool
+    {
+        return $this->movementPoints->hasPointsRemaining();
+    }
+
+    /**
+     * Changes player name with validation
+     */
+    public function changeName(string $newName): void
+    {
+        $this->validateName($newName);
+        $this->name = $newName;
+    }
+
+    /**
+     * Changes player color
+     */
+    public function changeColor(int $newColor): void
+    {
+        if ($newColor < 0 || $newColor > 0xFFFFFF) {
+            throw new InvalidArgumentException('Color must be a valid hexadecimal value');
+        }
+
+        $this->color = $newColor;
+    }
+
+    /**
+     * Gets domain events for publishing
+     */
+    public function getDomainEvents(): array
+    {
+        return $this->domainEvents;
+    }
+
+    /**
+     * Clears domain events after publishing
+     */
+    public function clearDomainEvents(): void
+    {
+        $this->domainEvents = [];
     }
 
     /**
@@ -106,12 +175,55 @@ class Player
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->id->getValue(),
             'name' => $this->name,
             'position' => $this->position->toArray(),
-            'movementPoints' => $this->movementPoints,
-            'maxMovementPoints' => $this->maxMovementPoints,
+            'movementPoints' => $this->movementPoints->getCurrent(),
+            'maxMovementPoints' => $this->movementPoints->getMaximum(),
             'color' => $this->color
         ];
     }
-} 
+
+    /**
+     * Factory method to create player from array data
+     */
+    public static function fromArray(array $data): self
+    {
+        $playerId = new PlayerId($data['id']);
+        $position = Position::fromArray($data['position']);
+
+        $player = new self(
+            $playerId,
+            $position,
+            $data['name'],
+            $data['maxMovementPoints'] ?? 3,
+            $data['color'] ?? 0xFF6B6B
+        );
+
+        // Restore movement points if different from max
+        if (isset($data['movementPoints']) && $data['movementPoints'] !== $data['maxMovementPoints']) {
+            $player->movementPoints = new MovementPoints(
+                $data['movementPoints'],
+                $data['maxMovementPoints'] ?? 3
+            );
+        }
+
+        return $player;
+    }
+
+    private function validateName(string $name): void
+    {
+        if (empty(trim($name))) {
+            throw new InvalidArgumentException('Player name cannot be empty');
+        }
+
+        if (strlen($name) > 50) {
+            throw new InvalidArgumentException('Player name cannot exceed 50 characters');
+        }
+    }
+
+    private function recordDomainEvent(object $event): void
+    {
+        $this->domainEvents[] = $event;
+    }
+}
