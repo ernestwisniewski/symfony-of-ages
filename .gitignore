@@ -1,6 +1,6 @@
 .DS_Store
 /.idea
-/tools/php-cs-fixer/vendor
+/tools/php-cs-fixer/vendor/
 /.php-cs-fixer.cache
 
 ###> symfony/framework-bundle ###
