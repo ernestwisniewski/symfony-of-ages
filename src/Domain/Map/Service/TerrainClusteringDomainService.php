@@ -66,30 +66,53 @@ class TerrainClusteringDomainService
     }
 
     /**
-     * Selects neighbor to convert based on domain rules
+     * Selects a suitable neighbor to convert to the current terrain type
      *
      * @param array $neighbors Array of neighbor tiles
-     * @param TerrainType $currentTerrain Current terrain type to spread
-     * @return array|null Neighbor to convert or null
+     * @param TerrainType $currentTerrain Current terrain type
+     * @return array|null Neighbor to convert or null if none suitable
      */
     public function selectNeighborToConvert(array $neighbors, TerrainType $currentTerrain): ?array
     {
-        // Find neighbors of different type
+        if (empty($neighbors)) {
+            return null;
+        }
+
+        // Domain rule: 30% chance to convert neighbor
+        if (mt_rand(1, 100) > 30) {
+            return null;
+        }
+
+        // Find all different terrain neighbors using PHP 8.4 array_filter
         $differentNeighbors = array_filter(
             $neighbors,
-            fn ($neighbor) => $neighbor['type'] !== $currentTerrain->value
+            fn($neighbor) => TerrainType::from($neighbor['type']) !== $currentTerrain
         );
 
         if (empty($differentNeighbors)) {
             return null;
         }
 
-        // Domain rule: 30% chance to convert neighbor
-        if (mt_rand(1, 100) <= 30) {
-            return $differentNeighbors[array_rand($differentNeighbors)];
-        }
+        // Randomly select one of the different neighbors for fair distribution
+        return $differentNeighbors[array_rand($differentNeighbors)];
+    }
 
-        return null;
+    /**
+     * Checks if two terrain types are compatible for clustering
+     */
+    private function areTerrainTypesCompatibleForClustering(TerrainType $terrain1, TerrainType $terrain2): bool
+    {
+        // Simple compatibility check - more similar terrains cluster better
+        $compatibility = [
+            TerrainType::PLAINS->value => [TerrainType::FOREST, TerrainType::DESERT],
+            TerrainType::FOREST->value => [TerrainType::PLAINS, TerrainType::MOUNTAIN],
+            TerrainType::MOUNTAIN->value => [TerrainType::FOREST, TerrainType::DESERT],
+            TerrainType::WATER->value => [TerrainType::SWAMP],
+            TerrainType::DESERT->value => [TerrainType::PLAINS, TerrainType::MOUNTAIN],
+            TerrainType::SWAMP->value => [TerrainType::WATER, TerrainType::FOREST]
+        ];
+
+        return in_array($terrain2, $compatibility[$terrain1->value] ?? []);
     }
 
     /**
@@ -123,23 +146,27 @@ class TerrainClusteringDomainService
     /**
      * Validates clustering configuration
      *
-     * @param array $clusterConfig Clustering configuration to validate
+     * @param array $clusterConfig Configuration to validate
      * @return bool True if configuration is valid
      */
     public function isValidClusteringConfiguration(array $clusterConfig): bool
     {
-        foreach ($clusterConfig as $terrain => $probability) {
-            // Check if terrain type exists
-            if (!TerrainType::tryFrom($terrain)) {
-                return false;
-            }
+        $terrainValues = array_map(fn($terrain) => $terrain->value, TerrainType::cases());
 
-            // Check if probability is valid (0.0 to 1.0)
-            if (!is_float($probability) || $probability < 0.0 || $probability > 1.0) {
-                return false;
-            }
+        // Check if all provided terrain types are valid using PHP 8.4 array_all
+        $hasValidTerrainTypes = array_all(
+            array_keys($clusterConfig),
+            fn($terrain) => in_array($terrain, $terrainValues)
+        );
+
+        if (!$hasValidTerrainTypes) {
+            return false;
         }
 
-        return true;
+        // Check if all probabilities are valid using PHP 8.4 array_all
+        return array_all(
+            $clusterConfig,
+            fn($probability) => is_float($probability) && $probability >= 0.0 && $probability <= 1.0
+        );
     }
 }

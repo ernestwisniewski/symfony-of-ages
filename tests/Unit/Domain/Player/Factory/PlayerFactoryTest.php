@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Domain\Player\Factory;
 
+use App\Domain\Player\Entity\Player;
 use App\Domain\Player\Factory\PlayerFactory;
 use App\Domain\Player\Service\PlayerAttributeDomainService;
-use App\Domain\Player\Entity\Player;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for PlayerFactory
+ * Unit tests for PlayerFactory after encapsulation improvements
  */
 class PlayerFactoryTest extends TestCase
 {
@@ -44,7 +44,7 @@ class PlayerFactoryTest extends TestCase
         $this->assertInstanceOf(PlayerId::class, $player->getId()); // ID is generated internally
         $this->assertEquals($name, $player->getName());
         $this->assertEquals($position, $player->getPosition());
-        $this->assertEquals($maxMovementPoints, $player->getMaxMovementPoints());
+        $this->assertEquals($maxMovementPoints, $player->maxMovementPoints);
         $this->assertEquals($expectedColor, $player->getColor());
     }
 
@@ -59,7 +59,7 @@ class PlayerFactoryTest extends TestCase
 
         $player = $this->playerFactory->createPlayer($name, $position);
 
-        $this->assertEquals(3, $player->getMaxMovementPoints()); // Default value
+        $this->assertEquals(3, $player->maxMovementPoints); // Default value
     }
 
     public function testCreatePlayerWithAttributes(): void
@@ -82,7 +82,7 @@ class PlayerFactoryTest extends TestCase
         $this->assertEquals($id, $player->getId());
         $this->assertEquals($name, $player->getName());
         $this->assertEquals($position, $player->getPosition());
-        $this->assertEquals($maxMovementPoints, $player->getMaxMovementPoints());
+        $this->assertEquals($maxMovementPoints, $player->maxMovementPoints);
         $this->assertEquals($color, $player->getColor());
     }
 
@@ -94,7 +94,7 @@ class PlayerFactoryTest extends TestCase
 
         $player = $this->playerFactory->createPlayerWithAttributes($id, $name, $position);
 
-        $this->assertEquals(3, $player->getMaxMovementPoints());
+        $this->assertEquals(3, $player->maxMovementPoints);
         $this->assertEquals(0xFF6B6B, $player->getColor());
     }
 
@@ -109,8 +109,8 @@ class PlayerFactoryTest extends TestCase
 
         $this->assertInstanceOf(Player::class, $player);
         $this->assertEquals('Test Player', $player->getName());
-        $this->assertEquals(50, $player->getPosition()->getRow()); // Updated to match actual implementation
-        $this->assertEquals(50, $player->getPosition()->getCol());
+        $this->assertEquals(50, $player->getPosition()->row); // Updated to match actual implementation
+        $this->assertEquals(50, $player->getPosition()->col);
     }
 
     public function testCreateTestPlayerWithCustomName(): void
@@ -173,9 +173,9 @@ class PlayerFactoryTest extends TestCase
         $player2 = $this->playerFactory->createPlayer('Player 2', $position);
         $player3 = $this->playerFactory->createPlayer('Player 3', $position);
 
-        $this->assertNotEquals($player1->getId()->getValue(), $player2->getId()->getValue());
-        $this->assertNotEquals($player2->getId()->getValue(), $player3->getId()->getValue());
-        $this->assertNotEquals($player1->getId()->getValue(), $player3->getId()->getValue());
+        $this->assertNotEquals($player1->getId()->value, $player2->getId()->value);
+        $this->assertNotEquals($player2->getId()->value, $player3->getId()->value);
+        $this->assertNotEquals($player1->getId()->value, $player3->getId()->value);
     }
 
     public function testFactoryGeneratesVariousColors(): void
@@ -206,8 +206,8 @@ class PlayerFactoryTest extends TestCase
         $player = $this->playerFactory->createPlayer('State Test', new Position(0, 0), 4);
 
         // Test initial state
-        $this->assertEquals(4, $player->getMovementPoints()); // Should equal max initially
-        $this->assertEquals(4, $player->getMaxMovementPoints());
+        $this->assertEquals(4, $player->currentMovementPoints); // Should equal max initially
+        $this->assertEquals(4, $player->maxMovementPoints);
         $this->assertTrue($player->canContinueTurn());
         $this->assertEmpty($player->getDomainEvents());
     }

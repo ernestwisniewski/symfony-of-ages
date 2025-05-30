@@ -3,55 +3,106 @@
 namespace App\Domain\Map\ValueObject;
 
 /**
- * TerrainProperties aggregates all terrain characteristics
+ * TerrainProperties - pure value object for terrain characteristics
  *
- * Main aggregate containing all specialized terrain property value objects.
+ * Simple aggregate containing all specialized terrain property value objects.
  * Provides unified access to visual, movement, combat, and economic properties.
+ * Uses modern PHP 8.4 property hooks for clean API.
+ *
+ * Contains only basic data access and simple property queries.
+ * Complex analysis logic has been moved to TerrainAnalyzer domain service.
  */
-readonly class TerrainProperties
+class TerrainProperties
 {
     public function __construct(
-        private TerrainVisualProperties $visual,
-        private TerrainMovementProperties $movement,
-        private TerrainCombatProperties $combat,
-        private TerrainEconomicProperties $economic
-    ) {
+        public readonly TerrainVisualProperties   $visual,
+        public readonly TerrainMovementProperties $movement,
+        public readonly TerrainCombatProperties   $combat,
+        public readonly TerrainEconomicProperties $economic
+    )
+    {
     }
 
+    /**
+     * Quick access properties using modern property hooks
+     */
+    public string $name {
+        get => $this->visual->name;
+    }
+
+    public int $color {
+        get => $this->visual->color;
+    }
+
+    public int $movementCost {
+        get => $this->movement->movementCost;
+    }
+
+    public bool $isPassable {
+        get => $this->movement->isPassable();
+    }
+
+    public int $defenseBonus {
+        get => $this->combat->defenseBonus;
+    }
+
+    public int $resourceYield {
+        get => $this->economic->resourceYield;
+    }
+
+    public string $hexColor {
+        get => $this->visual->getHexColor();
+    }
+
+    /**
+     * Gets visual properties
+     */
     public function visual(): TerrainVisualProperties
     {
         return $this->visual;
     }
 
+    /**
+     * Gets movement properties
+     */
     public function movement(): TerrainMovementProperties
     {
         return $this->movement;
     }
 
+    /**
+     * Gets combat properties
+     */
     public function combat(): TerrainCombatProperties
     {
         return $this->combat;
     }
 
+    /**
+     * Gets economic properties
+     */
     public function economic(): TerrainEconomicProperties
     {
         return $this->economic;
     }
 
     /**
-     * Provides backward compatibility with legacy array format
+     * Provides basic array format for API responses
      */
-    public function toLegacyArray(): array
+    public function toArray(): array
     {
         return [
-            'name' => $this->visual->getName(),
-            'color' => $this->visual->getColor(),
-            'movementCost' => $this->movement->getMovementCost(),
-            'defense' => $this->combat->getDefenseBonus(),
-            'resources' => $this->economic->getResourceYield()
+            'name' => $this->name,
+            'color' => $this->color,
+            'movementCost' => $this->movementCost,
+            'defense' => $this->defenseBonus,
+            'resources' => $this->resourceYield
         ];
     }
 
+    /**
+     * Returns detailed array with all property categories
+     */
     public function toDetailedArray(): array
     {
         return [
@@ -59,58 +110,7 @@ readonly class TerrainProperties
             'movement' => $this->movement->toArray(),
             'combat' => $this->combat->toArray(),
             'economic' => $this->economic->toArray(),
-            'legacy' => $this->toLegacyArray()
+            'quick_access' => $this->toArray()
         ];
     }
-
-    /**
-     * Quick access methods for common operations
-     */
-    public function getName(): string
-    {
-        return $this->visual->getName();
-    }
-
-    public function getColor(): int
-    {
-        return $this->visual->getColor();
-    }
-
-    public function getMovementCost(): int
-    {
-        return $this->movement->getMovementCost();
-    }
-
-    public function isPassable(): bool
-    {
-        return $this->movement->isPassable();
-    }
-
-    public function getDefenseBonus(): int
-    {
-        return $this->combat->getDefenseBonus();
-    }
-
-    public function getResourceYield(): int
-    {
-        return $this->economic->getResourceYield();
-    }
-
-    /**
-     * Tactical analysis methods
-     */
-    public function isTacticallyAdvantaged(): bool
-    {
-        return $this->combat->providesDefensiveAdvantage();
-    }
-
-    public function isEconomicallyViable(): bool
-    {
-        return $this->economic->isResourceRich();
-    }
-
-    public function isStrategicallyImportant(): bool
-    {
-        return $this->isTacticallyAdvantaged() || $this->isEconomicallyViable();
-    }
-} 
+}

@@ -115,8 +115,8 @@ class TerrainGenerationDomainServiceTest extends TestCase
             $this->assertIsArray($tile['properties']);
             $this->assertIsArray($tile['coordinates']);
 
-            // Verify terrain-specific properties (using legacy properties for backward compatibility)
-            $expectedProperties = $terrain->getLegacyProperties();
+            // Verify terrain-specific properties using modern API
+            $expectedProperties = $terrain->getProperties()->toArray();
             $this->assertEquals($expectedProperties, $tile['properties']);
         }
     }
@@ -204,7 +204,7 @@ class TerrainGenerationDomainServiceTest extends TestCase
         // Verify that tile properties match terrain enum properties
         foreach (TerrainType::cases() as $terrain) {
             $tile = $this->service->createTerrainTile($terrain, 0, 0);
-            $expectedProperties = $terrain->getLegacyProperties();
+            $expectedProperties = $terrain->getProperties()->toArray();
 
             $this->assertEquals($expectedProperties, $tile['properties']);
             $this->assertEquals($expectedProperties['name'], $tile['name']);

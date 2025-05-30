@@ -3,7 +3,7 @@
 namespace Tests\Unit\Domain\Player\ValueObject;
 
 use App\Domain\Player\ValueObject\MovementPoints;
-use InvalidArgumentException;
+use App\Domain\Player\Exception\InvalidPlayerDataException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,21 +15,21 @@ class MovementPointsTest extends TestCase
     {
         $movementPoints = new MovementPoints(2, 3);
         
-        $this->assertEquals(2, $movementPoints->getCurrent());
-        $this->assertEquals(3, $movementPoints->getMaximum());
+        $this->assertEquals(2, $movementPoints->current);
+        $this->assertEquals(3, $movementPoints->maximum);
     }
 
     public function testCanCreateMovementPointsWithZeroValues(): void
     {
         $movementPoints = new MovementPoints(0, 0);
         
-        $this->assertEquals(0, $movementPoints->getCurrent());
-        $this->assertEquals(0, $movementPoints->getMaximum());
+        $this->assertEquals(0, $movementPoints->current);
+        $this->assertEquals(0, $movementPoints->maximum);
     }
 
     public function testThrowsExceptionForNegativeMaximum(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Maximum movement points cannot be negative');
         
         new MovementPoints(1, -1);
@@ -37,7 +37,7 @@ class MovementPointsTest extends TestCase
 
     public function testThrowsExceptionForNegativeCurrent(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Current movement points cannot be negative');
         
         new MovementPoints(-1, 3);
@@ -45,7 +45,7 @@ class MovementPointsTest extends TestCase
 
     public function testThrowsExceptionWhenCurrentExceedsMaximum(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Current movement points cannot exceed maximum');
         
         new MovementPoints(5, 3);
@@ -84,17 +84,17 @@ class MovementPointsTest extends TestCase
         $movementPoints = new MovementPoints(3, 3);
         $newMovementPoints = $movementPoints->spend(2);
         
-        $this->assertEquals(1, $newMovementPoints->getCurrent());
-        $this->assertEquals(3, $newMovementPoints->getMaximum());
+        $this->assertEquals(1, $newMovementPoints->current);
+        $this->assertEquals(3, $newMovementPoints->maximum);
         // Original should be unchanged
-        $this->assertEquals(3, $movementPoints->getCurrent());
+        $this->assertEquals(3, $movementPoints->current);
     }
 
     public function testSpendThrowsExceptionForInsufficientPoints(): void
     {
         $movementPoints = new MovementPoints(1, 3);
         
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Cannot spend 2 movement points. Available: 1');
         
         $movementPoints->spend(2);
@@ -105,10 +105,10 @@ class MovementPointsTest extends TestCase
         $movementPoints = new MovementPoints(1, 3);
         $restoredPoints = $movementPoints->restore();
         
-        $this->assertEquals(3, $restoredPoints->getCurrent());
-        $this->assertEquals(3, $restoredPoints->getMaximum());
+        $this->assertEquals(3, $restoredPoints->current);
+        $this->assertEquals(3, $restoredPoints->maximum);
         // Original should be unchanged
-        $this->assertEquals(1, $movementPoints->getCurrent());
+        $this->assertEquals(1, $movementPoints->current);
     }
 
     public function testHasPointsRemainingReturnsTrueForPositivePoints(): void
@@ -152,15 +152,15 @@ class MovementPointsTest extends TestCase
         $data = ['current' => 2, 'maximum' => 3];
         $movementPoints = MovementPoints::fromArray($data);
         
-        $this->assertEquals(2, $movementPoints->getCurrent());
-        $this->assertEquals(3, $movementPoints->getMaximum());
+        $this->assertEquals(2, $movementPoints->current);
+        $this->assertEquals(3, $movementPoints->maximum);
     }
 
     public function testCreateFull(): void
     {
         $movementPoints = MovementPoints::createFull(5);
         
-        $this->assertEquals(5, $movementPoints->getCurrent());
-        $this->assertEquals(5, $movementPoints->getMaximum());
+        $this->assertEquals(5, $movementPoints->current);
+        $this->assertEquals(5, $movementPoints->maximum);
     }
 } 

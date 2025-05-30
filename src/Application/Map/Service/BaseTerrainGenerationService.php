@@ -2,8 +2,8 @@
 
 namespace App\Application\Map\Service;
 
-use App\Domain\Map\Service\TerrainGenerationDomainService;
 use App\Domain\Map\Enum\TerrainType;
+use App\Domain\Map\Service\TerrainGenerationDomainService;
 
 /**
  * BaseTerrainGenerationService handles terrain generation coordination
@@ -15,7 +15,8 @@ class BaseTerrainGenerationService
 {
     public function __construct(
         private readonly TerrainGenerationDomainService $terrainDomainService
-    ) {
+    )
+    {
     }
 
     /**

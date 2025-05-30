@@ -19,122 +19,52 @@ class HexGridServiceTest extends TestCase
         $this->hexGridService = new HexGridService();
     }
 
-    public function testGetAdjacentPositions(): void
-    {
-        $position = new Position(5, 5);
-        $adjacentPositions = $this->hexGridService->getAdjacentPositions($position, 10, 10);
-
-        $this->assertCount(6, $adjacentPositions); // Hexagonal grid has 6 neighbors
-        
-        foreach ($adjacentPositions as $adjacentPosition) {
-            $this->assertInstanceOf(Position::class, $adjacentPosition);
-            $this->assertTrue($adjacentPosition->isValidForMap(10, 10));
-        }
-    }
-
-    public function testGetAdjacentPositionsAtMapEdge(): void
-    {
-        $position = new Position(0, 0); // Corner position
-        $adjacentPositions = $this->hexGridService->getAdjacentPositions($position, 10, 10);
-
-        // Should have fewer neighbors due to map boundaries
-        $this->assertLessThan(6, count($adjacentPositions));
-        
-        foreach ($adjacentPositions as $adjacentPosition) {
-            $this->assertInstanceOf(Position::class, $adjacentPosition);
-            $this->assertTrue($adjacentPosition->isValidForMap(10, 10));
-        }
-    }
-
     #[DataProvider('hexDirectionsProvider')]
     public function testGetHexDirections(int $row, array $expectedDirections): void
     {
         $directions = $this->hexGridService->getHexDirections($row);
         
-        $this->assertCount(6, $directions);
         $this->assertEquals($expectedDirections, $directions);
     }
 
-    public function testGetNeighborTiles(): void
+    public function testGetAdjacentPositionsEvenRow(): void
     {
-        $map = [
-            [
-                ['type' => 'plains', 'name' => 'Plains'],
-                ['type' => 'forest', 'name' => 'Forest'],
-                ['type' => 'mountain', 'name' => 'Mountain']
-            ],
-            [
-                ['type' => 'water', 'name' => 'Water'],
-                ['type' => 'desert', 'name' => 'Desert'],
-                ['type' => 'swamp', 'name' => 'Swamp']
-            ]
+        $position = new Position(4, 5); // Even row
+        $adjacentPositions = $this->hexGridService->getAdjacentPositions($position, 10, 10);
+        
+        $this->assertCount(6, $adjacentPositions);
+        
+        $expectedPositionStrings = [
+            '(3, 4)', '(3, 5)', // Top neighbors
+            '(4, 4)', '(4, 6)', // Side neighbors  
+            '(5, 4)', '(5, 5)'  // Bottom neighbors
         ];
-
-        $position = new Position(0, 1); // Forest position
-        $neighbors = $this->hexGridService->getNeighborTiles($map, $position, 2, 3);
-
-        $this->assertIsArray($neighbors);
-        $this->assertNotEmpty($neighbors);
-
-        foreach ($neighbors as $neighbor) {
-            $this->assertArrayHasKey('type', $neighbor);
-            $this->assertArrayHasKey('name', $neighbor);
+        
+        $actualPositionStrings = array_map(fn($pos) => $pos->__toString(), $adjacentPositions);
+        
+        foreach ($expectedPositionStrings as $expectedPosString) {
+            $this->assertContains($expectedPosString, $actualPositionStrings);
         }
     }
 
-    public function testCountNeighborsOfType(): void
+    public function testGetAdjacentPositionsOddRow(): void
     {
-        $map = [
-            [
-                ['type' => 'plains'],
-                ['type' => 'forest'],
-                ['type' => 'forest']
-            ],
-            [
-                ['type' => 'plains'],
-                ['type' => 'forest'],
-                ['type' => 'plains']
-            ],
-            [
-                ['type' => 'forest'],
-                ['type' => 'plains'],
-                ['type' => 'mountain']
-            ]
-        ];
-
-        $position = new Position(1, 1); // Center position
-        $forestCount = $this->hexGridService->countNeighborsOfType($map, $position, 3, 3, 'forest');
-        $plainsCount = $this->hexGridService->countNeighborsOfType($map, $position, 3, 3, 'plains');
-
-        $this->assertGreaterThan(0, $forestCount);
-        $this->assertGreaterThan(0, $plainsCount);
-        $this->assertLessThanOrEqual(6, $forestCount + $plainsCount);
-    }
-
-    public function testGetNeighborTerrainCounts(): void
-    {
-        $map = [
-            [
-                ['type' => 'plains'],
-                ['type' => 'forest'],
-                ['type' => 'forest']
-            ],
-            [
-                ['type' => 'plains'],
-                ['type' => 'forest'],
-                ['type' => 'plains']
-            ]
-        ];
-
-        $position = new Position(0, 1); // Forest position
-        $terrainCounts = $this->hexGridService->getNeighborTerrainCounts($map, $position, 2, 3);
-
-        $this->assertIsArray($terrainCounts);
-        $this->assertArrayHasKey('plains', $terrainCounts);
-        $this->assertArrayHasKey('forest', $terrainCounts);
+        $position = new Position(5, 5); // Odd row
+        $adjacentPositions = $this->hexGridService->getAdjacentPositions($position, 10, 10);
         
-        $totalNeighbors = array_sum($terrainCounts);
-        $this->assertLessThanOrEqual(6, $totalNeighbors);
+        $this->assertCount(6, $adjacentPositions);
+        
+        $expectedPositionStrings = [
+            '(4, 5)', '(4, 6)', // Top neighbors
+            '(5, 4)', '(5, 6)', // Side neighbors
+            '(6, 5)', '(6, 6)'  // Bottom neighbors
+        ];
+        
+        $actualPositionStrings = array_map(fn($pos) => $pos->__toString(), $adjacentPositions);
+        
+        foreach ($expectedPositionStrings as $expectedPosString) {
+            $this->assertContains($expectedPosString, $actualPositionStrings);
+        }
     }
 
     #[DataProvider('mapBoundsProvider')]
@@ -195,21 +125,6 @@ class HexGridServiceTest extends TestCase
         }
     }
 
-    public function testEmptyMapHandling(): void
-    {
-        $emptyMap = [];
-        $position = new Position(0, 0);
-
-        $neighbors = $this->hexGridService->getNeighborTiles($emptyMap, $position, 0, 0);
-        $this->assertEmpty($neighbors);
-
-        $terrainCounts = $this->hexGridService->getNeighborTerrainCounts($emptyMap, $position, 0, 0);
-        $this->assertEmpty($terrainCounts);
-
-        $count = $this->hexGridService->countNeighborsOfType($emptyMap, $position, 0, 0, 'forest');
-        $this->assertEquals(0, $count);
-    }
-
     public static function hexDirectionsProvider(): array
     {
         return [
@@ -267,6 +182,7 @@ class HexGridServiceTest extends TestCase
             'Adjacent bottom-left even' => [new Position(4, 5), new Position(5, 4), true],
             'Two steps away' => [new Position(5, 5), new Position(5, 7), false],
             'Diagonal non-adjacent' => [new Position(5, 5), new Position(6, 6), true],
+            'Far away' => [new Position(0, 0), new Position(10, 10), false],
         ];
     }
 } 

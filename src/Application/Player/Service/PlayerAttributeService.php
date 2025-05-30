@@ -15,7 +15,8 @@ class PlayerAttributeService
 {
     public function __construct(
         private readonly PlayerAttributeDomainService $attributeDomainService
-    ) {
+    )
+    {
     }
 
     /**
@@ -25,7 +26,7 @@ class PlayerAttributeService
      */
     public function generatePlayerId(): string
     {
-        return $this->attributeDomainService->generatePlayerId()->getValue();
+        return $this->attributeDomainService->generatePlayerId()->value;
     }
 
     /**

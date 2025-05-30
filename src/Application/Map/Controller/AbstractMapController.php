@@ -24,7 +24,8 @@ abstract class AbstractMapController extends AbstractController
     public function __construct(
         protected readonly MapGenerator    $mapGenerator,
         protected readonly LoggerInterface $logger
-    ) {
+    )
+    {
     }
 
     /**
@@ -69,9 +70,9 @@ abstract class AbstractMapController extends AbstractController
      */
     protected function transformMapDataForClient(array $mapData): array
     {
-        return array_map(function ($row) {
-            return array_map(function ($tile) {
-                return [
+        return array_map(
+            fn($row) => array_map(
+                fn($tile) => [
                     'type' => $tile['type'],
                     'name' => $tile['name'],
                     'properties' => [
@@ -80,9 +81,11 @@ abstract class AbstractMapController extends AbstractController
                         'defense' => $tile['properties']['defense'],
                         'resources' => $tile['properties']['resources']
                     ]
-                ];
-            }, $row);
-        }, $mapData);
+                ],
+                $row
+            ),
+            $mapData
+        );
     }
 
     /**

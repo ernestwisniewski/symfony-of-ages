@@ -55,7 +55,7 @@ class GetPlayerController extends AbstractPlayerController
             );
 
             $this->logger->debug("Player data retrieved successfully", [
-                'player_id' => $player->getId()->getValue(),
+                'player_id' => $player->id,
                 'possible_moves_count' => count($possibleMoves)
             ]);
 

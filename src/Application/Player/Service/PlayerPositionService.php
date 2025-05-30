@@ -29,7 +29,8 @@ class PlayerPositionService
 
     public function __construct(
         private readonly HexGridService $hexGridService
-    ) {
+    )
+    {
     }
 
     /**
@@ -68,15 +69,15 @@ class PlayerPositionService
      */
     public function isValidStartingPosition(Position $position, array $mapData): bool
     {
-        $row = $position->getRow();
-        $col = $position->getCol();
+        $row = $position->row;
+        $col = $position->col;
 
         if (!isset($mapData[$row][$col])) {
             return false;
         }
 
         $terrainType = TerrainType::from($mapData[$row][$col]['type']);
-        return $terrainType->isPassable();
+        return $terrainType->getProperties()->isPassable;
     }
 
     /**
@@ -166,7 +167,7 @@ class PlayerPositionService
             $position = $this->searchInRadius($centerRow, $centerCol, $radius, $mapRows, $mapCols, $mapData);
 
             if ($position) {
-                error_log("Using fallback position: ({$position->getRow()}, {$position->getCol()}) at radius {$radius} from center");
+                error_log("Using fallback position: ({$position->row}, {$position->col}) at radius {$radius} from center");
                 return $position;
             }
         }

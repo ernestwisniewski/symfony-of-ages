@@ -2,8 +2,8 @@
 
 namespace App\Application\Map\Service;
 
-use App\Domain\Map\Service\TerrainClusteringDomainService;
 use App\Domain\Map\Enum\TerrainType;
+use App\Domain\Map\Service\TerrainClusteringDomainService;
 
 /**
  * TerrainClusteringService handles terrain clustering coordination
@@ -18,7 +18,8 @@ class TerrainClusteringService
         private readonly HexNeighborService             $neighborService,
         private readonly BaseTerrainGenerationService   $terrainGenerationService,
         private readonly TerrainClusteringDomainService $clusteringDomainService
-    ) {
+    )
+    {
     }
 
     /**

@@ -99,16 +99,14 @@ class TerrainSmoothingDomainService
      */
     public function getCompatibleTerrainTypes(TerrainType $terrainType, float $threshold = 0.5): array
     {
-        $compatible = [];
         $compatibilities = self::TERRAIN_COMPATIBILITY[$terrainType->value] ?? [];
 
-        foreach ($compatibilities as $terrain => $score) {
-            if ($score >= $threshold) {
-                $compatible[] = TerrainType::from($terrain);
-            }
-        }
-
-        return $compatible;
+        return array_map(
+            fn($terrain) => TerrainType::from($terrain),
+            array_keys(
+                array_filter($compatibilities, fn($score) => $score >= $threshold)
+            )
+        );
     }
 
     /**
@@ -125,17 +123,32 @@ class TerrainSmoothingDomainService
             return false;
         }
 
-        $incompatibleCount = 0;
-        $totalNeighbors = count($neighborTerrains);
+        // Check if any neighbors are incompatible using PHP 8.4 array_any
+        $hasIncompatibleNeighbors = array_any(
+            $neighborTerrains,
+            fn($neighborTerrain) => !$this->areTerrainTypesCompatible(
+                $currentTerrain,
+                TerrainType::from($neighborTerrain),
+                $threshold
+            )
+        );
 
-        foreach ($neighborTerrains as $neighborTerrain) {
-            if (!$this->areTerrainTypesCompatible($currentTerrain, TerrainType::from($neighborTerrain), $threshold)) {
-                $incompatibleCount++;
-            }
+        // If no incompatible neighbors, no need to replace
+        if (!$hasIncompatibleNeighbors) {
+            return false;
         }
 
-        // Replace if more than half of neighbors are incompatible
-        return ($incompatibleCount / $totalNeighbors) > 0.5;
+        // Count incompatible neighbors for more detailed analysis
+        $incompatibleCount = count(array_filter(
+            $neighborTerrains,
+            fn($neighborTerrain) => !$this->areTerrainTypesCompatible(
+                $currentTerrain,
+                TerrainType::from($neighborTerrain),
+                $threshold
+            )
+        ));
+
+        return ($incompatibleCount / count($neighborTerrains)) > 0.5;
     }
 
     /**
@@ -156,32 +169,28 @@ class TerrainSmoothingDomainService
             return TerrainType::from($terrain);
         }
 
-        $bestTerrain = null;
-        $bestScore = 0.0;
+        $terrainScores = array_map(
+            function ($terrain, $count) use ($neighborTerrains) {
+                $terrainType = TerrainType::from($terrain);
 
-        foreach ($neighborTerrains as $terrain => $count) {
-            $terrainType = TerrainType::from($terrain);
-            $totalCompatibility = 0.0;
-            $comparisons = 0;
+                $compatibilityScores = array_map(
+                    fn($otherTerrain) => $terrain !== $otherTerrain
+                        ? $this->getCompatibilityScore($terrainType, TerrainType::from($otherTerrain))
+                        : 0.0,
+                    array_keys($neighborTerrains)
+                );
 
-            // Calculate average compatibility with all other neighbors
-            foreach ($neighborTerrains as $otherTerrain => $otherCount) {
-                if ($terrain !== $otherTerrain) {
-                    $totalCompatibility += $this->getCompatibilityScore($terrainType, TerrainType::from($otherTerrain));
-                    $comparisons++;
-                }
-            }
+                $averageCompatibility = array_sum($compatibilityScores) / max(1, count($compatibilityScores) - 1);
+                return $averageCompatibility * $count; // Weight by frequency
+            },
+            array_keys($neighborTerrains),
+            $neighborTerrains
+        );
 
-            $averageCompatibility = $comparisons > 0 ? $totalCompatibility / $comparisons : 0.0;
-            $weightedScore = $averageCompatibility * $count; // Weight by frequency
-
-            if ($weightedScore > $bestScore) {
-                $bestScore = $weightedScore;
-                $bestTerrain = $terrainType;
-            }
-        }
-
-        return $bestTerrain;
+        $bestTerrainKey = array_search(max($terrainScores), $terrainScores);
+        return $bestTerrainKey !== false
+            ? TerrainType::from(array_keys($neighborTerrains)[$bestTerrainKey])
+            : null;
     }
 
     /**
@@ -202,13 +211,15 @@ class TerrainSmoothingDomainService
      */
     public function isValidCompatibilityMatrix(array $matrix): bool
     {
-        $terrainTypes = array_map(fn ($terrain) => $terrain->value, TerrainType::cases());
+        $terrainTypes = array_map(fn($terrain) => $terrain->value, TerrainType::cases());
 
+        // Check if all terrain types exist as keys
         foreach ($terrainTypes as $terrain1) {
             if (!isset($matrix[$terrain1])) {
                 return false;
             }
 
+            // Check if each terrain has compatibility with all other terrains
             foreach ($terrainTypes as $terrain2) {
                 if (!isset($matrix[$terrain1][$terrain2])) {
                     return false;

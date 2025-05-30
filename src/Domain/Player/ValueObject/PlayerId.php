@@ -2,34 +2,30 @@
 
 namespace App\Domain\Player\ValueObject;
 
-use InvalidArgumentException;
+use App\Domain\Player\Exception\InvalidPlayerDataException;
 
 /**
  * PlayerId value object for strongly typed player identification
  *
- * Encapsulates player ID validation and provides type safety
- * for player identification across the domain.
+ * Immutable value object that encapsulates player ID validation
+ * and provides type safety for player identification across the domain.
+ * Uses readonly properties to ensure true immutability.
  */
 class PlayerId
 {
-    private string $value;
+    public readonly string $value;
 
     public function __construct(string $value)
     {
         if (empty($value)) {
-            throw new InvalidArgumentException('Player ID cannot be empty');
+            throw InvalidPlayerDataException::emptyPlayerId();
         }
 
         if (strlen($value) < 3) {
-            throw new InvalidArgumentException('Player ID must be at least 3 characters long');
+            throw InvalidPlayerDataException::playerIdTooShort(3);
         }
 
         $this->value = $value;
-    }
-
-    public function getValue(): string
-    {
-        return $this->value;
     }
 
     public function equals(PlayerId $other): bool

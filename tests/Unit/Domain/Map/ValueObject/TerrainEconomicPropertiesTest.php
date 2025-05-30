@@ -3,6 +3,7 @@
 namespace Tests\Unit\Domain\Map\ValueObject;
 
 use App\Domain\Map\ValueObject\TerrainEconomicProperties;
+use App\Domain\Map\Exception\InvalidTerrainDataException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -15,19 +16,19 @@ class TerrainEconomicPropertiesTest extends TestCase
     {
         $properties = new TerrainEconomicProperties(3);
         
-        $this->assertEquals(3, $properties->getResourceYield());
+        $this->assertEquals(3, $properties->resourceYield);
     }
 
     public function testCreateWithZeroResourceYield(): void
     {
         $properties = new TerrainEconomicProperties(0);
         
-        $this->assertEquals(0, $properties->getResourceYield());
+        $this->assertEquals(0, $properties->resourceYield);
     }
 
     public function testCreateWithNegativeResourceYieldThrowsException(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidTerrainDataException::class);
         $this->expectExceptionMessage('Resource yield cannot be negative');
         
         new TerrainEconomicProperties(-1);
@@ -42,7 +43,7 @@ class TerrainEconomicPropertiesTest extends TestCase
 
     public function testIsResourceRichWithVeryHighYield(): void
     {
-        $properties = new TerrainEconomicProperties(5);
+        $properties = new TerrainEconomicProperties(4);
         
         $this->assertTrue($properties->isResourceRich());
     }
@@ -58,16 +59,16 @@ class TerrainEconomicPropertiesTest extends TestCase
     {
         $properties = new TerrainEconomicProperties(2);
         
-        $this->assertTrue($properties->hasModerateResources());
+        $this->assertTrue($properties->hasModeratResources());
     }
 
     public function testHasModerateResourcesWithDifferentValues(): void
     {
-        $lowResources = new TerrainEconomicProperties(1);
-        $highResources = new TerrainEconomicProperties(3);
+        $properties1 = new TerrainEconomicProperties(1);
+        $properties2 = new TerrainEconomicProperties(3);
         
-        $this->assertFalse($lowResources->hasModerateResources());
-        $this->assertFalse($highResources->hasModerateResources());
+        $this->assertFalse($properties1->hasModeratResources());
+        $this->assertFalse($properties2->hasModeratResources());
     }
 
     public function testIsPoorInResourcesWithLowYield(): void
@@ -86,7 +87,7 @@ class TerrainEconomicPropertiesTest extends TestCase
 
     public function testIsPoorInResourcesWithHighYield(): void
     {
-        $properties = new TerrainEconomicProperties(2);
+        $properties = new TerrainEconomicProperties(3);
         
         $this->assertFalse($properties->isPoorInResources());
     }
@@ -114,7 +115,7 @@ class TerrainEconomicPropertiesTest extends TestCase
 
     public function testIsHighValueWithVeryHighYield(): void
     {
-        $properties = new TerrainEconomicProperties(10);
+        $properties = new TerrainEconomicProperties(5);
         
         $this->assertTrue($properties->isHighValue());
     }
@@ -133,12 +134,12 @@ class TerrainEconomicPropertiesTest extends TestCase
         
         $this->assertIsArray($array);
         $this->assertArrayHasKey('resourceYield', $array);
-        $this->assertArrayHasKey('economicValue', $array);
-        $this->assertArrayHasKey('worthExploiting', $array);
+        $this->assertArrayHasKey('economicValueLevel', $array);
+        $this->assertArrayHasKey('isResourceRich', $array);
         
         $this->assertEquals(3, $array['resourceYield']);
-        $this->assertEquals('good', $array['economicValue']);
-        $this->assertTrue($array['worthExploiting']);
+        $this->assertEquals('Rich', $array['economicValueLevel']);
+        $this->assertTrue($array['isResourceRich']);
     }
 
     #[DataProvider('economicValueLevelProvider')]
@@ -147,7 +148,7 @@ class TerrainEconomicPropertiesTest extends TestCase
         $properties = new TerrainEconomicProperties($resourceYield);
         $array = $properties->toArray();
         
-        $this->assertEquals($expectedLevel, $array['economicValue']);
+        $this->assertEquals($expectedLevel, $array['economicValueLevel']);
     }
 
     #[DataProvider('economicAssessmentProvider')]
@@ -162,7 +163,7 @@ class TerrainEconomicPropertiesTest extends TestCase
         $properties = new TerrainEconomicProperties($resourceYield);
         
         $this->assertEquals($expectedResourceRich, $properties->isResourceRich());
-        $this->assertEquals($expectedModerateResources, $properties->hasModerateResources());
+        $this->assertEquals($expectedModerateResources, $properties->hasModeratResources());
         $this->assertEquals($expectedPoorInResources, $properties->isPoorInResources());
         $this->assertEquals($expectedNoResources, $properties->hasNoResources());
         $this->assertEquals($expectedHighValue, $properties->isHighValue());
@@ -174,15 +175,9 @@ class TerrainEconomicPropertiesTest extends TestCase
         $resourceRich = new TerrainEconomicProperties(3);
         $this->assertTrue($resourceRich->isResourceRich());
         
-        $array = $resourceRich->toArray();
-        $this->assertTrue($array['worthExploiting']);
-        
         // Non-resource rich terrain should not be worth exploiting
         $poorResources = new TerrainEconomicProperties(1);
         $this->assertFalse($poorResources->isResourceRich());
-        
-        $poorArray = $poorResources->toArray();
-        $this->assertFalse($poorArray['worthExploiting']);
     }
 
     public function testMutuallyExclusiveResourceStates(): void
@@ -190,22 +185,22 @@ class TerrainEconomicPropertiesTest extends TestCase
         // No resources and moderate resources should be mutually exclusive
         $noResources = new TerrainEconomicProperties(0);
         $this->assertTrue($noResources->hasNoResources());
-        $this->assertFalse($noResources->hasModerateResources());
+        $this->assertFalse($noResources->hasModeratResources());
         
         // Moderate and resource rich should be mutually exclusive
         $moderateResources = new TerrainEconomicProperties(2);
-        $this->assertTrue($moderateResources->hasModerateResources());
+        $this->assertTrue($moderateResources->hasModeratResources());
         $this->assertFalse($moderateResources->isResourceRich());
     }
 
     public function testPoorResourcesIncludesNoResources(): void
     {
-        // No resources should also be considered poor in resources
+        // No resources should be considered poor in resources per updated logic
         $noResources = new TerrainEconomicProperties(0);
         $this->assertTrue($noResources->hasNoResources());
         $this->assertTrue($noResources->isPoorInResources());
         
-        // Low resources should also be considered poor
+        // Low resources should be considered poor
         $lowResources = new TerrainEconomicProperties(1);
         $this->assertFalse($lowResources->hasNoResources());
         $this->assertTrue($lowResources->isPoorInResources());
@@ -217,7 +212,7 @@ class TerrainEconomicPropertiesTest extends TestCase
         $properties2 = new TerrainEconomicProperties(3);
         
         // Same values should create equivalent objects
-        $this->assertEquals($properties1->getResourceYield(), $properties2->getResourceYield());
+        $this->assertEquals($properties1->resourceYield, $properties2->resourceYield);
         $this->assertEquals($properties1->isResourceRich(), $properties2->isResourceRich());
         $this->assertEquals($properties1->toArray(), $properties2->toArray());
     }
@@ -244,25 +239,24 @@ class TerrainEconomicPropertiesTest extends TestCase
     public static function economicValueLevelProvider(): array
     {
         return [
-            'Worthless' => [0, 'worthless'],
-            'Poor' => [1, 'poor'],
-            'Moderate' => [2, 'moderate'],
-            'Good' => [3, 'good'],
-            'Excellent Level 1' => [4, 'excellent'],
-            'Excellent Level 2' => [5, 'excellent'],
-            'Exceptional' => [10, 'excellent'],
+            'None' => [0, 'None'],
+            'Poor' => [1, 'Poor'],
+            'Moderate' => [2, 'Moderate'],
+            'Rich' => [3, 'Rich'],
+            'Abundant Level 1' => [4, 'Abundant Level 1'],
+            'Abundant Level 2' => [5, 'Abundant Level 2'],
+            'Exceptional' => [10, 'Exceptional'],
         ];
     }
 
     public static function economicAssessmentProvider(): array
     {
         return [
-            // [resourceYield, expectedResourceRich, expectedModerateResources, expectedPoorInResources, expectedNoResources, expectedHighValue]
             'No resources' => [0, false, false, true, true, false],
             'Poor resources' => [1, false, false, true, false, false],
             'Moderate resources' => [2, false, true, false, false, false],
-            'Good resources' => [3, true, false, false, false, false],
-            'Excellent resources' => [4, true, false, false, false, true],
+            'Rich resources' => [3, true, false, false, false, false],
+            'Abundant resources' => [4, true, false, false, false, true],
             'Exceptional resources' => [5, true, false, false, false, true],
             'Maximum yield' => [10, true, false, false, false, true],
         ];

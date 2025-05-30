@@ -31,7 +31,8 @@ class MapValidationService
     public function __construct(
         private readonly HexNeighborService           $neighborService,
         private readonly BaseTerrainGenerationService $terrainGenerationService
-    ) {
+    )
+    {
     }
 
     /**
@@ -98,23 +99,22 @@ class MapValidationService
      */
     public function calculateTerrainStatistics(array $map, int $rows, int $cols): array
     {
-        $terrainCounts = [];
         $totalTiles = $rows * $cols;
 
-        for ($row = 0; $row < $rows; $row++) {
-            for ($col = 0; $col < $cols; $col++) {
-                $terrainType = $map[$row][$col]['type'];
-                $terrainCounts[$terrainType] = ($terrainCounts[$terrainType] ?? 0) + 1;
-            }
-        }
+        // Flatten map and count terrain types using array_reduce for correct flattening
+        $terrainCounts = array_count_values(
+            array_reduce(
+                $map,
+                fn($carry, $row) => array_merge($carry, array_column($row, 'type')),
+                []
+            )
+        );
 
-        // Convert to percentages
-        $terrainPercentages = [];
-        foreach ($terrainCounts as $terrain => $count) {
-            $terrainPercentages[$terrain] = round(($count / $totalTiles) * 100, 2);
-        }
-
-        return $terrainPercentages;
+        // Convert to percentages using array_map
+        return array_map(
+            fn($count) => round(($count / $totalTiles) * 100, 2),
+            $terrainCounts
+        );
     }
 
     /**
@@ -226,12 +226,20 @@ class MapValidationService
     {
         $essentialTerrains = [TerrainType::PLAINS->value, TerrainType::FOREST->value];
 
-        foreach ($essentialTerrains as $terrain) {
-            $percentage = $terrainStats[$terrain] ?? 0;
+        // Use array_any to check if any essential terrain is insufficient using PHP 8.4
+        $hasInsufficientTerrain = array_any(
+            $essentialTerrains,
+            fn($terrain) => ($terrainStats[$terrain] ?? 0) < self::MIN_ESSENTIAL_TERRAIN_PERCENTAGE
+        );
 
-            if ($percentage < self::MIN_ESSENTIAL_TERRAIN_PERCENTAGE) {
-                $issues[] = "Insufficient {$terrain} terrain (needed for gameplay balance)";
-                $suggestions[] = "Ensure minimum {$terrain} generation";
+        if ($hasInsufficientTerrain) {
+            foreach ($essentialTerrains as $terrain) {
+                $percentage = $terrainStats[$terrain] ?? 0;
+
+                if ($percentage < self::MIN_ESSENTIAL_TERRAIN_PERCENTAGE) {
+                    $issues[] = "Insufficient {$terrain} terrain (needed for gameplay balance)";
+                    $suggestions[] = "Ensure minimum {$terrain} generation";
+                }
             }
         }
     }
@@ -262,24 +270,24 @@ class MapValidationService
      */
     private function convertWaterToPlains(array $map, int $rows, int $cols): array
     {
-        $newMap = $map;
         $conversionsNeeded = intval(($rows * $cols) * self::PASSABILITY_CONVERSION_RATE);
         $conversions = 0;
 
-        for ($row = 0; $row < $rows && $conversions < $conversionsNeeded; $row++) {
-            for ($col = 0; $col < $cols && $conversions < $conversionsNeeded; $col++) {
-                if ($map[$row][$col]['type'] === TerrainType::WATER->value) {
-                    $newMap[$row][$col] = $this->terrainGenerationService->createTerrainTile(
-                        TerrainType::PLAINS,
-                        $row,
-                        $col
-                    );
-                    $conversions++;
+        // Use functional approach with early termination
+        return array_map(function ($row, $rowIndex) use (&$conversions, $conversionsNeeded, $cols) {
+            return array_map(function ($tile, $colIndex) use (&$conversions, $conversionsNeeded, $rowIndex) {
+                if ($conversions >= $conversionsNeeded || $tile['type'] !== TerrainType::WATER->value) {
+                    return $tile;
                 }
-            }
-        }
 
-        return $newMap;
+                $conversions++;
+                return $this->terrainGenerationService->createTerrainTile(
+                    TerrainType::PLAINS,
+                    $rowIndex,
+                    $colIndex
+                );
+            }, $row, array_keys($row));
+        }, $map, array_keys($map));
     }
 
     /**
@@ -366,14 +374,12 @@ class MapValidationService
      */
     private function isTileInCluster(array $tile, array $cluster): bool
     {
-        foreach ($cluster as $clusterTile) {
-            if ($tile['coordinates']['row'] === $clusterTile['row'] &&
-                $tile['coordinates']['col'] === $clusterTile['col']) {
-                return true;
-            }
-        }
-
-        return false;
+        // Use PHP 8.4 array_any to check if tile coordinates match any cluster tile
+        return array_any(
+            $cluster,
+            fn($clusterTile) => $tile['coordinates']['row'] === $clusterTile['row'] &&
+                $tile['coordinates']['col'] === $clusterTile['col']
+        );
     }
 
     /**
@@ -386,18 +392,18 @@ class MapValidationService
      */
     private function calculatePassableTerrainPercentage(array $map, int $rows, int $cols): float
     {
-        $passableCount = 0;
         $totalTiles = $rows * $cols;
 
-        for ($row = 0; $row < $rows; $row++) {
-            for ($col = 0; $col < $cols; $col++) {
-                $terrainType = TerrainType::from($map[$row][$col]['type']);
-                if ($terrainType->isPassable()) {
-                    $passableCount++;
-                }
-            }
-        }
+        // Flatten and count passable tiles using functional approach
+        $passableTiles = array_filter(
+            array_reduce(
+                $map,
+                fn($carry, $row) => array_merge($carry, $row),
+                []
+            ),
+            fn($tile) => TerrainType::from($tile['type'])->getProperties()->isPassable
+        );
 
-        return ($passableCount / $totalTiles) * 100;
+        return (count($passableTiles) / $totalTiles) * 100;
     }
 }

@@ -2,42 +2,55 @@
 
 namespace App\Domain\Map\ValueObject;
 
+use App\Domain\Map\Exception\InvalidTerrainDataException;
+
 /**
- * TerrainCombatProperties represents tactical/combat terrain characteristics
+ * TerrainCombatProperties encapsulates combat-related terrain characteristics
  *
- * Value Object containing defense bonuses and tactical advantages.
- * Used by combat systems and tactical analysis.
+ * Immutable value object that represents the defensive bonuses and tactical
+ * advantages provided by different terrain types in combat situations.
+ * Uses readonly properties to ensure true immutability.
  */
-readonly class TerrainCombatProperties
+class TerrainCombatProperties
 {
-    public function __construct(
-        private int $defenseBonus
-    ) {
-        if ($defenseBonus < 0) {
-            throw new \InvalidArgumentException('Defense bonus cannot be negative');
-        }
-    }
+    public readonly int $defenseBonus;
 
-    public function getDefenseBonus(): int
+    public function __construct(int $defenseBonus)
     {
-        return $this->defenseBonus;
+        if ($defenseBonus < 0) {
+            throw InvalidTerrainDataException::negativeDefenseBonus();
+        }
+
+        $this->defenseBonus = $defenseBonus;
     }
 
+    /**
+     * Determines if terrain provides defensive advantage (defense >= 3)
+     */
     public function providesDefensiveAdvantage(): bool
     {
         return $this->defenseBonus >= 3;
     }
 
+    /**
+     * Determines if terrain provides minor defense (defense >= 1 && < 3)
+     */
     public function providesMinorDefense(): bool
     {
-        return $this->defenseBonus > 0 && $this->defenseBonus < 3;
+        return $this->defenseBonus >= 1 && $this->defenseBonus < 3;
     }
 
+    /**
+     * Determines if terrain has no defensive value (defense = 0)
+     */
     public function hasNoDefensiveValue(): bool
     {
         return $this->defenseBonus === 0;
     }
 
+    /**
+     * Determines if terrain is fortified (defense >= 4)
+     */
     public function isFortified(): bool
     {
         return $this->defenseBonus >= 4;
@@ -47,20 +60,25 @@ readonly class TerrainCombatProperties
     {
         return [
             'defenseBonus' => $this->defenseBonus,
-            'defensiveLevel' => $this->getDefensiveLevel(),
-            'tacticalAdvantage' => $this->providesDefensiveAdvantage()
+            'providesDefensiveAdvantage' => $this->providesDefensiveAdvantage(),
+            'isFortified' => $this->isFortified(),
+            'defensiveLevel' => $this->getDefensiveLevel()
         ];
     }
 
+    /**
+     * Gets human-readable defensive level
+     */
     private function getDefensiveLevel(): string
     {
-        return match (true) {
-            $this->hasNoDefensiveValue() => 'none',
-            $this->defenseBonus === 1 => 'minimal',
-            $this->defenseBonus === 2 => 'light',
-            $this->defenseBonus === 3 => 'moderate',
-            $this->isFortified() => 'fortified',
-            default => 'unknown'
+        return match ($this->defenseBonus) {
+            0 => 'None',
+            1 => 'Minor',
+            2 => 'Moderate',
+            3 => 'Strong',
+            4 => 'Fortress Level 1',
+            5 => 'Fortress Level 2',
+            default => 'Heavily Fortified'
         };
     }
-} 
+}

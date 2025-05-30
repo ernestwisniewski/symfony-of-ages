@@ -2,8 +2,8 @@
 
 namespace App\Application\Player\Service;
 
-use App\Domain\Player\Service\MovementDomainService;
 use App\Domain\Player\Entity\Player;
+use App\Domain\Player\Service\PlayerTurnDomainService;
 use App\Domain\Player\ValueObject\Position;
 use App\Domain\Shared\Service\HexGridService;
 
@@ -18,9 +18,10 @@ use App\Domain\Shared\Service\HexGridService;
 class MovementCalculationService
 {
     public function __construct(
-        private readonly MovementDomainService $movementDomainService,
-        private readonly HexGridService        $hexGridService
-    ) {
+        private readonly PlayerTurnDomainService $turnDomainService,
+        private readonly HexGridService          $hexGridService
+    )
+    {
     }
 
     /**
@@ -35,7 +36,7 @@ class MovementCalculationService
     public function calculatePossibleMoves(Player $player, array $mapData, int $mapRows, int $mapCols): array
     {
         $currentPosition = $player->getPosition();
-        $availableMovementPoints = $player->getMovementPoints();
+        $availableMovementPoints = $player->currentMovementPoints;
 
         if ($availableMovementPoints <= 0) {
             return [];
@@ -47,10 +48,10 @@ class MovementCalculationService
         $adjacentPositions = $this->hexGridService->getAdjacentPositions($currentPosition, $mapRows, $mapCols);
 
         foreach ($adjacentPositions as $position) {
-            $terrainData = $mapData[$position->getRow()][$position->getCol()];
+            $terrainData = $mapData[$position->row][$position->col];
 
-            // Validate movement using domain service
-            $validationResult = $this->movementDomainService->validateMovement(
+            // Validate movement using centralized domain service
+            $validationResult = $this->turnDomainService->validateMovement(
                 $currentPosition,
                 $position,
                 $terrainData
@@ -106,11 +107,14 @@ class MovementCalculationService
 
         return [
             'totalPossibleMoves' => count($possibleMoves),
-            'currentMovementPoints' => $player->getMovementPoints(),
-            'maxMovementPoints' => $player->getMaxMovementPoints(),
+            'currentMovementPoints' => $player->currentMovementPoints,
+            'maxMovementPoints' => $player->maxMovementPoints,
             'movesByCost' => $movesByCost,
             'availableTerrainTypes' => $terrainTypeCount,
-            'allMoves' => $possibleMoves
+            'allMoves' => $possibleMoves,
+            'hasAffordableMoves' => array_any($possibleMoves, fn($move) => $move['canAfford']),
+            'bestAffordableMove' => array_find($possibleMoves, fn($move) => $move['canAfford'] && $move['movementCost'] === 1),
+            'cheapestMove' => array_find($possibleMoves, fn($move) => $move['canAfford'] && $move['movementCost'] === min(array_column($possibleMoves, 'movementCost')))
         ];
     }
 
@@ -125,7 +129,7 @@ class MovementCalculationService
     public function canPlayerMoveTo(Player $player, Position $targetPosition, array $mapData): array
     {
         // Check if position is in range (adjacent)
-        if (!$this->movementDomainService->arePositionsAdjacent($player->getPosition(), $targetPosition)) {
+        if (!$this->turnDomainService->arePositionsAdjacent($player->getPosition(), $targetPosition)) {
             return [
                 'canMove' => false,
                 'reason' => 'Position is not adjacent',
@@ -133,10 +137,10 @@ class MovementCalculationService
             ];
         }
 
-        $terrainData = $mapData[$targetPosition->getRow()][$targetPosition->getCol()];
+        $terrainData = $mapData[$targetPosition->row][$targetPosition->col];
 
         // Validate movement
-        $validationResult = $this->movementDomainService->validateMovement(
+        $validationResult = $this->turnDomainService->validateMovement(
             $player->getPosition(),
             $targetPosition,
             $terrainData
@@ -151,14 +155,40 @@ class MovementCalculationService
         }
 
         $movementCost = $validationResult->getMovementCost();
-        $canAfford = $player->getMovementPoints() >= $movementCost;
+        $canAfford = $player->currentMovementPoints >= $movementCost;
 
         return [
             'canMove' => $canAfford,
             'movementCost' => $movementCost,
-            'remainingMovementAfter' => $canAfford ? $player->getMovementPoints() - $movementCost : 0,
+            'remainingMovementAfter' => $canAfford ? $player->currentMovementPoints - $movementCost : 0,
             'reason' => $canAfford ? 'Move is valid' : 'Insufficient movement points',
             'code' => $canAfford ? 'VALID' : 'INSUFFICIENT_MOVEMENT_POINTS'
         ];
+    }
+
+    /**
+     * Finds optimal move based on specific criteria using PHP 8.4 array functions
+     */
+    public function findOptimalMove(Player $player, array $mapData, int $mapRows, int $mapCols, string $criteria = 'cheapest'): ?array
+    {
+        $possibleMoves = $this->calculatePossibleMoves($player, $mapData, $mapRows, $mapCols);
+
+        return match ($criteria) {
+            'cheapest' => array_find($possibleMoves, fn($move) => $move['movementCost'] === min(array_column($possibleMoves, 'movementCost'))),
+            'expensive' => array_find($possibleMoves, fn($move) => $move['movementCost'] === max(array_column($possibleMoves, 'movementCost'))),
+            'plains' => array_find($possibleMoves, fn($move) => $move['terrain']['type'] === 'plains'),
+            'forest' => array_find($possibleMoves, fn($move) => $move['terrain']['type'] === 'forest'),
+            default => $possibleMoves[0] ?? null
+        };
+    }
+
+    /**
+     * Checks if all moves meet certain criteria using PHP 8.4 array_all
+     */
+    public function hasOnlyExpensiveMoves(Player $player, array $mapData, int $mapRows, int $mapCols, int $maxCost = 2): bool
+    {
+        $possibleMoves = $this->calculatePossibleMoves($player, $mapData, $mapRows, $mapCols);
+
+        return array_all($possibleMoves, fn($move) => $move['movementCost'] > $maxCost);
     }
 }

@@ -26,7 +26,7 @@ class PlayerTurnServiceTest extends TestCase
 
     public function testStartPlayerTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -42,7 +42,7 @@ class PlayerTurnServiceTest extends TestCase
 
     public function testEndPlayerTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -58,7 +58,7 @@ class PlayerTurnServiceTest extends TestCase
 
     public function testCanPlayerContinueTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -77,7 +77,7 @@ class PlayerTurnServiceTest extends TestCase
 
     public function testGetRemainingMovementPoints(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -85,7 +85,7 @@ class PlayerTurnServiceTest extends TestCase
         );
 
         $this->turnDomainService->expects($this->once())
-            ->method('getRemainingMovement')
+            ->method('getRemainingMovementPoints')
             ->with($player)
             ->willReturn(2);
 
@@ -96,7 +96,7 @@ class PlayerTurnServiceTest extends TestCase
 
     public function testGetMaxMovementPoints(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -110,7 +110,7 @@ class PlayerTurnServiceTest extends TestCase
 
     public function testShouldEndTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',

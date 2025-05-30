@@ -13,7 +13,7 @@ use App\Domain\Map\Enum\TerrainType;
  */
 class TerrainGenerationDomainService
 {
-    /** @var array Weighted probabilities for base terrain generation */
+    /** @var array Terrain generation weights for random selection */
     private const array TERRAIN_WEIGHTS = [
         TerrainType::PLAINS->value => 35,    // Most common - basic grassland
         TerrainType::FOREST->value => 25,    // Common - wooded areas
@@ -23,20 +23,37 @@ class TerrainGenerationDomainService
         TerrainType::SWAMP->value => 5       // Rare - marshy areas
     ];
 
+    // Modern property hooks for configuration access
+    public array $terrainWeights {
+        get => self::TERRAIN_WEIGHTS;
+    }
+
+    public int $totalWeight {
+        get => array_sum(self::TERRAIN_WEIGHTS);
+    }
+
+    public array $idealDistribution {
+        get => array_map(
+            fn($weight) => round($weight, 2),
+            self::TERRAIN_WEIGHTS
+        );
+    }
+
     /**
-     * Selects a terrain type based on weighted probabilities
+     * Selects terrain type based on weighted probabilities using modern array functions
      *
-     * @return TerrainType Randomly selected terrain type based on weights
+     * @return TerrainType Randomly selected terrain type
      */
     public function getWeightedRandomTerrain(): TerrainType
     {
-        $totalWeight = array_sum(self::TERRAIN_WEIGHTS);
+        $totalWeight = $this->totalWeight;
         $random = mt_rand(1, $totalWeight);
         $currentWeight = 0;
 
+        // Traditional approach since array_find is still experimental
         foreach (self::TERRAIN_WEIGHTS as $terrainValue => $weight) {
             $currentWeight += $weight;
-            if ($random <= $currentWeight) {
+            if ($currentWeight >= $random) {
                 return TerrainType::from($terrainValue);
             }
         }
@@ -46,7 +63,7 @@ class TerrainGenerationDomainService
     }
 
     /**
-     * Creates a terrain tile data structure according to domain rules
+     * Creates a complete terrain tile data structure
      *
      * @param TerrainType $terrainType The terrain type for this tile
      * @param int $row Row coordinate
@@ -59,62 +76,60 @@ class TerrainGenerationDomainService
 
         return [
             'type' => $terrainType->value,
-            'name' => $properties->getName(),
-            'properties' => $properties->toLegacyArray(),
-            'coordinates' => [
-                'row' => $row,
-                'col' => $col
-            ]
+            'name' => $properties->name,
+            'coordinates' => ['row' => $row, 'col' => $col],
+            'properties' => $properties->toArray()
         ];
     }
 
     /**
-     * Gets the terrain weights configuration
+     * Gets terrain generation weights for external analysis
      *
      * @return array Terrain weights array
      */
     public function getTerrainWeights(): array
     {
-        return self::TERRAIN_WEIGHTS;
+        return $this->terrainWeights;
     }
 
     /**
      * Validates terrain weight configuration
      *
-     * @param array $weights Custom terrain weights
+     * @param array $weights Weights to validate
      * @return bool True if weights are valid
      */
     public function areValidTerrainWeights(array $weights): bool
     {
-        foreach ($weights as $terrain => $weight) {
-            // Check if terrain type exists
-            if (!TerrainType::tryFrom($terrain)) {
-                return false;
-            }
-
-            // Check if weight is valid
-            if (!is_int($weight) || $weight < 0) {
-                return false;
-            }
+        if (empty($weights)) {
+            return false;
         }
 
-        return true;
+        $terrainValues = array_map(fn($terrain) => $terrain->value, TerrainType::cases());
+
+        // Check if all terrain types are valid using PHP 8.4 array_all
+        $hasValidTerrainTypes = array_all(
+            array_keys($weights),
+            fn($terrain) => in_array($terrain, $terrainValues)
+        );
+
+        if (!$hasValidTerrainTypes) {
+            return false;
+        }
+
+        // Check if all weights are valid integers (allow zero but not negative) using PHP 8.4 array_all
+        return array_all(
+            $weights,
+            fn($weight) => is_int($weight) && $weight >= 0
+        );
     }
 
     /**
-     * Calculates ideal terrain distribution percentages
+     * Gets ideal terrain distribution percentages for validation
      *
-     * @return array Terrain type => ideal percentage
+     * @return array Ideal distribution percentages
      */
     public function getIdealTerrainDistribution(): array
     {
-        $totalWeight = array_sum(self::TERRAIN_WEIGHTS);
-        $distribution = [];
-
-        foreach (self::TERRAIN_WEIGHTS as $terrain => $weight) {
-            $distribution[$terrain] = ($weight / $totalWeight) * 100;
-        }
-
-        return $distribution;
+        return $this->idealDistribution;
     }
 }

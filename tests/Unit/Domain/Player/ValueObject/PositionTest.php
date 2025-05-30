@@ -3,7 +3,7 @@
 namespace Tests\Unit\Domain\Player\ValueObject;
 
 use App\Domain\Player\ValueObject\Position;
-use InvalidArgumentException;
+use App\Domain\Player\Exception\InvalidPlayerDataException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -16,21 +16,21 @@ class PositionTest extends TestCase
     {
         $position = new Position(5, 10);
         
-        $this->assertEquals(5, $position->getRow());
-        $this->assertEquals(10, $position->getCol());
+        $this->assertEquals(5, $position->row);
+        $this->assertEquals(10, $position->col);
     }
 
     public function testCreatePositionWithZeroCoordinates(): void
     {
         $position = new Position(0, 0);
         
-        $this->assertEquals(0, $position->getRow());
-        $this->assertEquals(0, $position->getCol());
+        $this->assertEquals(0, $position->row);
+        $this->assertEquals(0, $position->col);
     }
 
     public function testThrowsExceptionForNegativeRow(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Row cannot be negative');
         
         new Position(-1, 5);
@@ -38,7 +38,7 @@ class PositionTest extends TestCase
 
     public function testThrowsExceptionForNegativeCol(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Column cannot be negative');
         
         new Position(5, -1);
@@ -134,13 +134,13 @@ class PositionTest extends TestCase
         $data = ['row' => 15, 'col' => 8];
         $position = Position::fromArray($data);
         
-        $this->assertEquals(15, $position->getRow());
-        $this->assertEquals(8, $position->getCol());
+        $this->assertEquals(15, $position->row);
+        $this->assertEquals(8, $position->col);
     }
 
     public function testFromArrayWithMissingRow(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Row is required');
         
         Position::fromArray(['col' => 8]);
@@ -148,7 +148,7 @@ class PositionTest extends TestCase
 
     public function testFromArrayWithMissingCol(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Column is required');
         
         Position::fromArray(['row' => 15]);
@@ -168,8 +168,8 @@ class PositionTest extends TestCase
         $position2 = new Position(5, 10);
         
         // Same values should create equivalent objects
-        $this->assertEquals($position1->getRow(), $position2->getRow());
-        $this->assertEquals($position1->getCol(), $position2->getCol());
+        $this->assertEquals($position1->row, $position2->row);
+        $this->assertEquals($position1->col, $position2->col);
         $this->assertEquals($position1->toArray(), $position2->toArray());
         $this->assertTrue($position1->equals($position2));
     }

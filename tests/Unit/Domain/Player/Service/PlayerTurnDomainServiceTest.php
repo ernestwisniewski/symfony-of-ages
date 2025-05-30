@@ -6,6 +6,7 @@ use App\Domain\Player\Service\PlayerTurnDomainService;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;
+use App\Domain\Shared\Service\HexGridService;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -14,15 +15,17 @@ use PHPUnit\Framework\TestCase;
 class PlayerTurnDomainServiceTest extends TestCase
 {
     private PlayerTurnDomainService $service;
+    private HexGridService $hexGridService;
 
     protected function setUp(): void
     {
-        $this->service = new PlayerTurnDomainService();
+        $this->hexGridService = new HexGridService();
+        $this->service = new PlayerTurnDomainService($this->hexGridService);
     }
 
     public function testStartNewTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -31,17 +34,17 @@ class PlayerTurnDomainServiceTest extends TestCase
 
         // Use movement points first
         $player->moveTo(new Position(5, 6), 2);
-        $this->assertEquals(1, $player->getMovementPoints());
+        $this->assertEquals(1, $player->currentMovementPoints);
 
         // Start new turn - should restore movement points
         $this->service->startNewTurn($player);
 
-        $this->assertEquals(3, $player->getMovementPoints());
+        $this->assertEquals(3, $player->currentMovementPoints);
     }
 
     public function testCanStartNewTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -55,7 +58,7 @@ class PlayerTurnDomainServiceTest extends TestCase
 
     public function testCanPlayerContinueTurnWithMovementPoints(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -69,7 +72,7 @@ class PlayerTurnDomainServiceTest extends TestCase
 
     public function testCanPlayerContinueTurnWithoutMovementPoints(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -86,7 +89,7 @@ class PlayerTurnDomainServiceTest extends TestCase
 
     public function testShouldEndTurnWithMovementPoints(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -100,7 +103,7 @@ class PlayerTurnDomainServiceTest extends TestCase
 
     public function testShouldEndTurnWithoutMovementPoints(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -117,7 +120,7 @@ class PlayerTurnDomainServiceTest extends TestCase
 
     public function testGetRemainingMovement(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -127,14 +130,14 @@ class PlayerTurnDomainServiceTest extends TestCase
         // Use some movement points
         $player->moveTo(new Position(5, 6), 1);
 
-        $result = $this->service->getRemainingMovement($player);
+        $result = $this->service->getRemainingMovementPoints($player);
 
         $this->assertEquals(2, $result);
     }
 
     public function testCalculateMovementEfficiencyWithFullMovement(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -148,7 +151,7 @@ class PlayerTurnDomainServiceTest extends TestCase
 
     public function testCalculateMovementEfficiencyWithPartialMovement(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',
@@ -165,7 +168,7 @@ class PlayerTurnDomainServiceTest extends TestCase
 
     public function testCalculateMovementEfficiencyWithAllMovementUsed(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('test_player'),
             new Position(5, 5),
             'Test Player',

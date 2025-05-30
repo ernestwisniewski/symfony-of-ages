@@ -2,42 +2,55 @@
 
 namespace App\Domain\Map\ValueObject;
 
+use App\Domain\Map\Exception\InvalidTerrainDataException;
+
 /**
- * TerrainMovementProperties represents movement-related terrain characteristics
+ * TerrainMovementProperties encapsulates movement-related terrain characteristics
  *
- * Value Object containing movement cost and passability information.
- * Used by movement validation systems and pathfinding algorithms.
+ * Immutable value object that represents the movement cost and passability
+ * properties of terrain types for player movement calculations.
+ * Uses readonly properties to ensure true immutability.
  */
-readonly class TerrainMovementProperties
+class TerrainMovementProperties
 {
-    public function __construct(
-        private int $movementCost
-    ) {
-        if ($movementCost < 0) {
-            throw new \InvalidArgumentException('Movement cost cannot be negative');
-        }
-    }
+    public readonly int $movementCost;
 
-    public function getMovementCost(): int
+    public function __construct(int $movementCost)
     {
-        return $this->movementCost;
+        if ($movementCost < 0) {
+            throw InvalidTerrainDataException::negativeMovementCost();
+        }
+
+        $this->movementCost = $movementCost;
     }
 
+    /**
+     * Determines if terrain is passable (movement cost > 0)
+     */
     public function isPassable(): bool
     {
         return $this->movementCost > 0;
     }
 
+    /**
+     * Determines if terrain is impassable (movement cost = 0)
+     */
     public function isImpassable(): bool
     {
         return $this->movementCost === 0;
     }
 
+    /**
+     * Determines if terrain is easy to traverse (movement cost = 1)
+     */
     public function isEasyToTraverse(): bool
     {
         return $this->movementCost === 1;
     }
 
+    /**
+     * Determines if terrain is difficult to traverse (movement cost >= 3)
+     */
     public function isDifficultToTraverse(): bool
     {
         return $this->movementCost >= 3;
@@ -47,19 +60,23 @@ readonly class TerrainMovementProperties
     {
         return [
             'movementCost' => $this->movementCost,
-            'passable' => $this->isPassable(),
-            'difficulty' => $this->getMovementDifficultyLevel()
+            'isPassable' => $this->isPassable(),
+            'difficultyLevel' => $this->getMovementDifficultyLevel()
         ];
     }
 
+    /**
+     * Gets human-readable movement difficulty level
+     */
     private function getMovementDifficultyLevel(): string
     {
-        return match (true) {
-            $this->isImpassable() => 'impassable',
-            $this->isEasyToTraverse() => 'easy',
-            $this->movementCost === 2 => 'moderate',
-            $this->isDifficultToTraverse() => 'difficult',
-            default => 'unknown'
+        return match ($this->movementCost) {
+            0 => 'Impassable',
+            1 => 'Easy',
+            2 => 'Moderate',
+            3 => 'Difficult',
+            4 => 'Very Difficult',
+            default => 'Extremely Difficult'
         };
     }
-} 
+}

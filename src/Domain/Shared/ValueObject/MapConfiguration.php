@@ -6,38 +6,40 @@ namespace App\Domain\Shared\ValueObject;
  * MapConfiguration holds shared map constants
  *
  * Centralized configuration for map dimensions and display properties
- * to avoid duplication across controllers and services.
+ * using modern PHP 8.4 features and enum-like constant pattern.
  */
 final class MapConfiguration
 {
-    /** @var int Number of columns in the hex grid */
-    public const int COLS = 100;
-
-    /** @var int Number of rows in the hex grid */
     public const int ROWS = 100;
-
-    /** @var int Size (radius) of individual hexagons in pixels */
+    public const int COLS = 100;
     public const int HEX_SIZE = 58;
+
+    private static ?self $instance = null;
+
+    private function __construct()
+    {
+    }
+
+    public static function instance(): self
+    {
+        return self::$instance ??= new self;
+    }
 
     /**
      * Gets map configuration as array
-     *
-     * @param array $additionalConfig Additional configuration parameters
-     * @return array Complete map configuration
      */
     public static function getConfig(array $additionalConfig = []): array
     {
         return array_merge([
             'rows' => self::ROWS,
             'cols' => self::COLS,
-            'size' => self::HEX_SIZE
+            'size' => self::HEX_SIZE,
+            'totalTiles' => self::getTotalTiles()
         ], $additionalConfig);
     }
 
     /**
-     * Gets total number of tiles in the map
-     *
-     * @return int Total tiles
+     * Gets total number of tiles on the map
      */
     public static function getTotalTiles(): int
     {
@@ -46,10 +48,6 @@ final class MapConfiguration
 
     /**
      * Validates if coordinates are within map bounds
-     *
-     * @param int $row Row coordinate
-     * @param int $col Column coordinate
-     * @return bool True if within bounds
      */
     public static function areCoordinatesValid(int $row, int $col): bool
     {

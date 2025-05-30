@@ -2,45 +2,36 @@
 
 namespace App\Domain\Player\ValueObject;
 
-use InvalidArgumentException;
+use App\Domain\Player\Exception\InvalidPlayerDataException;
 
 /**
  * MovementPoints value object for player movement management
  *
- * Encapsulates movement points logic, validation, and business rules
- * for player movement capabilities within a turn.
+ * Immutable value object that encapsulates movement points logic,
+ * validation, and business rules for player movement capabilities
+ * within a turn. Uses readonly properties to ensure true immutability.
  */
 class MovementPoints
 {
-    private int $current;
-    private int $maximum;
+    public readonly int $current;
+    public readonly int $maximum;
 
     public function __construct(int $current, int $maximum)
     {
-        if ($maximum < 0) {
-            throw new InvalidArgumentException('Maximum movement points cannot be negative');
+        if ($current < 0) {
+            throw InvalidPlayerDataException::negativeMovementPoints('Current');
         }
 
-        if ($current < 0) {
-            throw new InvalidArgumentException('Current movement points cannot be negative');
+        if ($maximum < 0) {
+            throw InvalidPlayerDataException::negativeMovementPoints('Maximum');
         }
 
         if ($current > $maximum) {
-            throw new InvalidArgumentException('Current movement points cannot exceed maximum');
+            throw InvalidPlayerDataException::movementPointsExceedMaximum();
         }
 
         $this->current = $current;
         $this->maximum = $maximum;
-    }
-
-    public function getCurrent(): int
-    {
-        return $this->current;
-    }
-
-    public function getMaximum(): int
-    {
-        return $this->maximum;
     }
 
     public function canSpend(int $cost): bool
@@ -51,7 +42,7 @@ class MovementPoints
     public function spend(int $cost): self
     {
         if (!$this->canSpend($cost)) {
-            throw new InvalidArgumentException("Cannot spend {$cost} movement points. Available: {$this->current}");
+            throw InvalidPlayerDataException::cannotSpendMovementPoints($cost, $this->current);
         }
 
         return new self($this->current - $cost, $this->maximum);

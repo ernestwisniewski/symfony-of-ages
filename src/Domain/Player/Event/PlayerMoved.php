@@ -11,55 +11,22 @@ use DateTimeImmutable;
  *
  * Represents the fact that a player has moved from one position to another.
  * Can be used for logging, notifications, or triggering other domain logic.
+ * Uses modern PHP 8.4 asymmetric visibility for cleaner API.
  */
 class PlayerMoved
 {
-    private PlayerId $playerId;
-    private Position $fromPosition;
-    private Position $toPosition;
-    private int $movementCost;
-    private DateTimeImmutable $occurredAt;
-
     public function __construct(
-        PlayerId $playerId,
-        Position $fromPosition,
-        Position $toPosition,
-        int      $movementCost
-    ) {
-        $this->playerId = $playerId;
-        $this->fromPosition = $fromPosition;
-        $this->toPosition = $toPosition;
-        $this->movementCost = $movementCost;
-        $this->occurredAt = new DateTimeImmutable();
+        public readonly PlayerId          $playerId,
+        public readonly Position          $fromPosition,
+        public readonly Position          $toPosition,
+        public readonly int               $movementCost,
+        public readonly DateTimeImmutable $occurredAt = new DateTimeImmutable
+    )
+    {
     }
 
-    public function getPlayerId(): PlayerId
-    {
-        return $this->playerId;
-    }
-
-    public function getFromPosition(): Position
-    {
-        return $this->fromPosition;
-    }
-
-    public function getToPosition(): Position
-    {
-        return $this->toPosition;
-    }
-
-    public function getMovementCost(): int
-    {
-        return $this->movementCost;
-    }
-
-    public function getOccurredAt(): DateTimeImmutable
-    {
-        return $this->occurredAt;
-    }
-
-    public function getDistance(): int
-    {
-        return $this->fromPosition->distanceTo($this->toPosition);
+    // Computed property using property hooks
+    public int $distance {
+        get => $this->fromPosition->distanceTo($this->toPosition);
     }
 }

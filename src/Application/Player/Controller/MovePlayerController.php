@@ -51,17 +51,16 @@ class MovePlayerController extends AbstractPlayerController
             );
 
             $this->logger->debug("Possible moves calculated", [
-                'player_id' => $player->getId()->getValue(),
+                'player_id' => $player->id->value,
                 'moves_count' => count($possibleMoves)
             ]);
 
             return $this->json([
                 'success' => true,
-                'currentPosition' => $player->getPosition()->toArray(),
-                'currentMovementPoints' => $player->getMovementPoints(),
-                'maxMovementPoints' => $player->getMaxMovementPoints(),
                 'possibleMoves' => $possibleMoves,
-                'movementOptions' => $movementOptions
+                'movementOptions' => $movementOptions,
+                'currentPosition' => $player->position->toArray(),
+                'remainingMovementPoints' => $player->currentMovementPoints
             ]);
 
         } catch (PlayerNotFoundException|PlayerServiceException $e) {
@@ -102,8 +101,8 @@ class MovePlayerController extends AbstractPlayerController
             $targetPosition = new Position($data['row'], $data['col']);
 
             $this->logger->info("Attempting player movement", [
-                'player_id' => $player->getId()->getValue(),
-                'from' => $player->getPosition()->toArray(),
+                'player_id' => $player->id->value,
+                'from' => $player->position->toArray(),
                 'to' => $targetPosition->toArray()
             ]);
 
@@ -118,18 +117,24 @@ class MovePlayerController extends AbstractPlayerController
                 $player->clearDomainEvents();
 
                 $this->logger->info("Player movement successful", [
-                    'player_id' => $player->getId()->getValue(),
+                    'player_id' => $player->id->value,
                     'new_position' => $targetPosition->toArray(),
-                    'remaining_movement' => $player->getMovementPoints()
+                    'remaining_movement' => $player->currentMovementPoints
                 ]);
             } else {
                 $this->logger->warning("Player movement failed", [
-                    'player_id' => $player->getId()->getValue(),
+                    'player_id' => $player->id->value,
                     'reason' => $result['message'] ?? 'Unknown reason'
                 ]);
             }
 
-            return $this->json($result);
+            return $this->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+                'player' => $player->toArray(),
+                'from' => $player->position->toArray(),
+                'to' => $targetPosition->toArray()
+            ]);
 
         } catch (InvalidPlayerDataException $e) {
             return $this->createErrorResponse('Invalid movement data: ' . $e->getMessage(), 400);
@@ -174,7 +179,7 @@ class MovePlayerController extends AbstractPlayerController
             );
 
             $this->logger->debug("Movement possibility checked", [
-                'player_id' => $player->getId()->getValue(),
+                'player_id' => $player->id->value,
                 'target_position' => $targetPosition->toArray(),
                 'can_move' => $movementCheck['canMove']
             ]);

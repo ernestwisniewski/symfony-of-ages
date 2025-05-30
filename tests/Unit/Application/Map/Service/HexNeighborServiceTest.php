@@ -25,29 +25,40 @@ class HexNeighborServiceTest extends TestCase
     public function testGetNeighbors(): void
     {
         $map = [
-            [['type' => 'plains'], ['type' => 'forest']],
-            [['type' => 'mountain'], ['type' => 'water']]
+            [
+                ['type' => 'plains', 'coordinates' => ['row' => 0, 'col' => 0]], 
+                ['type' => 'forest', 'coordinates' => ['row' => 0, 'col' => 1]]
+            ],
+            [
+                ['type' => 'mountain', 'coordinates' => ['row' => 1, 'col' => 0]], 
+                ['type' => 'water', 'coordinates' => ['row' => 1, 'col' => 1]]
+            ]
         ];
         $row = 0;
         $col = 0;
         $maxRows = 2;
         $maxCols = 2;
 
-        $expectedNeighbors = [
-            ['type' => 'forest', 'coordinates' => ['row' => 0, 'col' => 1]]
+        $adjacentPositions = [
+            new Position(0, 1),
+            new Position(1, 0)
         ];
 
         $this->hexGridService->expects($this->once())
-            ->method('getNeighborTiles')
+            ->method('getAdjacentPositions')
             ->with(
-                $this->equalTo($map),
                 $this->equalTo(new Position($row, $col)),
                 $this->equalTo($maxRows),
                 $this->equalTo($maxCols)
             )
-            ->willReturn($expectedNeighbors);
+            ->willReturn($adjacentPositions);
 
         $result = $this->service->getNeighbors($map, $row, $col, $maxRows, $maxCols);
+
+        $expectedNeighbors = [
+            ['type' => 'forest', 'coordinates' => ['row' => 0, 'col' => 1]],
+            ['type' => 'mountain', 'coordinates' => ['row' => 1, 'col' => 0]]
+        ];
 
         $this->assertEquals($expectedNeighbors, $result);
     }
@@ -55,7 +66,7 @@ class HexNeighborServiceTest extends TestCase
     public function testGetHexDirections(): void
     {
         $row = 0;
-        $expectedDirections = [[-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0], [1, 1]];
+        $expectedDirections = [[-1, -1], [-1, 0], [0, -1], [0, 1], [1, -1], [1, 0]];
 
         $this->hexGridService->expects($this->once())
             ->method('getHexDirections')
@@ -103,8 +114,14 @@ class HexNeighborServiceTest extends TestCase
     public function testCountNeighborsOfType(): void
     {
         $map = [
-            [['type' => 'plains'], ['type' => 'forest']],
-            [['type' => 'plains'], ['type' => 'water']]
+            [
+                ['type' => 'plains', 'coordinates' => ['row' => 0, 'col' => 0]], 
+                ['type' => 'forest', 'coordinates' => ['row' => 0, 'col' => 1]]
+            ],
+            [
+                ['type' => 'plains', 'coordinates' => ['row' => 1, 'col' => 0]], 
+                ['type' => 'water', 'coordinates' => ['row' => 1, 'col' => 1]]
+            ]
         ];
         $row = 0;
         $col = 0;
@@ -112,50 +129,62 @@ class HexNeighborServiceTest extends TestCase
         $maxCols = 2;
         $terrainType = 'plains';
 
+        $adjacentPositions = [
+            new Position(0, 1), // forest
+            new Position(1, 0)  // plains
+        ];
+
         $this->hexGridService->expects($this->once())
-            ->method('countNeighborsOfType')
+            ->method('getAdjacentPositions')
             ->with(
-                $this->equalTo($map),
                 $this->equalTo(new Position($row, $col)),
                 $this->equalTo($maxRows),
-                $this->equalTo($maxCols),
-                $this->equalTo($terrainType)
+                $this->equalTo($maxCols)
             )
-            ->willReturn(2);
+            ->willReturn($adjacentPositions);
 
         $result = $this->service->countNeighborsOfType($map, $row, $col, $maxRows, $maxCols, $terrainType);
 
-        $this->assertEquals(2, $result);
+        $this->assertEquals(1, $result); // Only one plains neighbor
     }
 
     public function testGetNeighborTerrainCounts(): void
     {
         $map = [
-            [['type' => 'plains'], ['type' => 'forest']],
-            [['type' => 'plains'], ['type' => 'water']]
+            [
+                ['type' => 'plains', 'coordinates' => ['row' => 0, 'col' => 0]], 
+                ['type' => 'forest', 'coordinates' => ['row' => 0, 'col' => 1]]
+            ],
+            [
+                ['type' => 'plains', 'coordinates' => ['row' => 1, 'col' => 0]], 
+                ['type' => 'water', 'coordinates' => ['row' => 1, 'col' => 1]]
+            ]
         ];
         $row = 0;
         $col = 0;
         $maxRows = 2;
         $maxCols = 2;
 
-        $expectedCounts = [
-            'plains' => 2,
-            'forest' => 1,
-            'water' => 1
+        $adjacentPositions = [
+            new Position(0, 1), // forest
+            new Position(1, 0)  // plains
         ];
 
         $this->hexGridService->expects($this->once())
-            ->method('getNeighborTerrainCounts')
+            ->method('getAdjacentPositions')
             ->with(
-                $this->equalTo($map),
                 $this->equalTo(new Position($row, $col)),
                 $this->equalTo($maxRows),
                 $this->equalTo($maxCols)
             )
-            ->willReturn($expectedCounts);
+            ->willReturn($adjacentPositions);
 
         $result = $this->service->getNeighborTerrainCounts($map, $row, $col, $maxRows, $maxCols);
+
+        $expectedCounts = [
+            'forest' => 1,
+            'plains' => 1
+        ];
 
         $this->assertEquals($expectedCounts, $result);
     }

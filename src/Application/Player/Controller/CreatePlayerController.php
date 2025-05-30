@@ -53,25 +53,25 @@ class CreatePlayerController extends AbstractPlayerController
                 $mapData
             );
 
-            $position = $player->getPosition();
+            $position = $player->position;
             $this->logger->info("Player created successfully", [
-                'player_id' => $player->getId()->getValue(),
-                'player_name' => $player->getName(),
-                'position' => ['row' => $position->getRow(), 'col' => $position->getCol()]
+                'player_id' => $player->id->value,
+                'player_name' => $player->name,
+                'position' => ['row' => $position->row, 'col' => $position->col]
             ]);
 
             // Validate that the hex position is valid
             $terrain = null;
-            if ($position->getRow() >= 0 && $position->getRow() < MapConfiguration::ROWS &&
-                $position->getCol() >= 0 && $position->getCol() < MapConfiguration::COLS) {
-                $terrain = $mapData[$position->getRow()][$position->getCol()];
+            if ($position->row >= 0 && $position->row < MapConfiguration::ROWS &&
+                $position->col >= 0 && $position->col < MapConfiguration::COLS) {
+                $terrain = $mapData[$position->row][$position->col];
                 $this->logger->debug("Player placed on terrain", [
                     'terrain' => $terrain['name'],
-                    'position' => ['row' => $position->getRow(), 'col' => $position->getCol()]
+                    'position' => ['row' => $position->row, 'col' => $position->col]
                 ]);
             } else {
                 $this->logger->warning("Player position is outside map bounds", [
-                    'position' => ['row' => $position->getRow(), 'col' => $position->getCol()],
+                    'position' => ['row' => $position->row, 'col' => $position->col],
                     'map_bounds' => ['rows' => MapConfiguration::ROWS, 'cols' => MapConfiguration::COLS]
                 ]);
             }
@@ -87,7 +87,7 @@ class CreatePlayerController extends AbstractPlayerController
             return $this->json([
                 'success' => true,
                 'player' => $player->toArray(),
-                'message' => "Player {$playerName} created at hex ({$position->getRow()}, {$position->getCol()}) on {$terrainName}",
+                'message' => "Player {$playerName} created at hex ({$position->row}, {$position->col}) on {$terrainName}",
                 'events' => count($events) // For debugging purposes
             ]);
 

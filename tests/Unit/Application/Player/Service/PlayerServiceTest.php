@@ -9,6 +9,7 @@ use App\Application\Player\Service\PlayerTurnService;
 use App\Application\Player\Service\PlayerPositionService;
 use App\Application\Player\Service\PlayerAttributeService;
 use App\Application\Player\Service\MovementCalculationService;
+use App\Application\Map\Service\HexNeighborService;
 use App\Domain\Shared\Service\HexGridService;
 use App\Domain\Player\Service\PlayerTurnDomainService;
 use App\Domain\Player\Service\PlayerAttributeDomainService;
@@ -30,6 +31,7 @@ class PlayerServiceTest extends TestCase
     private PlayerPositionService|MockObject $positionService;
     private PlayerAttributeService|MockObject $attributeService;
     private MovementCalculationService|MockObject $movementCalculationService;
+    private HexNeighborService|MockObject $hexNeighborService;
     private HexGridService|MockObject $hexGridService;
     private PlayerTurnDomainService|MockObject $turnDomainService;
     private PlayerAttributeDomainService|MockObject $attributeDomainService;
@@ -42,6 +44,7 @@ class PlayerServiceTest extends TestCase
         $this->positionService = $this->createMock(PlayerPositionService::class);
         $this->attributeService = $this->createMock(PlayerAttributeService::class);
         $this->movementCalculationService = $this->createMock(MovementCalculationService::class);
+        $this->hexNeighborService = $this->createMock(HexNeighborService::class);
         $this->hexGridService = $this->createMock(HexGridService::class);
         $this->turnDomainService = $this->createMock(PlayerTurnDomainService::class);
         $this->attributeDomainService = $this->createMock(PlayerAttributeDomainService::class);
@@ -55,7 +58,8 @@ class PlayerServiceTest extends TestCase
             $this->movementCalculationService,
             $this->hexGridService,
             $this->turnDomainService,
-            $this->attributeDomainService
+            $this->attributeDomainService,
+            $this->hexNeighborService
         );
     }
 
@@ -68,9 +72,11 @@ class PlayerServiceTest extends TestCase
             [['type' => 'plains', 'name' => 'Plains']]
         ];
 
-        $expectedPlayer = new Player(
+        $expectedPosition = new Position(30, 40);
+
+        $expectedPlayer = Player::create(
             new PlayerId('player_123'),
-            new Position(30, 40),
+            $expectedPosition,
             $name,
             3
         );
@@ -90,7 +96,7 @@ class PlayerServiceTest extends TestCase
         $name = 'Test Player';
         $position = new Position(10, 10);
 
-        $expectedPlayer = new Player(
+        $expectedPlayer = Player::create(
             new PlayerId('test_player'),
             $position,
             $name,
@@ -109,7 +115,7 @@ class PlayerServiceTest extends TestCase
 
     public function testMovePlayer(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -139,7 +145,7 @@ class PlayerServiceTest extends TestCase
 
     public function testStartPlayerTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -155,7 +161,7 @@ class PlayerServiceTest extends TestCase
 
     public function testEndPlayerTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -171,7 +177,7 @@ class PlayerServiceTest extends TestCase
 
     public function testCanPlayerMoveToPosition(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -192,7 +198,7 @@ class PlayerServiceTest extends TestCase
 
     public function testCanPlayerContinueTurn(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -253,7 +259,7 @@ class PlayerServiceTest extends TestCase
 
     public function testGetPlayerStatus(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -291,7 +297,7 @@ class PlayerServiceTest extends TestCase
 
     public function testCalculatePlayerPossibleMoves(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -355,7 +361,7 @@ class PlayerServiceTest extends TestCase
 
     public function testAnalyzePlayerTacticalSituation(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -374,15 +380,23 @@ class PlayerServiceTest extends TestCase
                 2 => [],
                 3 => [],
                 4 => [],
-                5 => ['type' => 'plains', 'name' => 'Plains']
+                5 => ['type' => 'plains', 'name' => 'Plains'],
+                6 => ['type' => 'plains', 'name' => 'Plains']
             ]
         ];
 
-        // Mock HexGridService calls
-        $this->hexGridService->expects($this->exactly(2))
+        // Mock HexNeighborService calls for map operations
+        $this->hexNeighborService->expects($this->once())
             ->method('getNeighborTiles')
             ->willReturn([
                 ['type' => 'plains', 'name' => 'Plains', 'coordinates' => ['row' => 5, 'col' => 6]]
+            ]);
+
+        // Mock HexGridService calls for position calculations
+        $this->hexGridService->expects($this->once())
+            ->method('getAdjacentPositions')
+            ->willReturn([
+                new Position(5, 6)
             ]);
 
         // Mock domain service calls

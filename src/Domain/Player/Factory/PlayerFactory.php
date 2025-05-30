@@ -4,6 +4,7 @@ namespace App\Domain\Player\Factory;
 
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\Service\PlayerAttributeDomainService;
+use App\Domain\Player\ValueObject\MovementPoints;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;
 
@@ -18,7 +19,8 @@ class PlayerFactory
 {
     public function __construct(
         private readonly PlayerAttributeDomainService $attributeDomainService
-    ) {
+    )
+    {
     }
 
     /**
@@ -33,11 +35,12 @@ class PlayerFactory
         string   $name,
         Position $position,
         int      $maxMovementPoints = 3
-    ): Player {
+    ): Player
+    {
         $playerId = PlayerId::generate();
         $color = $this->attributeDomainService->generatePlayerColor();
 
-        return new Player(
+        return Player::create(
             $playerId,
             $position,
             $name,
@@ -62,12 +65,40 @@ class PlayerFactory
         Position $position,
         int      $maxMovementPoints = 3,
         int      $color = 0xFF6B6B
-    ): Player {
-        return new Player(
+    ): Player
+    {
+        return Player::create(
             $id,
             $position,
             $name,
             $maxMovementPoints,
+            $color
+        );
+    }
+
+    /**
+     * Creates a player with MovementPoints value object directly
+     *
+     * @param PlayerId $id Player ID
+     * @param string $name Player name
+     * @param Position $position Starting position
+     * @param MovementPoints $movementPoints Movement points value object
+     * @param int $color Player color
+     * @return Player New player instance
+     */
+    public function createPlayerWithMovementPoints(
+        PlayerId       $id,
+        string         $name,
+        Position       $position,
+        MovementPoints $movementPoints,
+        int            $color = 0xFF6B6B
+    ): Player
+    {
+        return new Player(
+            $id,
+            $position,
+            $name,
+            $movementPoints,
             $color
         );
     }
@@ -82,7 +113,8 @@ class PlayerFactory
     public function createTestPlayer(
         string    $name = 'Test Player',
         ?Position $position = null
-    ): Player {
+    ): Player
+    {
         $position = $position ?? new Position(50, 50);
 
         return $this->createPlayer($name, $position, 3);

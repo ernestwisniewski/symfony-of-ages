@@ -11,9 +11,13 @@ use App\Domain\Map\ValueObject\TerrainVisualProperties;
 /**
  * TerrainType enum represents different types of terrain on the game map
  *
+ * Clean enum that only handles the mapping between terrain type values
+ * and their properties. All analysis logic has been moved to TerrainProperties
+ * for better separation of concerns and cleaner architecture.
+ *
  * Each terrain type has distinct characteristics that affect gameplay:
  * - Movement cost (how many movement points needed to enter)
- * - Defense bonus (combat advantage when positioned here)  
+ * - Defense bonus (combat advantage when positioned here)
  * - Resource yield (economic value generated)
  * - Visual representation (name and color for display)
  */
@@ -42,8 +46,7 @@ enum TerrainType: string
      *
      * Returns TerrainProperties aggregate containing specialized value objects
      * for different aspects of terrain (visual, movement, combat, economic).
-     * This provides better type safety and separation of concerns compared
-     * to the legacy array-based approach.
+     * This provides better type safety and separation of concerns.
      *
      * @return TerrainProperties Complete terrain characteristics
      */
@@ -88,98 +91,4 @@ enum TerrainType: string
             )
         };
     }
-
-    /**
-     * Legacy method for backward compatibility
-     * 
-     * @deprecated Use getProperties() instead for better type safety
-     * @return array Legacy array format for backward compatibility
-     */
-    public function getLegacyProperties(): array
-    {
-        return $this->getProperties()->toLegacyArray();
-    }
-
-    /**
-     * Gets visual properties only
-     */
-    public function getVisualProperties(): TerrainVisualProperties
-    {
-        return $this->getProperties()->visual();
-    }
-
-    /**
-     * Gets movement properties only
-     */
-    public function getMovementProperties(): TerrainMovementProperties
-    {
-        return $this->getProperties()->movement();
-    }
-
-    /**
-     * Gets combat properties only
-     */
-    public function getCombatProperties(): TerrainCombatProperties
-    {
-        return $this->getProperties()->combat();
-    }
-
-    /**
-     * Gets economic properties only
-     */
-    public function getEconomicProperties(): TerrainEconomicProperties
-    {
-        return $this->getProperties()->economic();
-    }
-
-    /**
-     * Quick access methods for common operations
-     */
-    public function getName(): string
-    {
-        return $this->getProperties()->getName();
-    }
-
-    public function getColor(): int
-    {
-        return $this->getProperties()->getColor();
-    }
-
-    public function getMovementCost(): int
-    {
-        return $this->getProperties()->getMovementCost();
-    }
-
-    public function isPassable(): bool
-    {
-        return $this->getProperties()->isPassable();
-    }
-
-    public function getDefenseBonus(): int
-    {
-        return $this->getProperties()->getDefenseBonus();
-    }
-
-    public function getResourceYield(): int
-    {
-        return $this->getProperties()->getResourceYield();
-    }
-
-    /**
-     * Tactical analysis helpers
-     */
-    public function isStrategicallyImportant(): bool
-    {
-        return $this->getProperties()->isStrategicallyImportant();
-    }
-
-    public function providesTacticalAdvantage(): bool
-    {
-        return $this->getProperties()->isTacticallyAdvantaged();
-    }
-
-    public function isEconomicallyViable(): bool
-    {
-        return $this->getProperties()->isEconomicallyViable();
-    }
-} 
+}

@@ -24,8 +24,8 @@ class PlayerAttributeDomainServiceTest extends TestCase
         $playerId = $this->attributeService->generatePlayerId();
 
         $this->assertInstanceOf(PlayerId::class, $playerId);
-        $this->assertStringStartsWith('player_', $playerId->getValue());
-        $this->assertGreaterThan(10, strlen($playerId->getValue()));
+        $this->assertStringStartsWith('player_', $playerId->value);
+        $this->assertGreaterThan(10, strlen($playerId->value));
     }
 
     public function testGeneratePlayerIdCreatesUniqueIds(): void
@@ -34,9 +34,9 @@ class PlayerAttributeDomainServiceTest extends TestCase
         $playerId2 = $this->attributeService->generatePlayerId();
         $playerId3 = $this->attributeService->generatePlayerId();
 
-        $this->assertNotEquals($playerId1->getValue(), $playerId2->getValue());
-        $this->assertNotEquals($playerId2->getValue(), $playerId3->getValue());
-        $this->assertNotEquals($playerId1->getValue(), $playerId3->getValue());
+        $this->assertNotEquals($playerId1->value, $playerId2->value);
+        $this->assertNotEquals($playerId2->value, $playerId3->value);
+        $this->assertNotEquals($playerId1->value, $playerId3->value);
     }
 
     public function testGeneratePlayerColorReturnsValidColor(): void

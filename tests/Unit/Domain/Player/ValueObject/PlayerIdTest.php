@@ -3,7 +3,7 @@
 namespace Tests\Unit\Domain\Player\ValueObject;
 
 use App\Domain\Player\ValueObject\PlayerId;
-use InvalidArgumentException;
+use App\Domain\Player\Exception\InvalidPlayerDataException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,12 +15,12 @@ class PlayerIdTest extends TestCase
     {
         $playerId = new PlayerId('player_123');
         
-        $this->assertEquals('player_123', $playerId->getValue());
+        $this->assertEquals('player_123', $playerId->value);
     }
 
     public function testThrowsExceptionForEmptyValue(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player ID cannot be empty');
         
         new PlayerId('');
@@ -28,7 +28,7 @@ class PlayerIdTest extends TestCase
 
     public function testThrowsExceptionForTooShortValue(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player ID must be at least 3 characters long');
         
         new PlayerId('ab');
@@ -38,7 +38,7 @@ class PlayerIdTest extends TestCase
     {
         $playerId = new PlayerId('abc');
         
-        $this->assertEquals('abc', $playerId->getValue());
+        $this->assertEquals('abc', $playerId->value);
     }
 
     public function testEqualsReturnsTrueForSameValue(): void
@@ -62,8 +62,8 @@ class PlayerIdTest extends TestCase
         $playerId = PlayerId::generate();
         
         $this->assertInstanceOf(PlayerId::class, $playerId);
-        $this->assertStringStartsWith('player_', $playerId->getValue());
-        $this->assertGreaterThanOrEqual(10, strlen($playerId->getValue()));
+        $this->assertStringStartsWith('player_', $playerId->value);
+        $this->assertGreaterThanOrEqual(10, strlen($playerId->value));
     }
 
     public function testGenerateCreatesUniqueIds(): void
@@ -71,7 +71,7 @@ class PlayerIdTest extends TestCase
         $playerId1 = PlayerId::generate();
         $playerId2 = PlayerId::generate();
         
-        $this->assertNotEquals($playerId1->getValue(), $playerId2->getValue());
+        $this->assertNotEquals($playerId1->value, $playerId2->value);
     }
 
     public function testToString(): void
@@ -84,7 +84,7 @@ class PlayerIdTest extends TestCase
     public function testToStringWithGeneratedId(): void
     {
         $playerId = PlayerId::generate();
-        $value = $playerId->getValue();
+        $value = $playerId->value;
         
         $this->assertEquals($value, (string)$playerId);
     }

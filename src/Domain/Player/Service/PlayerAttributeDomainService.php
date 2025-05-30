@@ -10,6 +10,7 @@ use App\Domain\Player\ValueObject\PlayerId;
  * Pure domain service that encapsulates business rules for player
  * attribute generation, validation, and management. Contains
  * domain knowledge about player attributes.
+ * Uses modern PHP 8.4 features for cleaner API.
  */
 class PlayerAttributeDomainService
 {
@@ -25,11 +26,44 @@ class PlayerAttributeDomainService
         0x5F27CD  // Purple
     ];
 
+    /** @var array Color names mapping for quick access */
+    private const array COLOR_NAMES = [
+        0xFF6B6B => 'Red',
+        0x4ECDC4 => 'Teal',
+        0x45B7D1 => 'Blue',
+        0x96CEB4 => 'Green',
+        0xFECA57 => 'Yellow',
+        0xFF9FF3 => 'Pink',
+        0x54A0FF => 'Light Blue',
+        0x5F27CD => 'Purple',
+    ];
+
     /** @var int Minimum player name length */
     private const int MIN_NAME_LENGTH = 1;
 
     /** @var int Maximum player name length */
     private const int MAX_NAME_LENGTH = 50;
+
+    // Modern property hooks for configuration access
+    public array $availableColors {
+        get => self::PLAYER_COLORS;
+    }
+
+    public array $colorNames {
+        get => self::COLOR_NAMES;
+    }
+
+    public int $minNameLength {
+        get => self::MIN_NAME_LENGTH;
+    }
+
+    public int $maxNameLength {
+        get => self::MAX_NAME_LENGTH;
+    }
+
+    public int $totalAvailableColors {
+        get => count(self::PLAYER_COLORS);
+    }
 
     /**
      * Generates unique player ID according to domain rules
@@ -48,7 +82,7 @@ class PlayerAttributeDomainService
      */
     public function generatePlayerColor(): int
     {
-        return self::PLAYER_COLORS[array_rand(self::PLAYER_COLORS)];
+        return $this->availableColors[array_rand($this->availableColors)];
     }
 
     /**
@@ -60,8 +94,8 @@ class PlayerAttributeDomainService
     public function isValidPlayerName(string $name): bool
     {
         $trimmedName = trim($name);
-        return strlen($trimmedName) >= self::MIN_NAME_LENGTH &&
-            strlen($trimmedName) <= self::MAX_NAME_LENGTH;
+        return strlen($trimmedName) >= $this->minNameLength &&
+            strlen($trimmedName) <= $this->maxNameLength;
     }
 
     /**
@@ -72,7 +106,8 @@ class PlayerAttributeDomainService
      */
     public function isValidPlayerColor(int $color): bool
     {
-        return in_array($color, self::PLAYER_COLORS);
+        // Use PHP 8.4 array_any instead of in_array for consistency with modern patterns
+        return array_any($this->availableColors, fn($availableColor) => $availableColor === $color);
     }
 
     /**
@@ -82,7 +117,7 @@ class PlayerAttributeDomainService
      */
     public function getAvailableColors(): array
     {
-        return self::PLAYER_COLORS;
+        return $this->availableColors;
     }
 
     /**
@@ -104,16 +139,30 @@ class PlayerAttributeDomainService
      */
     public function getColorName(int $color): string
     {
-        return match ($color) {
-            0xFF6B6B => 'Red',
-            0x4ECDC4 => 'Teal',
-            0x45B7D1 => 'Blue',
-            0x96CEB4 => 'Green',
-            0xFECA57 => 'Yellow',
-            0xFF9FF3 => 'Pink',
-            0x54A0FF => 'Light Blue',
-            0x5F27CD => 'Purple',
-            default => 'Unknown'
-        };
+        return $this->colorNames[$color] ?? 'Unknown';
+    }
+
+    /**
+     * Gets color information as associative array
+     */
+    public function getColorInfo(int $color): array
+    {
+        return [
+            'value' => $color,
+            'name' => $this->getColorName($color),
+            'hex' => sprintf('#%06X', $color),
+            'isValid' => $this->isValidPlayerColor($color)
+        ];
+    }
+
+    /**
+     * Gets all color information
+     */
+    public function getAllColorsInfo(): array
+    {
+        return array_map(
+            fn(int $color) => $this->getColorInfo($color),
+            $this->availableColors
+        );
     }
 }

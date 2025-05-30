@@ -38,7 +38,7 @@ class PlayerCreationServiceTest extends TestCase
         $maxMovementPoints = 3;
 
         $expectedPosition = new Position(5, 5);
-        $expectedPlayer = new Player(
+        $expectedPlayer = Player::create(
             new PlayerId('player_123'),
             $expectedPosition,
             $name,
@@ -70,7 +70,7 @@ class PlayerCreationServiceTest extends TestCase
         ];
 
         $expectedPosition = new Position(5, 5);
-        $expectedPlayer = new Player(
+        $expectedPlayer = Player::create(
             new PlayerId('player_123'),
             $expectedPosition,
             $name,
@@ -99,7 +99,7 @@ class PlayerCreationServiceTest extends TestCase
         $maxMovementPoints = 5;
 
         $expectedPosition = new Position($row, $col);
-        $expectedPlayer = new Player(
+        $expectedPlayer = Player::create(
             new PlayerId('player_456'),
             $expectedPosition,
             $name,
@@ -123,7 +123,7 @@ class PlayerCreationServiceTest extends TestCase
         $col = 7;
 
         $expectedPosition = new Position($row, $col);
-        $expectedPlayer = new Player(
+        $expectedPlayer = Player::create(
             new PlayerId('player_456'),
             $expectedPosition,
             $name,
@@ -145,7 +145,7 @@ class PlayerCreationServiceTest extends TestCase
         $name = 'Test Player';
         $position = new Position(10, 10);
 
-        $expectedPlayer = new Player(
+        $expectedPlayer = Player::create(
             new PlayerId('test_player'),
             $position,
             $name,
@@ -164,7 +164,7 @@ class PlayerCreationServiceTest extends TestCase
 
     public function testCreateTestPlayerWithDefaults(): void
     {
-        $expectedPlayer = new Player(
+        $expectedPlayer = Player::create(
             new PlayerId('test_player'),
             new Position(0, 0),
             'Test Player',

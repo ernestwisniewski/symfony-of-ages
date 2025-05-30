@@ -2,23 +2,27 @@
 
 namespace App\Application\Player\Service;
 
-use App\Domain\Player\Service\MovementDomainService;
 use App\Domain\Player\Entity\Player;
+use App\Domain\Player\Service\PlayerTurnDomainService;
 use App\Domain\Player\ValueObject\Position;
 
 /**
  * PlayerMovementService handles player movement validation and execution
  *
  * Application service that orchestrates movement operations by delegating
- * domain logic to the MovementDomainService and coordinating with
+ * domain logic to the PlayerTurnDomainService and coordinating with
  * position validation. Follows Single Responsibility Principle.
+ *
+ * Updated to use the centralized PlayerTurnDomainService for all
+ * turn and movement related domain logic.
  */
 class PlayerMovementService
 {
     public function __construct(
-        private readonly PlayerPositionService $positionService,
-        private readonly MovementDomainService $movementDomainService
-    ) {
+        private readonly PlayerPositionService   $positionService,
+        private readonly PlayerTurnDomainService $turnDomainService
+    )
+    {
     }
 
     /**
@@ -40,47 +44,24 @@ class PlayerMovementService
         }
 
         // Get terrain at target position
-        $terrain = $mapData[$targetPosition->getRow()][$targetPosition->getCol()];
+        $terrain = $mapData[$targetPosition->row][$targetPosition->col];
 
-        // Use domain service to validate movement
-        $validationResult = $this->movementDomainService->validateMovement(
-            $player->getPosition(),
-            $targetPosition,
-            $terrain
-        );
+        // Use centralized domain service to execute movement
+        $executionResult = $this->turnDomainService->executeMovement($player, $targetPosition, $terrain);
 
-        if (!$validationResult->isValid()) {
-            return [
-                'success' => false,
-                'message' => $validationResult->getReason(),
-                'code' => $validationResult->getCode()
-            ];
-        }
-
-        $movementCost = $validationResult->getMovementCost();
-
-        // Check if player has enough movement points
-        if (!$player->canMoveTo($movementCost)) {
-            return [
-                'success' => false,
-                'message' => "Not enough movement points (need: {$movementCost}, have: {$player->getMovementPoints()})"
-            ];
-        }
-
-        // Attempt movement using domain logic
-        $success = $player->moveTo($targetPosition, $movementCost);
-
-        if ($success) {
+        if ($executionResult->isSuccess()) {
             return [
                 'success' => true,
-                'message' => "Moved to {$terrain['name']} (cost: {$movementCost})",
-                'remainingMovement' => $player->getMovementPoints(),
+                'message' => $executionResult->getMessage(),
+                'movementCost' => $executionResult->getMovementCost(),
+                'remainingMovement' => $executionResult->getRemainingMovementPoints(),
                 'events' => $player->getDomainEvents() // Include domain events for potential handling
             ];
         } else {
             return [
                 'success' => false,
-                'message' => "Movement failed unexpectedly"
+                'message' => $executionResult->getMessage(),
+                'code' => $executionResult->getCode()
             ];
         }
     }
@@ -94,7 +75,7 @@ class PlayerMovementService
      */
     public function canPlayerMoveToPosition(Player $player, int $movementCost): bool
     {
-        return $player->canMoveTo($movementCost);
+        return $this->turnDomainService->canAffordMovement($player, $movementCost);
     }
 
     /**
@@ -106,7 +87,7 @@ class PlayerMovementService
      */
     public function arePositionsAdjacent(Position $from, Position $to): bool
     {
-        return $this->movementDomainService->arePositionsAdjacent($from, $to);
+        return $this->turnDomainService->arePositionsAdjacent($from, $to);
     }
 
     /**
@@ -117,6 +98,6 @@ class PlayerMovementService
      */
     public function getTerrainMovementCost(array $terrainData): int
     {
-        return $this->movementDomainService->calculateMovementCost($terrainData);
+        return $this->turnDomainService->calculateMovementCost($terrainData);
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Unit\Domain\Map\ValueObject;
 
 use App\Domain\Map\ValueObject\TerrainCombatProperties;
+use App\Domain\Map\Exception\InvalidTerrainDataException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -15,19 +16,19 @@ class TerrainCombatPropertiesTest extends TestCase
     {
         $properties = new TerrainCombatProperties(3);
         
-        $this->assertEquals(3, $properties->getDefenseBonus());
+        $this->assertEquals(3, $properties->defenseBonus);
     }
 
     public function testCreateWithZeroDefenseBonus(): void
     {
         $properties = new TerrainCombatProperties(0);
         
-        $this->assertEquals(0, $properties->getDefenseBonus());
+        $this->assertEquals(0, $properties->defenseBonus);
     }
 
     public function testCreateWithNegativeDefenseBonusThrowsException(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidTerrainDataException::class);
         $this->expectExceptionMessage('Defense bonus cannot be negative');
         
         new TerrainCombatProperties(-1);
@@ -42,7 +43,7 @@ class TerrainCombatPropertiesTest extends TestCase
 
     public function testProvidesDefensiveAdvantageWithVeryHighDefense(): void
     {
-        $properties = new TerrainCombatProperties(5);
+        $properties = new TerrainCombatProperties(4);
         
         $this->assertTrue($properties->providesDefensiveAdvantage());
     }
@@ -105,7 +106,7 @@ class TerrainCombatPropertiesTest extends TestCase
 
     public function testIsFortifiedWithVeryHighDefense(): void
     {
-        $properties = new TerrainCombatProperties(10);
+        $properties = new TerrainCombatProperties(5);
         
         $this->assertTrue($properties->isFortified());
     }
@@ -125,11 +126,11 @@ class TerrainCombatPropertiesTest extends TestCase
         $this->assertIsArray($array);
         $this->assertArrayHasKey('defenseBonus', $array);
         $this->assertArrayHasKey('defensiveLevel', $array);
-        $this->assertArrayHasKey('tacticalAdvantage', $array);
+        $this->assertArrayHasKey('providesDefensiveAdvantage', $array);
         
         $this->assertEquals(3, $array['defenseBonus']);
-        $this->assertEquals('moderate', $array['defensiveLevel']);
-        $this->assertTrue($array['tacticalAdvantage']);
+        $this->assertEquals('Strong', $array['defensiveLevel']);
+        $this->assertTrue($array['providesDefensiveAdvantage']);
     }
 
     #[DataProvider('defensiveLevelProvider')]
@@ -143,10 +144,10 @@ class TerrainCombatPropertiesTest extends TestCase
 
     #[DataProvider('tacticalAdvantageProvider')]
     public function testTacticalAdvantageLogic(
-        int $defenseBonus,
-        bool $expectedDefensiveAdvantage,
-        bool $expectedMinorDefense,
-        bool $expectedNoDefense,
+        int $defenseBonus, 
+        bool $expectedDefensiveAdvantage, 
+        bool $expectedMinorDefense, 
+        bool $expectedNoDefense, 
         bool $expectedFortified
     ): void {
         $properties = new TerrainCombatProperties($defenseBonus);
@@ -185,11 +186,11 @@ class TerrainCombatPropertiesTest extends TestCase
 
     public function testValueObjectImmutability(): void
     {
-        $properties1 = new TerrainCombatProperties(3);
-        $properties2 = new TerrainCombatProperties(3);
+        $properties1 = new TerrainCombatProperties(2);
+        $properties2 = new TerrainCombatProperties(2);
         
         // Same values should create equivalent objects
-        $this->assertEquals($properties1->getDefenseBonus(), $properties2->getDefenseBonus());
+        $this->assertEquals($properties1->defenseBonus, $properties2->defenseBonus);
         $this->assertEquals($properties1->providesDefensiveAdvantage(), $properties2->providesDefensiveAdvantage());
         $this->assertEquals($properties1->toArray(), $properties2->toArray());
     }
@@ -216,20 +217,19 @@ class TerrainCombatPropertiesTest extends TestCase
     public static function defensiveLevelProvider(): array
     {
         return [
-            'None' => [0, 'none'],
-            'Minimal' => [1, 'minimal'],
-            'Light' => [2, 'light'],
-            'Moderate' => [3, 'moderate'],
-            'Fortified Level 1' => [4, 'fortified'],
-            'Fortified Level 2' => [5, 'fortified'],
-            'Heavily Fortified' => [10, 'fortified'],
+            'None' => [0, 'None'],
+            'Minor' => [1, 'Minor'],
+            'Moderate' => [2, 'Moderate'],
+            'Strong' => [3, 'Strong'],
+            'Fortress Level 1' => [4, 'Fortress Level 1'],
+            'Fortress Level 2' => [5, 'Fortress Level 2'],
+            'Heavily Fortified' => [10, 'Heavily Fortified'],
         ];
     }
 
     public static function tacticalAdvantageProvider(): array
     {
         return [
-            // [defenseBonus, expectedDefensiveAdvantage, expectedMinorDefense, expectedNoDefense, expectedFortified]
             'No defense' => [0, false, false, true, false],
             'Minimal defense' => [1, false, true, false, false],
             'Light defense' => [2, false, true, false, false],

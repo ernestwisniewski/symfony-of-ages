@@ -34,4 +34,49 @@ class InvalidPlayerDataException extends PlayerDomainException
     {
         return new self("Invalid position: row={$row}, col={$col}");
     }
+
+    public static function negativeRow(): self
+    {
+        return new self('Row cannot be negative');
+    }
+
+    public static function negativeColumn(): self
+    {
+        return new self('Column cannot be negative');
+    }
+
+    public static function missingRowData(): self
+    {
+        return new self('Row is required');
+    }
+
+    public static function missingColumnData(): self
+    {
+        return new self('Column is required');
+    }
+
+    public static function emptyPlayerId(): self
+    {
+        return new self('Player ID cannot be empty');
+    }
+
+    public static function playerIdTooShort(int $minLength): self
+    {
+        return new self("Player ID must be at least {$minLength} characters long");
+    }
+
+    public static function negativeMovementPoints(string $type): self
+    {
+        return new self("{$type} movement points cannot be negative");
+    }
+
+    public static function movementPointsExceedMaximum(): self
+    {
+        return new self('Current movement points cannot exceed maximum');
+    }
+
+    public static function cannotSpendMovementPoints(int $cost, int $available): self
+    {
+        return new self("Cannot spend {$cost} movement points. Available: {$available}");
+    }
 }

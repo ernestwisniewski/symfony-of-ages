@@ -3,6 +3,7 @@
 namespace Tests\Unit\Domain\Map\ValueObject;
 
 use App\Domain\Map\ValueObject\TerrainMovementProperties;
+use App\Domain\Map\Exception\InvalidTerrainDataException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -15,19 +16,19 @@ class TerrainMovementPropertiesTest extends TestCase
     {
         $properties = new TerrainMovementProperties(2);
         
-        $this->assertEquals(2, $properties->getMovementCost());
+        $this->assertEquals(2, $properties->movementCost);
     }
 
     public function testCreateWithZeroMovementCost(): void
     {
         $properties = new TerrainMovementProperties(0);
         
-        $this->assertEquals(0, $properties->getMovementCost());
+        $this->assertEquals(0, $properties->movementCost);
     }
 
     public function testCreateWithNegativeMovementCostThrowsException(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidTerrainDataException::class);
         $this->expectExceptionMessage('Movement cost cannot be negative');
         
         new TerrainMovementProperties(-1);
@@ -103,12 +104,12 @@ class TerrainMovementPropertiesTest extends TestCase
         
         $this->assertIsArray($array);
         $this->assertArrayHasKey('movementCost', $array);
-        $this->assertArrayHasKey('passable', $array);
-        $this->assertArrayHasKey('difficulty', $array);
+        $this->assertArrayHasKey('isPassable', $array);
+        $this->assertArrayHasKey('difficultyLevel', $array);
         
         $this->assertEquals(2, $array['movementCost']);
-        $this->assertTrue($array['passable']);
-        $this->assertEquals('moderate', $array['difficulty']);
+        $this->assertTrue($array['isPassable']);
+        $this->assertEquals('Moderate', $array['difficultyLevel']);
     }
 
     #[DataProvider('movementDifficultyProvider')]
@@ -117,7 +118,7 @@ class TerrainMovementPropertiesTest extends TestCase
         $properties = new TerrainMovementProperties($movementCost);
         $array = $properties->toArray();
         
-        $this->assertEquals($expectedDifficulty, $array['difficulty']);
+        $this->assertEquals($expectedDifficulty, $array['difficultyLevel']);
     }
 
     #[DataProvider('passabilityProvider')]
@@ -148,7 +149,7 @@ class TerrainMovementPropertiesTest extends TestCase
         $properties2 = new TerrainMovementProperties(2);
         
         // Same values should create equivalent objects
-        $this->assertEquals($properties1->getMovementCost(), $properties2->getMovementCost());
+        $this->assertEquals($properties1->movementCost, $properties2->movementCost);
         $this->assertEquals($properties1->isPassable(), $properties2->isPassable());
         $this->assertEquals($properties1->toArray(), $properties2->toArray());
     }
@@ -175,12 +176,12 @@ class TerrainMovementPropertiesTest extends TestCase
     public static function movementDifficultyProvider(): array
     {
         return [
-            'Impassable' => [0, 'impassable'],
-            'Easy' => [1, 'easy'],
-            'Moderate' => [2, 'moderate'],
-            'Difficult' => [3, 'difficult'],
-            'Very Difficult' => [4, 'difficult'],
-            'Extremely Difficult' => [10, 'difficult'],
+            'Impassable' => [0, 'Impassable'],
+            'Easy' => [1, 'Easy'],
+            'Moderate' => [2, 'Moderate'],
+            'Difficult' => [3, 'Difficult'],
+            'Very Difficult' => [4, 'Very Difficult'],
+            'Extremely Difficult' => [10, 'Extremely Difficult'],
         ];
     }
 

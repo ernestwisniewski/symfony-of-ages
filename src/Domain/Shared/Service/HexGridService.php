@@ -5,11 +5,11 @@ namespace App\Domain\Shared\Service;
 use App\Domain\Player\ValueObject\Position;
 
 /**
- * HexGridService provides centralized hexagonal grid operations
+ * HexGridService provides pure hexagonal grid domain logic
  *
- * Domain service that handles all hexagonal grid calculations,
- * neighbor finding, and distance calculations to eliminate code duplication
- * across different parts of the application.
+ * Clean domain service focused solely on hexagonal grid calculations,
+ * positions, directions, and geometry. Does NOT handle map data structures.
+ * Map structure handling is delegated to Application layer services.
  */
 class HexGridService
 {
@@ -17,14 +17,14 @@ class HexGridService
      * Gets adjacent positions in hexagonal grid
      *
      * @param Position $position Current position
-     * @param int $mapRows Number of map rows
-     * @param int $mapCols Number of map columns
+     * @param int $mapRows Number of map rows for boundary validation
+     * @param int $mapCols Number of map columns for boundary validation
      * @return Position[] Array of adjacent positions
      */
     public function getAdjacentPositions(Position $position, int $mapRows, int $mapCols): array
     {
-        $row = $position->getRow();
-        $col = $position->getCol();
+        $row = $position->row;
+        $col = $position->col;
         $adjacentPositions = [];
 
         $directions = $this->getHexDirections($row);
@@ -68,73 +68,6 @@ class HexGridService
     }
 
     /**
-     * Gets neighboring tiles for a given position
-     *
-     * @param array $map Current map state
-     * @param Position $position Current position
-     * @param int $maxRows Total rows in map
-     * @param int $maxCols Total columns in map
-     * @return array Array of neighboring tile data
-     */
-    public function getNeighborTiles(array $map, Position $position, int $maxRows, int $maxCols): array
-    {
-        $neighbors = [];
-        $adjacentPositions = $this->getAdjacentPositions($position, $maxRows, $maxCols);
-
-        foreach ($adjacentPositions as $adjPosition) {
-            $neighbors[] = $map[$adjPosition->getRow()][$adjPosition->getCol()];
-        }
-
-        return $neighbors;
-    }
-
-    /**
-     * Counts neighbors of a specific terrain type
-     *
-     * @param array $map Current map state
-     * @param Position $position Current position
-     * @param int $maxRows Total rows in map
-     * @param int $maxCols Total columns in map
-     * @param string $terrainType Terrain type to count
-     * @return int Number of neighbors with specified terrain type
-     */
-    public function countNeighborsOfType(array $map, Position $position, int $maxRows, int $maxCols, string $terrainType): int
-    {
-        $neighbors = $this->getNeighborTiles($map, $position, $maxRows, $maxCols);
-        $count = 0;
-
-        foreach ($neighbors as $neighbor) {
-            if ($neighbor['type'] === $terrainType) {
-                $count++;
-            }
-        }
-
-        return $count;
-    }
-
-    /**
-     * Gets terrain type counts for all neighbors
-     *
-     * @param array $map Current map state
-     * @param Position $position Current position
-     * @param int $maxRows Total rows in map
-     * @param int $maxCols Total columns in map
-     * @return array Associative array of terrain_type => count
-     */
-    public function getNeighborTerrainCounts(array $map, Position $position, int $maxRows, int $maxCols): array
-    {
-        $neighbors = $this->getNeighborTiles($map, $position, $maxRows, $maxCols);
-        $terrainCounts = [];
-
-        foreach ($neighbors as $neighbor) {
-            $terrainType = $neighbor['type'];
-            $terrainCounts[$terrainType] = ($terrainCounts[$terrainType] ?? 0) + 1;
-        }
-
-        return $terrainCounts;
-    }
-
-    /**
      * Checks if coordinates are within map bounds
      *
      * @param int $row Row coordinate
@@ -172,15 +105,9 @@ class HexGridService
         if ($from->equals($to)) {
             return true; // Same position is considered adjacent
         }
-        
+
         $adjacentPositions = $this->getAdjacentPositions($from, PHP_INT_MAX, PHP_INT_MAX);
-        
-        foreach ($adjacentPositions as $adjacentPosition) {
-            if ($adjacentPosition->equals($to)) {
-                return true;
-            }
-        }
-        
-        return false;
+
+        return array_any($adjacentPositions, fn($adjacentPosition) => $adjacentPosition->equals($to));
     }
 }

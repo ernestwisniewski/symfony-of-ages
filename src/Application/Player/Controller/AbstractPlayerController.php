@@ -29,14 +29,20 @@ abstract class AbstractPlayerController extends AbstractController
         protected readonly PlayerService   $playerService,
         protected readonly MapGenerator    $mapGenerator,
         protected readonly LoggerInterface $logger
-    ) {
+    )
+    {
     }
 
     /**
      * Gets or generates map data, storing it in session for consistency
      *
-     * Uses the refactored MapGenerator facade which orchestrates between
-     * specialized map generation services while maintaining backward compatibility.
+     * Uses the MapGenerator service to create map data when none exists in session.
+     * This ensures consistent map state across requests and integrates with
+     * specialized map generation services.
+     *
+     * @param SessionInterface $session Session for retrieving/storing map data
+     * @return array Map data
+     * @throws MapGenerationException When map generation fails
      */
     protected function getOrGenerateMapData(SessionInterface $session): array
     {

@@ -184,8 +184,8 @@ class PlayerPositionServiceTest extends TestCase
 
         $position = $this->positionService->generateValidStartingPosition($mapRows, $mapCols, $mapData);
 
-        $this->assertEquals($centerRow, $position->getRow());
-        $this->assertEquals($centerCol, $position->getCol());
+        $this->assertEquals($centerRow, $position->row);
+        $this->assertEquals($centerCol, $position->col);
     }
 
     public function testGenerateValidStartingPositionWithSmallMap(): void

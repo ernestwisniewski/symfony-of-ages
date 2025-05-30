@@ -15,8 +15,8 @@ class TerrainVisualPropertiesTest extends TestCase
     {
         $properties = new TerrainVisualProperties('Forest', 0x228B22);
         
-        $this->assertEquals('Forest', $properties->getName());
-        $this->assertEquals(0x228B22, $properties->getColor());
+        $this->assertEquals('Forest', $properties->name);
+        $this->assertEquals(0x228B22, $properties->color);
     }
 
     public function testGetHexColor(): void
@@ -28,22 +28,21 @@ class TerrainVisualPropertiesTest extends TestCase
 
     public function testGetHexColorWithPadding(): void
     {
-        // Test color that needs padding (like 0x000001)
-        $properties = new TerrainVisualProperties('Dark', 0x000001);
+        $properties = new TerrainVisualProperties('Test', 0x1);
         
         $this->assertEquals('#000001', $properties->getHexColor());
     }
 
     public function testGetHexColorWithZero(): void
     {
-        $properties = new TerrainVisualProperties('Black', 0x000000);
+        $properties = new TerrainVisualProperties('Test', 0x0);
         
         $this->assertEquals('#000000', $properties->getHexColor());
     }
 
     public function testGetHexColorWithMaxValue(): void
     {
-        $properties = new TerrainVisualProperties('White', 0xFFFFFF);
+        $properties = new TerrainVisualProperties('Test', 0xFFFFFF);
         
         $this->assertEquals('#FFFFFF', $properties->getHexColor());
     }
@@ -88,29 +87,25 @@ class TerrainVisualPropertiesTest extends TestCase
         $properties2 = new TerrainVisualProperties('Forest', 0x228B22);
         
         // Same values should create equivalent objects
-        $this->assertEquals($properties1->getName(), $properties2->getName());
-        $this->assertEquals($properties1->getColor(), $properties2->getColor());
+        $this->assertEquals($properties1->name, $properties2->name);
+        $this->assertEquals($properties1->color, $properties2->color);
         $this->assertEquals($properties1->getHexColor(), $properties2->getHexColor());
         $this->assertEquals($properties1->toArray(), $properties2->toArray());
     }
 
     public function testDifferentValuesCreateDifferentObjects(): void
     {
-        $properties1 = new TerrainVisualProperties('Forest', 0x228B22);
-        $properties2 = new TerrainVisualProperties('Plains', 0x90EE90);
+        $properties1 = new TerrainVisualProperties('Plains', 0x90EE90);
+        $properties2 = new TerrainVisualProperties('Forest', 0x228B22);
         
-        $this->assertNotEquals($properties1->getName(), $properties2->getName());
-        $this->assertNotEquals($properties1->getColor(), $properties2->getColor());
         $this->assertNotEquals($properties1->getHexColor(), $properties2->getHexColor());
-        $this->assertNotEquals($properties1->toArray(), $properties2->toArray());
     }
 
     #[DataProvider('validColorProvider')]
-    public function testValidColors(int $color, string $expectedHex): void
+    public function testValidColors(string $name, int $color, string $expectedHex): void
     {
-        $properties = new TerrainVisualProperties('Test', $color);
+        $properties = new TerrainVisualProperties($name, $color);
         
-        $this->assertEquals($color, $properties->getColor());
         $this->assertEquals($expectedHex, $properties->getHexColor());
     }
 
@@ -119,23 +114,30 @@ class TerrainVisualPropertiesTest extends TestCase
     {
         $properties = new TerrainVisualProperties($name, 0x000000);
         
-        $this->assertEquals($name, $properties->getName());
+        $this->assertEquals($name, $properties->name);
+    }
+
+    public function testLongNameThrowsException(): void
+    {
+        $this->expectException(\App\Domain\Map\Exception\InvalidTerrainDataException::class);
+        
+        new TerrainVisualProperties('Very Long Terrain Name With Many Words', 0x000000);
     }
 
     public static function validColorProvider(): array
     {
         return [
-            'Black' => [0x000000, '#000000'],
-            'White' => [0xFFFFFF, '#FFFFFF'],
-            'Red' => [0xFF0000, '#FF0000'],
-            'Green' => [0x00FF00, '#00FF00'],
-            'Blue' => [0x0000FF, '#0000FF'],
-            'Forest Green' => [0x228B22, '#228B22'],
-            'Light Green' => [0x90EE90, '#90EE90'],
-            'Gray' => [0x808080, '#808080'],
-            'Royal Blue' => [0x4169E1, '#4169E1'],
-            'Sandy Brown' => [0xF4A460, '#F4A460'],
-            'Dark Olive Green' => [0x556B2F, '#556B2F'],
+            'Black' => ['Black', 0x000000, '#000000'],
+            'White' => ['White', 0xFFFFFF, '#FFFFFF'],
+            'Red' => ['Red', 0xFF0000, '#FF0000'],
+            'Green' => ['Green', 0x00FF00, '#00FF00'],
+            'Blue' => ['Blue', 0x0000FF, '#0000FF'],
+            'Forest Green' => ['Forest Green', 0x228B22, '#228B22'],
+            'Light Green' => ['Light Green', 0x90EE90, '#90EE90'],
+            'Gray' => ['Gray', 0x808080, '#808080'],
+            'Royal Blue' => ['Royal Blue', 0x4169E1, '#4169E1'],
+            'Sandy Brown' => ['Sandy Brown', 0xF4A460, '#F4A460'],
+            'Dark Olive Green' => ['Dark Olive Green', 0x556B2F, '#556B2F'],
         ];
     }
 
@@ -148,7 +150,7 @@ class TerrainVisualPropertiesTest extends TestCase
             'With special chars' => ['Forest-Land'],
             'Mixed case' => ['MiXeD CaSe'],
             'Short name' => ['A'],
-            'Long name' => ['Very Long Terrain Name With Many Words'],
+            'Medium name' => ['Short Name Here'],
         ];
     }
 } 

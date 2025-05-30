@@ -2,15 +2,16 @@
 
 namespace App\Tests\Unit\Domain\Player\Entity;
 
-use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\Event\PlayerMoved;
-use App\Domain\Player\ValueObject\Position;
 use App\Domain\Player\Exception\InvalidPlayerDataException;
+use App\Domain\Player\ValueObject\MovementPoints;
+use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Player\ValueObject\Position;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for Player entity
+ * Unit tests for Player entity after encapsulation improvements
  */
 class PlayerTest extends TestCase
 {
@@ -25,27 +26,29 @@ class PlayerTest extends TestCase
 
     public function testCanCreatePlayerWithValidData(): void
     {
+        $movementPoints = MovementPoints::createFull(3);
         $player = new Player(
             $this->playerId,
             $this->position,
             'Test Player',
-            3,
+            $movementPoints,
             0xFF6B6B
         );
 
         $this->assertEquals($this->playerId, $player->getId());
         $this->assertEquals($this->position, $player->getPosition());
         $this->assertEquals('Test Player', $player->getName());
-        $this->assertEquals(3, $player->getMovementPoints());
-        $this->assertEquals(3, $player->getMaxMovementPoints());
+        $this->assertEquals(3, $player->currentMovementPoints);
+        $this->assertEquals(3, $player->maxMovementPoints);
         $this->assertEquals(0xFF6B6B, $player->getColor());
     }
 
     public function testCanCreatePlayerWithDefaultValues(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Default Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Default Player', $movementPoints);
 
-        $this->assertEquals(3, $player->getMaxMovementPoints());
+        $this->assertEquals(3, $player->maxMovementPoints);
         $this->assertEquals(0xFF6B6B, $player->getColor());
     }
 
@@ -54,7 +57,8 @@ class PlayerTest extends TestCase
         $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player name cannot be empty');
 
-        new Player($this->playerId, $this->position, '');
+        $movementPoints = MovementPoints::createFull(3);
+        new Player($this->playerId, $this->position, '', $movementPoints);
     }
 
     public function testThrowsExceptionForWhitespaceOnlyName(): void
@@ -62,7 +66,8 @@ class PlayerTest extends TestCase
         $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player name cannot be empty');
 
-        new Player($this->playerId, $this->position, '   ');
+        $movementPoints = MovementPoints::createFull(3);
+        new Player($this->playerId, $this->position, '   ', $movementPoints);
     }
 
     public function testThrowsExceptionForTooLongName(): void
@@ -72,36 +77,40 @@ class PlayerTest extends TestCase
         $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player name cannot exceed 50 characters');
 
-        new Player($this->playerId, $this->position, $longName);
+        $movementPoints = MovementPoints::createFull(3);
+        new Player($this->playerId, $this->position, $longName, $movementPoints);
     }
 
     public function testCanMoveToValidPosition(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
         $newPosition = new Position(11, 15);
 
         $result = $player->moveTo($newPosition, 2);
 
         $this->assertTrue($result);
         $this->assertEquals($newPosition, $player->getPosition());
-        $this->assertEquals(1, $player->getMovementPoints()); // 3 - 2 = 1
+        $this->assertEquals(1, $player->currentMovementPoints); // 3 - 2 = 1
     }
 
     public function testCannotMoveWithInsufficientMovementPoints(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
         $newPosition = new Position(11, 15);
 
         $result = $player->moveTo($newPosition, 5); // Need 5, have 3
 
         $this->assertFalse($result);
         $this->assertEquals($this->position, $player->getPosition()); // Position unchanged
-        $this->assertEquals(3, $player->getMovementPoints()); // Movement points unchanged
+        $this->assertEquals(3, $player->currentMovementPoints); // Movement points unchanged
     }
 
     public function testMoveToPublishesDomainEvent(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
         $newPosition = new Position(11, 15);
 
         $player->moveTo($newPosition, 2);
@@ -111,15 +120,16 @@ class PlayerTest extends TestCase
         $this->assertInstanceOf(PlayerMoved::class, $events[0]);
 
         $event = $events[0];
-        $this->assertEquals($this->playerId, $event->getPlayerId());
-        $this->assertEquals($this->position, $event->getFromPosition());
-        $this->assertEquals($newPosition, $event->getToPosition());
-        $this->assertEquals(2, $event->getMovementCost());
+        $this->assertEquals($this->playerId, $event->playerId);
+        $this->assertEquals($this->position, $event->fromPosition);
+        $this->assertEquals($newPosition, $event->toPosition);
+        $this->assertEquals(2, $event->movementCost);
     }
 
     public function testCanMoveToReturnsTrueForSufficientPoints(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
 
         $this->assertTrue($player->canMoveTo(2));
         $this->assertTrue($player->canMoveTo(3));
@@ -127,7 +137,8 @@ class PlayerTest extends TestCase
 
     public function testCanMoveToReturnsFalseForInsufficientPoints(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
 
         $this->assertFalse($player->canMoveTo(4));
         $this->assertFalse($player->canMoveTo(10));
@@ -135,27 +146,30 @@ class PlayerTest extends TestCase
 
     public function testStartNewTurnRestoresMovementPoints(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
         
         // Spend some movement points
         $player->moveTo(new Position(11, 15), 2);
-        $this->assertEquals(1, $player->getMovementPoints());
+        $this->assertEquals(1, $player->currentMovementPoints);
 
         // Start new turn
         $player->startNewTurn();
-        $this->assertEquals(3, $player->getMovementPoints());
+        $this->assertEquals(3, $player->currentMovementPoints);
     }
 
     public function testCanContinueTurnReturnsTrueWithMovementPoints(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
 
         $this->assertTrue($player->canContinueTurn());
     }
 
     public function testCanContinueTurnReturnsFalseWithoutMovementPoints(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
         
         // Spend all movement points
         $player->moveTo(new Position(11, 15), 3);
@@ -165,7 +179,8 @@ class PlayerTest extends TestCase
 
     public function testCanChangeNameWithValidName(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Old Name');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Old Name', $movementPoints);
 
         $player->changeName('New Name');
 
@@ -174,7 +189,8 @@ class PlayerTest extends TestCase
 
     public function testCannotChangeNameToEmptyString(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Valid Name');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Valid Name', $movementPoints);
 
         $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player name cannot be empty');
@@ -184,7 +200,8 @@ class PlayerTest extends TestCase
 
     public function testCanChangeColorWithValidColor(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
 
         $player->changeColor(0x00FF00);
 
@@ -193,7 +210,8 @@ class PlayerTest extends TestCase
 
     public function testCannotChangeColorToNegativeValue(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
 
         $this->expectException(InvalidPlayerDataException::class);
 
@@ -202,7 +220,8 @@ class PlayerTest extends TestCase
 
     public function testCannotChangeColorToValueAboveMaximum(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
 
         $this->expectException(InvalidPlayerDataException::class);
 
@@ -211,7 +230,8 @@ class PlayerTest extends TestCase
 
     public function testClearDomainEventsRemovesAllEvents(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player');
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
         
         // Generate some events
         $player->moveTo(new Position(11, 15), 1);
@@ -226,7 +246,8 @@ class PlayerTest extends TestCase
 
     public function testToArrayReturnsCorrectData(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player', 5, 0x00FF00);
+        $movementPoints = MovementPoints::createFull(5);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints, 0x00FF00);
 
         $expected = [
             'id' => 'player_123',
@@ -253,12 +274,12 @@ class PlayerTest extends TestCase
 
         $player = Player::fromArray($data);
 
-        $this->assertEquals('player_456', $player->getId()->getValue());
+        $this->assertEquals('player_456', $player->getId()->value);
         $this->assertEquals('Restored Player', $player->getName());
-        $this->assertEquals(20, $player->getPosition()->getRow());
-        $this->assertEquals(25, $player->getPosition()->getCol());
-        $this->assertEquals(2, $player->getMovementPoints());
-        $this->assertEquals(4, $player->getMaxMovementPoints());
+        $this->assertEquals(20, $player->getPosition()->row);
+        $this->assertEquals(25, $player->getPosition()->col);
+        $this->assertEquals(2, $player->currentMovementPoints);
+        $this->assertEquals(4, $player->maxMovementPoints);
         $this->assertEquals(0x0000FF, $player->getColor());
     }
 
@@ -272,17 +293,41 @@ class PlayerTest extends TestCase
 
         $player = Player::fromArray($data);
 
-        $this->assertEquals(3, $player->getMaxMovementPoints());
+        $this->assertEquals(3, $player->maxMovementPoints);
         $this->assertEquals(0xFF6B6B, $player->getColor());
     }
 
     public function testMovementPointsValueObjectIsAccessible(): void
     {
-        $player = new Player($this->playerId, $this->position, 'Test Player', 5);
+        $movementPoints = MovementPoints::createFull(5);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
 
-        $movementPoints = $player->getMovementPointsValueObject();
+        // Test that we can access movement points through virtual properties and getter
+        $this->assertEquals(5, $player->currentMovementPoints);
+        $this->assertEquals(5, $player->maxMovementPoints);
+        $this->assertInstanceOf(MovementPoints::class, $player->getMovementPoints());
+    }
 
-        $this->assertEquals(5, $movementPoints->getCurrent());
-        $this->assertEquals(5, $movementPoints->getMaximum());
+    public function testDomainEventsTraitFunctionality(): void
+    {
+        $movementPoints = MovementPoints::createFull(3);
+        $player = new Player($this->playerId, $this->position, 'Test Player', $movementPoints);
+
+        // Test initial state
+        $this->assertFalse($player->hasDomainEvents());
+        $this->assertEquals(0, $player->getDomainEventsCount());
+
+        // Generate an event
+        $player->moveTo(new Position(11, 15), 1);
+
+        // Test after event generation
+        $this->assertTrue($player->hasDomainEvents());
+        $this->assertEquals(1, $player->getDomainEventsCount());
+
+        // Test pullDomainEvents
+        $events = $player->pullDomainEvents();
+        $this->assertCount(1, $events);
+        $this->assertFalse($player->hasDomainEvents()); // Should be cleared after pull
+        $this->assertEquals(0, $player->getDomainEventsCount());
     }
 } 

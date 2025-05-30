@@ -33,8 +33,8 @@ class PlayerTurnController extends AbstractPlayerController
             $player = $this->getPlayerFromSession($session);
 
             $this->logger->info("Starting new turn for player", [
-                'player_id' => $player->getId()->getValue(),
-                'current_movement_points' => $player->getMovementPoints()
+                'player_id' => $player->id->value,
+                'previous_movement_points' => $player->currentMovementPoints
             ]);
 
             // Start new turn using the facade (delegates to PlayerTurnService)
@@ -44,8 +44,8 @@ class PlayerTurnController extends AbstractPlayerController
             $session->set('player', $player->toArray());
 
             $this->logger->info("New turn started successfully", [
-                'player_id' => $player->getId()->getValue(),
-                'restored_movement_points' => $player->getMovementPoints()
+                'player_id' => $player->id->value,
+                'new_movement_points' => $player->currentMovementPoints
             ]);
 
             return $this->json([

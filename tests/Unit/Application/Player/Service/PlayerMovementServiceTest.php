@@ -4,8 +4,8 @@ namespace App\Tests\Unit\Application\Player\Service;
 
 use App\Application\Player\Service\PlayerMovementService;
 use App\Application\Player\Service\PlayerPositionService;
-use App\Domain\Player\Service\MovementDomainService;
-use App\Domain\Player\Service\MovementValidationResult;
+use App\Domain\Player\Service\PlayerTurnDomainService;
+use App\Domain\Player\Service\MovementExecutionResult;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\ValueObject\Position;
@@ -13,6 +13,8 @@ use App\Domain\Player\Repository\PlayerRepositoryInterface;
 use App\Domain\Game\Exception\MovementNotAllowedException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use App\Domain\Player\ValueObject\MovementPoints;
+use App\Domain\Shared\Service\HexGridService;
 
 /**
  * Unit tests for PlayerMovementService
@@ -21,22 +23,25 @@ class PlayerMovementServiceTest extends TestCase
 {
     private PlayerMovementService $movementService;
     private PlayerPositionService|MockObject $positionService;
-    private MovementDomainService|MockObject $domainService;
+    private PlayerTurnDomainService|MockObject $turnDomainService;
+    private HexGridService|MockObject $hexGridService;
 
     protected function setUp(): void
     {
         $this->positionService = $this->createMock(PlayerPositionService::class);
-        $this->domainService = $this->createMock(MovementDomainService::class);
+        $this->turnDomainService = $this->createMock(PlayerTurnDomainService::class);
+        $this->hexGridService = $this->createMock(HexGridService::class);
         
         $this->movementService = new PlayerMovementService(
             $this->positionService,
-            $this->domainService
+            $this->turnDomainService,
+            $this->hexGridService
         );
     }
 
     public function testMovePlayerSuccessfully(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -63,28 +68,28 @@ class PlayerMovementServiceTest extends TestCase
             ->with($targetPosition, 7, 7)
             ->willReturn(true);
 
-        // Mock movement validation - the actual terrain data passed will be from mapData[5][6]
-        $validationResult = MovementValidationResult::valid(2);
-        $this->domainService
+        // Mock movement execution
+        $executionResult = MovementExecutionResult::success(2, 1);
+        $this->turnDomainService
             ->expects($this->once())
-            ->method('validateMovement')
-            ->with($player->getPosition(), $targetPosition, ['type' => 'plains', 'name' => 'Plains'])
-            ->willReturn($validationResult);
+            ->method('executeMovement')
+            ->with($player, $targetPosition, ['type' => 'plains', 'name' => 'Plains'])
+            ->willReturn($executionResult);
 
         $result = $this->movementService->movePlayer($player, $targetPosition, $mapData);
 
         $this->assertTrue($result['success']);
-        $this->assertStringContainsString('Moved to Plains', $result['message']);
-        $this->assertEquals(1, $result['remainingMovement']); // 3 - 2 = 1
-        $this->assertEquals($targetPosition, $player->getPosition());
+        $this->assertEquals(2, $result['movementCost']);
+        $this->assertEquals(1, $result['remainingMovement']);
     }
 
     public function testMovePlayerToInvalidPosition(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
-            'Test Player'
+            'Test Player',
+            3
         );
 
         $targetPosition = new Position(25, 25); // Out of bounds
@@ -105,10 +110,11 @@ class PlayerMovementServiceTest extends TestCase
 
     public function testMovePlayerToImpassableTerrain(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
-            'Test Player'
+            'Test Player',
+            3
         );
 
         $targetPosition = new Position(5, 6);
@@ -131,13 +137,13 @@ class PlayerMovementServiceTest extends TestCase
             ->with($targetPosition, 7, 7)
             ->willReturn(true);
 
-        // Mock movement validation to return invalid
-        $validationResult = MovementValidationResult::invalid('Cannot move to impassable terrain', 'IMPASSABLE_TERRAIN');
-        $this->domainService
+        // Mock movement execution to fail
+        $executionResult = MovementExecutionResult::failed('Cannot move to impassable terrain', 'IMPASSABLE_TERRAIN');
+        $this->turnDomainService
             ->expects($this->once())
-            ->method('validateMovement')
-            ->with($player->getPosition(), $targetPosition, ['type' => 'water', 'name' => 'Water'])
-            ->willReturn($validationResult);
+            ->method('executeMovement')
+            ->with($player, $targetPosition, ['type' => 'water', 'name' => 'Water'])
+            ->willReturn($executionResult);
 
         $result = $this->movementService->movePlayer($player, $targetPosition, $mapData);
 
@@ -148,7 +154,7 @@ class PlayerMovementServiceTest extends TestCase
 
     public function testMovePlayerWithInsufficientMovementPoints(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
@@ -175,32 +181,39 @@ class PlayerMovementServiceTest extends TestCase
             ->with($targetPosition, 7, 7)
             ->willReturn(true);
 
-        // Mock movement validation to return valid but costly
-        $validationResult = MovementValidationResult::valid(3); // Costs 3, but player has only 1
-        $this->domainService
+        // Mock movement execution to fail due to insufficient points
+        $executionResult = MovementExecutionResult::failed('Insufficient movement points. Required: 3, Available: 1', 'INSUFFICIENT_MOVEMENT_POINTS');
+        $this->turnDomainService
             ->expects($this->once())
-            ->method('validateMovement')
-            ->with($player->getPosition(), $targetPosition, ['type' => 'mountain', 'name' => 'Mountain'])
-            ->willReturn($validationResult);
+            ->method('executeMovement')
+            ->with($player, $targetPosition, ['type' => 'mountain', 'name' => 'Mountain'])
+            ->willReturn($executionResult);
 
         $result = $this->movementService->movePlayer($player, $targetPosition, $mapData);
 
         $this->assertFalse($result['success']);
-        $this->assertEquals('Not enough movement points (need: 3, have: 1)', $result['message']);
+        $this->assertStringContainsString('Insufficient movement points', $result['message']);
     }
 
     public function testCanPlayerMoveToPosition(): void
     {
-        $player = new Player(
+        $player = Player::create(
             new PlayerId('player_123'),
             new Position(5, 5),
             'Test Player',
             3
         );
 
-        $this->assertTrue($this->movementService->canPlayerMoveToPosition($player, 2));
-        $this->assertTrue($this->movementService->canPlayerMoveToPosition($player, 3));
-        $this->assertFalse($this->movementService->canPlayerMoveToPosition($player, 4));
+        // Mock canAffordMovement
+        $this->turnDomainService
+            ->expects($this->once())
+            ->method('canAffordMovement')
+            ->with($player, 2)
+            ->willReturn(true);
+
+        $result = $this->movementService->canPlayerMoveToPosition($player, 2);
+
+        $this->assertTrue($result);
     }
 
     public function testArePositionsAdjacent(): void
@@ -208,7 +221,8 @@ class PlayerMovementServiceTest extends TestCase
         $from = new Position(5, 5);
         $to = new Position(5, 6);
 
-        $this->domainService
+        // Mock arePositionsAdjacent
+        $this->turnDomainService
             ->expects($this->once())
             ->method('arePositionsAdjacent')
             ->with($from, $to)
@@ -221,16 +235,17 @@ class PlayerMovementServiceTest extends TestCase
 
     public function testGetTerrainMovementCost(): void
     {
-        $terrainData = ['type' => 'forest'];
+        $terrainData = ['type' => 'mountain', 'name' => 'Mountain'];
 
-        $this->domainService
+        // Mock calculateMovementCost
+        $this->turnDomainService
             ->expects($this->once())
             ->method('calculateMovementCost')
             ->with($terrainData)
-            ->willReturn(2);
+            ->willReturn(3);
 
         $result = $this->movementService->getTerrainMovementCost($terrainData);
 
-        $this->assertEquals(2, $result);
+        $this->assertEquals(3, $result);
     }
 }

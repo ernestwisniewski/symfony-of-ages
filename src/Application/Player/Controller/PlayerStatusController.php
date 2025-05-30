@@ -31,15 +31,15 @@ class PlayerStatusController extends AbstractPlayerController
             $player = $this->getPlayerFromSession($session);
 
             $this->logger->debug("Retrieving player status", [
-                'player_id' => $player->getId()->getValue()
+                'player_id' => $player->id->value
             ]);
 
             $status = $this->playerService->getPlayerStatus($player);
 
             $this->logger->debug("Player status retrieved successfully", [
-                'player_id' => $player->getId()->getValue(),
-                'movement_points' => $player->getMovementPoints(),
-                'can_continue' => $player->canContinueTurn()
+                'player_id' => $player->id->value,
+                'movement_points' => $player->currentMovementPoints,
+                'can_continue' => $player->canContinueTurn
             ]);
 
             return $this->json([
@@ -69,8 +69,8 @@ class PlayerStatusController extends AbstractPlayerController
             $mapData = $this->getOrGenerateMapData($session);
 
             $this->logger->info("Performing tactical analysis", [
-                'player_id' => $player->getId()->getValue(),
-                'position' => $player->getPosition()->toArray()
+                'player_id' => $player->id->value,
+                'position' => $player->position->toArray()
             ]);
 
             $tacticalAnalysis = $this->playerService->analyzePlayerTacticalSituation(
@@ -81,8 +81,13 @@ class PlayerStatusController extends AbstractPlayerController
             );
 
             $this->logger->info("Tactical analysis completed", [
-                'player_id' => $player->getId()->getValue(),
+                'player_id' => $player->id->value,
                 'recommendations_count' => count($tacticalAnalysis['recommendations'] ?? [])
+            ]);
+
+            $this->logger->debug("Tactical analysis retrieved", [
+                'player_id' => $player->id->value,
+                'position' => $player->position->toArray()
             ]);
 
             return $this->json([

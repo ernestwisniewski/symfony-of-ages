@@ -16,7 +16,8 @@ class PlayerTurnService
 {
     public function __construct(
         private readonly PlayerTurnDomainService $turnDomainService
-    ) {
+    )
+    {
     }
 
     /**
@@ -60,7 +61,7 @@ class PlayerTurnService
      */
     public function getRemainingMovementPoints(Player $player): int
     {
-        return $this->turnDomainService->getRemainingMovement($player);
+        return $this->turnDomainService->getRemainingMovementPoints($player);
     }
 
     /**
@@ -71,7 +72,7 @@ class PlayerTurnService
      */
     public function getMaxMovementPoints(Player $player): int
     {
-        return $player->getMaxMovementPoints();
+        return $player->maxMovementPoints;
     }
 
     /**

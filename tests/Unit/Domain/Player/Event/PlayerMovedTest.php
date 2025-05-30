@@ -22,11 +22,11 @@ class PlayerMovedTest extends TestCase
 
         $event = new PlayerMoved($playerId, $fromPosition, $toPosition, $movementCost);
 
-        $this->assertEquals($playerId, $event->getPlayerId());
-        $this->assertEquals($fromPosition, $event->getFromPosition());
-        $this->assertEquals($toPosition, $event->getToPosition());
-        $this->assertEquals($movementCost, $event->getMovementCost());
-        $this->assertInstanceOf(DateTimeImmutable::class, $event->getOccurredAt());
+        $this->assertEquals($playerId, $event->playerId);
+        $this->assertEquals($fromPosition, $event->fromPosition);
+        $this->assertEquals($toPosition, $event->toPosition);
+        $this->assertEquals($movementCost, $event->movementCost);
+        $this->assertInstanceOf(DateTimeImmutable::class, $event->occurredAt);
     }
 
     public function testEventOccurredAtIsSetToCurrentTime(): void
@@ -40,12 +40,12 @@ class PlayerMovedTest extends TestCase
         $event = new PlayerMoved($playerId, $fromPosition, $toPosition, $movementCost);
         $afterCreation = new DateTimeImmutable();
 
-        $occurredAt = $event->getOccurredAt();
+        $occurredAt = $event->occurredAt;
         $this->assertGreaterThanOrEqual($beforeCreation, $occurredAt);
         $this->assertLessThanOrEqual($afterCreation, $occurredAt);
     }
 
-    public function testGetDistanceCalculatesCorrectDistance(): void
+    public function testDistanceCalculatesCorrectDistance(): void
     {
         $playerId = new PlayerId('player_789');
         $fromPosition = new Position(3, 3);
@@ -54,10 +54,10 @@ class PlayerMovedTest extends TestCase
 
         $event = new PlayerMoved($playerId, $fromPosition, $toPosition, $movementCost);
 
-        $this->assertEquals(2, $event->getDistance());
+        $this->assertEquals(2, $event->distance);
     }
 
-    public function testGetDistanceForSamePosition(): void
+    public function testDistanceForSamePosition(): void
     {
         $playerId = new PlayerId('player_same');
         $position = new Position(7, 7);
@@ -65,10 +65,10 @@ class PlayerMovedTest extends TestCase
 
         $event = new PlayerMoved($playerId, $position, $position, $movementCost);
 
-        $this->assertEquals(0, $event->getDistance());
+        $this->assertEquals(0, $event->distance);
     }
 
-    public function testGetDistanceForAdjacentPositions(): void
+    public function testDistanceForAdjacentPositions(): void
     {
         $playerId = new PlayerId('player_adjacent');
         $fromPosition = new Position(4, 4);
@@ -77,7 +77,7 @@ class PlayerMovedTest extends TestCase
 
         $event = new PlayerMoved($playerId, $fromPosition, $toPosition, $movementCost);
 
-        $this->assertEquals(1, $event->getDistance());
+        $this->assertEquals(1, $event->distance);
     }
 
     public function testEventWithZeroMovementCost(): void
@@ -89,8 +89,8 @@ class PlayerMovedTest extends TestCase
 
         $event = new PlayerMoved($playerId, $fromPosition, $toPosition, $movementCost);
 
-        $this->assertEquals(0, $event->getMovementCost());
-        $this->assertEquals(1, $event->getDistance());
+        $this->assertEquals(0, $event->movementCost);
+        $this->assertEquals(1, $event->distance);
     }
 
     public function testEventWithHighMovementCost(): void
@@ -102,8 +102,8 @@ class PlayerMovedTest extends TestCase
 
         $event = new PlayerMoved($playerId, $fromPosition, $toPosition, $movementCost);
 
-        $this->assertEquals(5, $event->getMovementCost());
-        $this->assertEquals(1, $event->getDistance());
+        $this->assertEquals(5, $event->movementCost);
+        $this->assertEquals(1, $event->distance);
     }
 
     public function testEventImmutability(): void
@@ -116,14 +116,14 @@ class PlayerMovedTest extends TestCase
         $event = new PlayerMoved($playerId, $fromPosition, $toPosition, $movementCost);
 
         // Verify that all returned objects are the same instances (immutable)
-        $this->assertSame($playerId, $event->getPlayerId());
-        $this->assertSame($fromPosition, $event->getFromPosition());
-        $this->assertSame($toPosition, $event->getToPosition());
-        $this->assertSame($movementCost, $event->getMovementCost());
+        $this->assertSame($playerId, $event->playerId);
+        $this->assertSame($fromPosition, $event->fromPosition);
+        $this->assertSame($toPosition, $event->toPosition);
+        $this->assertSame($movementCost, $event->movementCost);
         
         // OccurredAt should always return the same instance
-        $occurredAt1 = $event->getOccurredAt();
-        $occurredAt2 = $event->getOccurredAt();
+        $occurredAt1 = $event->occurredAt;
+        $occurredAt2 = $event->occurredAt;
         $this->assertSame($occurredAt1, $occurredAt2);
     }
 
@@ -136,10 +136,10 @@ class PlayerMovedTest extends TestCase
 
         $event = new PlayerMoved($playerId, $fromPosition, $toPosition, $movementCost);
 
-        $this->assertGreaterThan(0, $event->getDistance());
-        $this->assertEquals($movementCost, $event->getMovementCost());
+        $this->assertGreaterThan(0, $event->distance);
+        $this->assertEquals($movementCost, $event->movementCost);
         
         // Movement cost and distance can be different (terrain affects cost)
-        $this->assertNotEquals($event->getDistance(), $event->getMovementCost());
+        $this->assertNotEquals($event->distance, $event->movementCost);
     }
 } 

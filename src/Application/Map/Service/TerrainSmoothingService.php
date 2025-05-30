@@ -2,8 +2,8 @@
 
 namespace App\Application\Map\Service;
 
-use App\Domain\Map\Service\TerrainSmoothingDomainService;
 use App\Domain\Map\Enum\TerrainType;
+use App\Domain\Map\Service\TerrainSmoothingDomainService;
 
 /**
  * TerrainSmoothingService handles terrain smoothing coordination
@@ -18,7 +18,8 @@ class TerrainSmoothingService
         private readonly HexNeighborService            $neighborService,
         private readonly BaseTerrainGenerationService  $terrainGenerationService,
         private readonly TerrainSmoothingDomainService $smoothingDomainService
-    ) {
+    )
+    {
     }
 
     /**
@@ -39,7 +40,7 @@ class TerrainSmoothingService
                 $neighbors = $this->neighborService->getNeighbors($map, $row, $col, $rows, $cols);
 
                 // Extract neighbor terrain types
-                $neighborTerrains = array_map(fn ($neighbor) => $neighbor['type'], $neighbors);
+                $neighborTerrains = array_map(fn($neighbor) => $neighbor['type'], $neighbors);
 
                 // Use domain service to determine if should replace
                 if ($this->smoothingDomainService->shouldReplaceForCompatibility($currentTerrain, $neighborTerrains)) {
@@ -93,14 +94,14 @@ class TerrainSmoothingService
      * Gets all compatible terrain types for a given terrain using domain service
      *
      * @param string $terrainType Terrain type to check
-     * @return array Array of compatible terrain types with their scores
+     * @return array Array of compatible terrain types as strings
      */
     public function getCompatibleTerrainTypes(string $terrainType): array
     {
         $compatibleTypes = $this->smoothingDomainService->getCompatibleTerrainTypes(TerrainType::from($terrainType));
 
-        // Convert to string array for backward compatibility
-        return array_map(fn ($terrain) => $terrain->value, $compatibleTypes);
+        // Convert to string array
+        return array_map(fn($terrain) => $terrain->value, $compatibleTypes);
     }
 
     /**
@@ -136,7 +137,7 @@ class TerrainSmoothingService
                 }
 
                 $neighbors = $this->neighborService->getNeighbors($map, $row, $col, $rows, $cols);
-                $neighborTerrains = array_map(fn ($neighbor) => $neighbor['type'], $neighbors);
+                $neighborTerrains = array_map(fn($neighbor) => $neighbor['type'], $neighbors);
 
                 // Use domain service to determine if should replace
                 if ($this->smoothingDomainService->shouldReplaceForCompatibility($currentTerrain, $neighborTerrains, 0.4)) {

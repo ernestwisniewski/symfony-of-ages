@@ -48,7 +48,8 @@ class MapGenerator
         private readonly TerrainClusteringService     $clusteringService,
         private readonly TerrainSmoothingService      $smoothingService,
         private readonly MapValidationService         $validationService,
-    ) {
+    )
+    {
     }
 
     /**
@@ -323,18 +324,17 @@ class MapGenerator
      */
     private function analyzeThemeCompliance(array $statistics, array $terrainEmphasis): array
     {
-        $compliance = [];
+        $result = [];
 
         foreach ($terrainEmphasis as $terrain => $expectedPercentage) {
-            $actualPercentage = $statistics[$terrain] ?? 0;
-            $compliance[$terrain] = [
+            $result[$terrain] = [
                 'expected' => $expectedPercentage,
-                'actual' => $actualPercentage,
-                'compliance_score' => min(1.0, $actualPercentage / max(1, $expectedPercentage))
+                'actual' => $statistics[$terrain] ?? 0,
+                'compliance_score' => min(1.0, ($statistics[$terrain] ?? 0) / max(1, $expectedPercentage))
             ];
         }
 
-        return $compliance;
+        return $result;
     }
 
     /**
@@ -352,11 +352,13 @@ class MapGenerator
             TerrainType::SWAMP->value => 5
         ];
 
-        $totalDeviation = 0;
-        foreach ($idealBalance as $terrain => $idealPercentage) {
-            $actualPercentage = $statistics[$terrain] ?? 0;
-            $totalDeviation += abs($idealPercentage - $actualPercentage);
-        }
+        $totalDeviation = array_sum(
+            array_map(
+                fn($terrain, $idealPercentage) => abs($idealPercentage - ($statistics[$terrain] ?? 0)),
+                array_keys($idealBalance),
+                $idealBalance
+            )
+        );
 
         // Convert deviation to score (lower deviation = higher score)
         return max(0, 1 - ($totalDeviation / self::MAX_DEVIATION));

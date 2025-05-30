@@ -135,14 +135,36 @@ class GenerateMapController extends AbstractMapController
     {
         $validTerrains = ['plains', 'forest', 'mountain', 'water', 'desert', 'swamp'];
 
-        foreach ($terrainEmphasis as $terrain => $percentage) {
-            if (!in_array($terrain, $validTerrains)) {
-                throw MapGenerationException::invalidTerrainEmphasis($terrain, $percentage);
-            }
+        // Check if any terrain is invalid using PHP 8.4 array_any
+        $hasInvalidTerrain = array_any(
+            array_keys($terrainEmphasis),
+            fn($terrain) => !in_array($terrain, $validTerrains)
+        );
 
-            if ($percentage < 0 || $percentage > 100) {
-                throw MapGenerationException::invalidTerrainEmphasis($terrain, $percentage);
-            }
+        if ($hasInvalidTerrain) {
+            // Find the first invalid terrain for error message
+            $invalidTerrain = array_find(
+                array_keys($terrainEmphasis),
+                fn($terrain) => !in_array($terrain, $validTerrains)
+            );
+            throw MapGenerationException::invalidTerrainEmphasis($invalidTerrain, $terrainEmphasis[$invalidTerrain]);
+        }
+
+        // Check if any percentage is invalid using PHP 8.4 array_any
+        $hasInvalidPercentage = array_any(
+            $terrainEmphasis,
+            fn($percentage) => $percentage < 0 || $percentage > 100
+        );
+
+        if ($hasInvalidPercentage) {
+            // Find the first invalid percentage for error message
+            $invalidEntry = array_find(
+                $terrainEmphasis,
+                fn($percentage, $terrain) => $percentage < 0 || $percentage > 100,
+                ARRAY_FILTER_USE_BOTH
+            );
+            $terrain = array_search($invalidEntry, $terrainEmphasis);
+            throw MapGenerationException::invalidTerrainEmphasis($terrain, $invalidEntry);
         }
     }
 }

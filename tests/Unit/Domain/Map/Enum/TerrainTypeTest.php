@@ -16,11 +16,11 @@ class TerrainTypeTest extends TestCase
         $properties = TerrainType::PLAINS->getProperties();
         
         $this->assertInstanceOf(TerrainProperties::class, $properties);
-        $this->assertEquals('Plains', $properties->getName());
-        $this->assertEquals(0x90EE90, $properties->getColor());
-        $this->assertEquals(1, $properties->getMovementCost());
-        $this->assertEquals(1, $properties->getDefenseBonus());
-        $this->assertEquals(2, $properties->getResourceYield());
+        $this->assertEquals('Plains', $properties->name);
+        $this->assertEquals(0x90EE90, $properties->color);
+        $this->assertEquals(1, $properties->movementCost);
+        $this->assertEquals(1, $properties->defenseBonus);
+        $this->assertEquals(2, $properties->resourceYield);
     }
 
     public function testForestHasCorrectProperties(): void
@@ -28,11 +28,11 @@ class TerrainTypeTest extends TestCase
         $properties = TerrainType::FOREST->getProperties();
         
         $this->assertInstanceOf(TerrainProperties::class, $properties);
-        $this->assertEquals('Forest', $properties->getName());
-        $this->assertEquals(0x228B22, $properties->getColor());
-        $this->assertEquals(2, $properties->getMovementCost());
-        $this->assertEquals(3, $properties->getDefenseBonus());
-        $this->assertEquals(3, $properties->getResourceYield());
+        $this->assertEquals('Forest', $properties->name);
+        $this->assertEquals(0x228B22, $properties->color);
+        $this->assertEquals(2, $properties->movementCost);
+        $this->assertEquals(3, $properties->defenseBonus);
+        $this->assertEquals(3, $properties->resourceYield);
     }
 
     public function testMountainHasCorrectProperties(): void
@@ -40,11 +40,11 @@ class TerrainTypeTest extends TestCase
         $properties = TerrainType::MOUNTAIN->getProperties();
         
         $this->assertInstanceOf(TerrainProperties::class, $properties);
-        $this->assertEquals('Mountain', $properties->getName());
-        $this->assertEquals(0x808080, $properties->getColor());
-        $this->assertEquals(3, $properties->getMovementCost());
-        $this->assertEquals(4, $properties->getDefenseBonus());
-        $this->assertEquals(4, $properties->getResourceYield());
+        $this->assertEquals('Mountain', $properties->name);
+        $this->assertEquals(0x808080, $properties->color);
+        $this->assertEquals(3, $properties->movementCost);
+        $this->assertEquals(4, $properties->defenseBonus);
+        $this->assertEquals(4, $properties->resourceYield);
     }
 
     public function testWaterHasCorrectProperties(): void
@@ -52,12 +52,12 @@ class TerrainTypeTest extends TestCase
         $properties = TerrainType::WATER->getProperties();
         
         $this->assertInstanceOf(TerrainProperties::class, $properties);
-        $this->assertEquals('Water', $properties->getName());
-        $this->assertEquals(0x4169E1, $properties->getColor());
-        $this->assertEquals(0, $properties->getMovementCost()); // Impassable
-        $this->assertEquals(0, $properties->getDefenseBonus());
-        $this->assertEquals(1, $properties->getResourceYield());
-        $this->assertFalse($properties->isPassable());
+        $this->assertEquals('Water', $properties->name);
+        $this->assertEquals(0x4169E1, $properties->color);
+        $this->assertEquals(0, $properties->movementCost); // Impassable
+        $this->assertEquals(0, $properties->defenseBonus);
+        $this->assertEquals(1, $properties->resourceYield);
+        $this->assertFalse($properties->isPassable);
     }
 
     public function testDesertHasCorrectProperties(): void
@@ -65,11 +65,11 @@ class TerrainTypeTest extends TestCase
         $properties = TerrainType::DESERT->getProperties();
         
         $this->assertInstanceOf(TerrainProperties::class, $properties);
-        $this->assertEquals('Desert', $properties->getName());
-        $this->assertEquals(0xF4A460, $properties->getColor());
-        $this->assertEquals(2, $properties->getMovementCost());
-        $this->assertEquals(1, $properties->getDefenseBonus());
-        $this->assertEquals(1, $properties->getResourceYield());
+        $this->assertEquals('Desert', $properties->name);
+        $this->assertEquals(0xF4A460, $properties->color);
+        $this->assertEquals(2, $properties->movementCost);
+        $this->assertEquals(1, $properties->defenseBonus);
+        $this->assertEquals(1, $properties->resourceYield);
     }
 
     public function testSwampHasCorrectProperties(): void
@@ -77,11 +77,11 @@ class TerrainTypeTest extends TestCase
         $properties = TerrainType::SWAMP->getProperties();
         
         $this->assertInstanceOf(TerrainProperties::class, $properties);
-        $this->assertEquals('Swamp', $properties->getName());
-        $this->assertEquals(0x556B2F, $properties->getColor());
-        $this->assertEquals(3, $properties->getMovementCost());
-        $this->assertEquals(2, $properties->getDefenseBonus());
-        $this->assertEquals(2, $properties->getResourceYield());
+        $this->assertEquals('Swamp', $properties->name);
+        $this->assertEquals(0x556B2F, $properties->color);
+        $this->assertEquals(3, $properties->movementCost);
+        $this->assertEquals(2, $properties->defenseBonus);
+        $this->assertEquals(2, $properties->resourceYield);
     }
 
     public function testAllTerrainTypesReturnTerrainPropertiesObject(): void
@@ -98,25 +98,25 @@ class TerrainTypeTest extends TestCase
             $properties = $terrainType->getProperties();
             
             // Name should be non-empty string
-            $this->assertIsString($properties->getName());
-            $this->assertNotEmpty($properties->getName());
+            $this->assertIsString($properties->name);
+            $this->assertNotEmpty($properties->name);
             
             // Color should be valid hex value
-            $this->assertIsInt($properties->getColor());
-            $this->assertGreaterThanOrEqual(0, $properties->getColor());
-            $this->assertLessThanOrEqual(0xFFFFFF, $properties->getColor());
+            $this->assertIsInt($properties->color);
+            $this->assertGreaterThanOrEqual(0, $properties->color);
+            $this->assertLessThanOrEqual(0xFFFFFF, $properties->color);
             
             // Movement cost should be non-negative
-            $this->assertIsInt($properties->getMovementCost());
-            $this->assertGreaterThanOrEqual(0, $properties->getMovementCost());
+            $this->assertIsInt($properties->movementCost);
+            $this->assertGreaterThanOrEqual(0, $properties->movementCost);
             
             // Defense should be non-negative
-            $this->assertIsInt($properties->getDefenseBonus());
-            $this->assertGreaterThanOrEqual(0, $properties->getDefenseBonus());
+            $this->assertIsInt($properties->defenseBonus);
+            $this->assertGreaterThanOrEqual(0, $properties->defenseBonus);
             
             // Resources should be positive
-            $this->assertIsInt($properties->getResourceYield());
-            $this->assertGreaterThan(0, $properties->getResourceYield());
+            $this->assertIsInt($properties->resourceYield);
+            $this->assertGreaterThan(0, $properties->resourceYield);
         }
     }
 
@@ -125,7 +125,7 @@ class TerrainTypeTest extends TestCase
         $impassableTerrains = [];
         
         foreach (TerrainType::cases() as $terrainType) {
-            if (!$terrainType->isPassable()) {
+            if (!$terrainType->getProperties()->isPassable) {
                 $impassableTerrains[] = $terrainType;
             }
         }
@@ -149,7 +149,7 @@ class TerrainTypeTest extends TestCase
         $colors = [];
         
         foreach (TerrainType::cases() as $terrainType) {
-            $color = $terrainType->getColor();
+            $color = $terrainType->getProperties()->color;
             
             $this->assertNotContains($color, $colors, "Color {$color} is used by multiple terrain types");
             $colors[] = $color;
@@ -162,7 +162,7 @@ class TerrainTypeTest extends TestCase
         $maxDefenseTerrain = null;
         
         foreach (TerrainType::cases() as $terrainType) {
-            $defense = $terrainType->getDefenseBonus();
+            $defense = $terrainType->getProperties()->defenseBonus;
             
             if ($defense > $maxDefense) {
                 $maxDefense = $defense;
@@ -180,7 +180,7 @@ class TerrainTypeTest extends TestCase
         $minMovementTerrain = null;
         
         foreach (TerrainType::cases() as $terrainType) {
-            $movementCost = $terrainType->getMovementCost();
+            $movementCost = $terrainType->getProperties()->movementCost;
             
             // Skip impassable terrain (movement cost 0)
             if ($movementCost > 0 && $movementCost < $minMovementCost) {
@@ -193,25 +193,32 @@ class TerrainTypeTest extends TestCase
         $this->assertEquals(1, $minMovementCost);
     }
 
-    public function testLegacyPropertiesBackwardCompatibility(): void
+    public function testPropertiesConsistency(): void
     {
         foreach (TerrainType::cases() as $terrainType) {
-            $legacyProperties = $terrainType->getLegacyProperties();
-            $newProperties = $terrainType->getProperties();
-            
-            $this->assertIsArray($legacyProperties);
-            $this->assertArrayHasKey('name', $legacyProperties);
-            $this->assertArrayHasKey('color', $legacyProperties);
-            $this->assertArrayHasKey('movementCost', $legacyProperties);
-            $this->assertArrayHasKey('defense', $legacyProperties);
-            $this->assertArrayHasKey('resources', $legacyProperties);
-            
-            // Verify compatibility
-            $this->assertEquals($newProperties->getName(), $legacyProperties['name']);
-            $this->assertEquals($newProperties->getColor(), $legacyProperties['color']);
-            $this->assertEquals($newProperties->getMovementCost(), $legacyProperties['movementCost']);
-            $this->assertEquals($newProperties->getDefenseBonus(), $legacyProperties['defense']);
-            $this->assertEquals($newProperties->getResourceYield(), $legacyProperties['resources']);
+            $properties = $terrainType->getProperties();
+
+            $this->assertIsString($properties->name);
+            $this->assertIsInt($properties->color);
+            $this->assertIsInt($properties->movementCost);
+            $this->assertIsInt($properties->defenseBonus);
+            $this->assertIsInt($properties->resourceYield);
+
+            // Test structured array format
+            $arrayProperties = $properties->toArray();
+            $this->assertIsArray($arrayProperties);
+            $this->assertArrayHasKey('name', $arrayProperties);
+            $this->assertArrayHasKey('color', $arrayProperties);
+            $this->assertArrayHasKey('movementCost', $arrayProperties);
+            $this->assertArrayHasKey('defense', $arrayProperties);
+            $this->assertArrayHasKey('resources', $arrayProperties);
+
+            // Verify consistency between properties and array format
+            $this->assertEquals($properties->name, $arrayProperties['name']);
+            $this->assertEquals($properties->color, $arrayProperties['color']);
+            $this->assertEquals($properties->movementCost, $arrayProperties['movementCost']);
+            $this->assertEquals($properties->defenseBonus, $arrayProperties['defense']);
+            $this->assertEquals($properties->resourceYield, $arrayProperties['resources']);
         }
     }
 
@@ -219,48 +226,30 @@ class TerrainTypeTest extends TestCase
     {
         $forest = TerrainType::FOREST;
         
-        // Test individual property accessor methods
-        $this->assertInstanceOf(\App\Domain\Map\ValueObject\TerrainVisualProperties::class, $forest->getVisualProperties());
-        $this->assertInstanceOf(\App\Domain\Map\ValueObject\TerrainMovementProperties::class, $forest->getMovementProperties());
-        $this->assertInstanceOf(\App\Domain\Map\ValueObject\TerrainCombatProperties::class, $forest->getCombatProperties());
-        $this->assertInstanceOf(\App\Domain\Map\ValueObject\TerrainEconomicProperties::class, $forest->getEconomicProperties());
+        // Test individual property accessor methods through getProperties()
+        $this->assertInstanceOf(\App\Domain\Map\ValueObject\TerrainVisualProperties::class, $forest->getProperties()->visual());
+        $this->assertInstanceOf(\App\Domain\Map\ValueObject\TerrainMovementProperties::class, $forest->getProperties()->movement());
+        $this->assertInstanceOf(\App\Domain\Map\ValueObject\TerrainCombatProperties::class, $forest->getProperties()->combat());
+        $this->assertInstanceOf(\App\Domain\Map\ValueObject\TerrainEconomicProperties::class, $forest->getProperties()->economic());
         
-        // Test quick access methods
-        $this->assertEquals('Forest', $forest->getName());
-        $this->assertEquals(0x228B22, $forest->getColor());
-        $this->assertEquals(2, $forest->getMovementCost());
-        $this->assertTrue($forest->isPassable());
-        $this->assertEquals(3, $forest->getDefenseBonus());
-        $this->assertEquals(3, $forest->getResourceYield());
-    }
-
-    public function testTacticalAnalysisMethods(): void
-    {
-        // Test strategic importance
-        $this->assertTrue(TerrainType::MOUNTAIN->isStrategicallyImportant());
-        $this->assertTrue(TerrainType::FOREST->isStrategicallyImportant());
-        $this->assertFalse(TerrainType::WATER->isStrategicallyImportant());
-        
-        // Test tactical advantage
-        $this->assertTrue(TerrainType::MOUNTAIN->providesTacticalAdvantage());
-        $this->assertTrue(TerrainType::FOREST->providesTacticalAdvantage());
-        $this->assertFalse(TerrainType::PLAINS->providesTacticalAdvantage());
-        
-        // Test economic viability
-        $this->assertTrue(TerrainType::MOUNTAIN->isEconomicallyViable());
-        $this->assertTrue(TerrainType::FOREST->isEconomicallyViable());
-        $this->assertFalse(TerrainType::DESERT->isEconomicallyViable());
+        // Test quick access methods through getProperties()
+        $this->assertEquals('Forest', $forest->getProperties()->name);
+        $this->assertEquals(0x228B22, $forest->getProperties()->color);
+        $this->assertEquals(2, $forest->getProperties()->movementCost);
+        $this->assertTrue($forest->getProperties()->isPassable);
+        $this->assertEquals(3, $forest->getProperties()->defenseBonus);
+        $this->assertEquals(3, $forest->getProperties()->resourceYield);
     }
 
     public function testMovementPropertySpecificMethods(): void
     {
-        // Test passability
-        $this->assertTrue(TerrainType::PLAINS->isPassable());
-        $this->assertFalse(TerrainType::WATER->isPassable());
+        // Test passability through getProperties()
+        $this->assertTrue(TerrainType::PLAINS->getProperties()->isPassable);
+        $this->assertFalse(TerrainType::WATER->getProperties()->isPassable);
         
         // Test through specialized movement properties
-        $this->assertTrue(TerrainType::PLAINS->getMovementProperties()->isEasyToTraverse());
-        $this->assertTrue(TerrainType::SWAMP->getMovementProperties()->isDifficultToTraverse());
-        $this->assertTrue(TerrainType::WATER->getMovementProperties()->isImpassable());
+        $this->assertTrue(TerrainType::PLAINS->getProperties()->movement()->isEasyToTraverse());
+        $this->assertTrue(TerrainType::SWAMP->getProperties()->movement()->isDifficultToTraverse());
+        $this->assertTrue(TerrainType::WATER->getProperties()->movement()->isImpassable());
     }
 } 

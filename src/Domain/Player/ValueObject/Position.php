@@ -2,7 +2,7 @@
 
 namespace App\Domain\Player\ValueObject;
 
-use InvalidArgumentException;
+use App\Domain\Player\Exception\InvalidPlayerDataException;
 
 /**
  * Position value object representing coordinates on the hexagonal grid
@@ -10,34 +10,25 @@ use InvalidArgumentException;
  * Immutable value object that encapsulates row and column coordinates
  * for positioning entities on the hexagonal map. Provides utility
  * methods for coordinate manipulation and validation.
+ * Uses readonly properties to ensure true immutability.
  */
 class Position
 {
-    private int $row;
-    private int $col;
+    public readonly int $row;
+    public readonly int $col;
 
     public function __construct(int $row, int $col)
     {
         if ($row < 0) {
-            throw new InvalidArgumentException('Row cannot be negative');
+            throw InvalidPlayerDataException::negativeRow();
         }
-        
+
         if ($col < 0) {
-            throw new InvalidArgumentException('Column cannot be negative');
+            throw InvalidPlayerDataException::negativeColumn();
         }
-        
+
         $this->row = $row;
         $this->col = $col;
-    }
-
-    public function getRow(): int
-    {
-        return $this->row;
-    }
-
-    public function getCol(): int
-    {
-        return $this->col;
     }
 
     /**
@@ -65,10 +56,10 @@ class Position
         // Proper hexagonal distance calculation using axial coordinates
         $q1 = $this->col - ($this->row + ($this->row & 1)) / 2;
         $r1 = $this->row;
-        
+
         $q2 = $other->col - ($other->row + ($other->row & 1)) / 2;
         $r2 = $other->row;
-        
+
         return intval((abs($q1 - $q2) + abs($q1 + $r1 - $q2 - $r2) + abs($r1 - $r2)) / 2);
     }
 
@@ -89,13 +80,13 @@ class Position
     public static function fromArray(array $data): self
     {
         if (!isset($data['row'])) {
-            throw new InvalidArgumentException('Row is required');
+            throw InvalidPlayerDataException::missingRowData();
         }
-        
+
         if (!isset($data['col'])) {
-            throw new InvalidArgumentException('Column is required');
+            throw InvalidPlayerDataException::missingColumnData();
         }
-        
+
         return new self($data['row'], $data['col']);
     }
 
