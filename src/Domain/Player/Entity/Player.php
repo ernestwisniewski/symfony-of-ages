@@ -5,8 +5,8 @@ namespace App\Domain\Player\Entity;
 use App\Domain\Game\ValueObject\MovementPoints;
 use App\Domain\Game\ValueObject\PlayerId;
 use App\Domain\Player\Event\PlayerMoved;
+use App\Domain\Player\Exception\InvalidPlayerDataException;
 use App\Domain\Player\ValueObject\Position;
-use InvalidArgumentException;
 
 /**
  * Player entity - Aggregate Root for player-related operations
@@ -32,6 +32,7 @@ class Player
     )
     {
         $this->validateName($name);
+        $this->validateColor($color);
 
         $this->id = $id;
         $this->position = $position;
@@ -146,10 +147,7 @@ class Player
      */
     public function changeColor(int $newColor): void
     {
-        if ($newColor < 0 || $newColor > 0xFFFFFF) {
-            throw new InvalidArgumentException('Color must be a valid hexadecimal value');
-        }
-
+        $this->validateColor($newColor);
         $this->color = $newColor;
     }
 
@@ -214,11 +212,18 @@ class Player
     private function validateName(string $name): void
     {
         if (empty(trim($name))) {
-            throw new InvalidArgumentException('Player name cannot be empty');
+            throw InvalidPlayerDataException::emptyName();
         }
 
         if (strlen($name) > 50) {
-            throw new InvalidArgumentException('Player name cannot exceed 50 characters');
+            throw InvalidPlayerDataException::nameTooLong(50);
+        }
+    }
+
+    private function validateColor(int $color): void
+    {
+        if ($color < 0 || $color > 0xFFFFFF) {
+            throw InvalidPlayerDataException::invalidColor($color);
         }
     }
 

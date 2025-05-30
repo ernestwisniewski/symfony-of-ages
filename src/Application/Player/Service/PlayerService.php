@@ -5,6 +5,7 @@ namespace App\Application\Player\Service;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\Enum\TerrainType;
 use App\Domain\Player\ValueObject\Position;
+use App\Application\Game\Service\MovementCalculationService;
 
 /**
  * PlayerService serves as a facade for player-related operations
@@ -23,11 +24,12 @@ class PlayerService
     ];
 
     public function __construct(
-        private readonly PlayerCreationService  $creationService,
-        private readonly PlayerMovementService  $movementService,
-        private readonly PlayerTurnService      $turnService,
-        private readonly PlayerPositionService  $positionService,
-        private readonly PlayerAttributeService $attributeService
+        private readonly PlayerCreationService       $creationService,
+        private readonly PlayerMovementService       $movementService,
+        private readonly PlayerTurnService           $turnService,
+        private readonly PlayerPositionService       $positionService,
+        private readonly PlayerAttributeService      $attributeService,
+        private readonly MovementCalculationService  $movementCalculationService
     )
     {
     }
@@ -224,6 +226,47 @@ class PlayerService
                 'should_end_turn' => $this->turnService->shouldEndTurn($player)
             ]
         ];
+    }
+
+    /**
+     * Calculates possible moves for player
+     *
+     * @param Player $player Player for whom we calculate moves
+     * @param array $mapData Map terrain data
+     * @param int $mapRows Number of map rows
+     * @param int $mapCols Number of map columns
+     * @return array Player's possible moves
+     */
+    public function calculatePlayerPossibleMoves(Player $player, array $mapData, int $mapRows, int $mapCols): array
+    {
+        return $this->movementCalculationService->calculatePossibleMoves($player, $mapData, $mapRows, $mapCols);
+    }
+
+    /**
+     * Calculates detailed movement options for player
+     *
+     * @param Player $player Player for whom we calculate movement options
+     * @param array $mapData Map terrain data
+     * @param int $mapRows Number of map rows
+     * @param int $mapCols Number of map columns
+     * @return array Detailed movement options
+     */
+    public function calculatePlayerMovementOptions(Player $player, array $mapData, int $mapRows, int $mapCols): array
+    {
+        return $this->movementCalculationService->calculateDetailedMovementOptions($player, $mapData, $mapRows, $mapCols);
+    }
+
+    /**
+     * Checks if player can move to specific position (with terrain map)
+     *
+     * @param Player $player Player
+     * @param Position $targetPosition Target position
+     * @param array $mapData Map data
+     * @return array Information about movement possibility
+     */
+    public function canPlayerMoveToSpecificPosition(Player $player, Position $targetPosition, array $mapData): array
+    {
+        return $this->movementCalculationService->canPlayerMoveTo($player, $targetPosition, $mapData);
     }
 
     // Private helper methods
