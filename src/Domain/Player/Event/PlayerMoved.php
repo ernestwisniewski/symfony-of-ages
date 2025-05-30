@@ -25,8 +25,7 @@ class PlayerMoved
         Position $fromPosition,
         Position $toPosition,
         int      $movementCost
-    )
-    {
+    ) {
         $this->playerId = $playerId;
         $this->fromPosition = $fromPosition;
         $this->toPosition = $toPosition;

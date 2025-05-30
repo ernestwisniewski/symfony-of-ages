@@ -2,32 +2,23 @@
 
 namespace App\Application\Map\Service;
 
+use App\Domain\Map\Service\TerrainClusteringDomainService;
 use App\Domain\Player\Enum\TerrainType;
 
 /**
- * TerrainClusteringService handles terrain clustering algorithms
+ * TerrainClusteringService handles terrain clustering coordination
  *
- * Responsible for applying clustering algorithms to create realistic terrain
- * formations by encouraging similar terrain types to group together.
- * Follows Single Responsibility Principle by focusing only on clustering logic.
+ * Application service that coordinates clustering operations and delegates
+ * domain logic to TerrainClusteringDomainService. Handles map iteration
+ * and orchestration concerns.
  */
 class TerrainClusteringService
 {
-    /** @var array Clustering probabilities for terrain types to appear near themselves */
-    private const array TERRAIN_CLUSTERS = [
-        TerrainType::WATER->value => 0.7,    // High clustering - water bodies
-        TerrainType::FOREST->value => 0.6,   // Good clustering - forest patches
-        TerrainType::DESERT->value => 0.6,   // Good clustering - desert regions
-        TerrainType::MOUNTAIN->value => 0.5, // Moderate clustering - mountain ranges
-        TerrainType::SWAMP->value => 0.4,    // Low clustering - scattered swamps
-        TerrainType::PLAINS->value => 0.3    // Minimal clustering - fills gaps
-    ];
-
     public function __construct(
-        private readonly HexNeighborService           $neighborService,
-        private readonly BaseTerrainGenerationService $terrainGenerationService
-    )
-    {
+        private readonly HexNeighborService             $neighborService,
+        private readonly BaseTerrainGenerationService   $terrainGenerationService,
+        private readonly TerrainClusteringDomainService $clusteringDomainService
+    ) {
     }
 
     /**
@@ -37,7 +28,6 @@ class TerrainClusteringService
      * @param int $rows Number of rows
      * @param int $cols Number of columns
      * @param int $iterations Number of clustering passes
-     *
      * @return array Map with clustering applied
      */
     public function applyClustering(array $map, int $rows, int $cols, int $iterations = 2): array
@@ -47,21 +37,20 @@ class TerrainClusteringService
 
             for ($row = 0; $row < $rows; $row++) {
                 for ($col = 0; $col < $cols; $col++) {
-                    $currentTerrain = $map[$row][$col]['type'];
+                    $currentTerrain = TerrainType::from($map[$row][$col]['type']);
                     $neighbors = $this->neighborService->getNeighbors($map, $row, $col, $rows, $cols);
 
                     // Check if we should cluster this terrain type
-                    if (isset(self::TERRAIN_CLUSTERS[$currentTerrain])) {
-                        $clusterChance = self::TERRAIN_CLUSTERS[$currentTerrain];
-                        $sameTerrainCount = $this->countSameTerrainNeighbors($neighbors, $currentTerrain);
+                    if ($this->clusteringDomainService->shouldTerrainCluster($currentTerrain)) {
+                        $sameTerrainCount = $this->clusteringDomainService->countSameTerrainNeighbors($neighbors, $currentTerrain);
                         $totalNeighbors = count($neighbors);
 
-                        // If this terrain should cluster and we have few same neighbors
-                        if ($totalNeighbors > 0 && $sameTerrainCount < 2) {
-                            $shouldCluster = mt_rand(1, 100) <= ($clusterChance * 100);
+                        // Use domain logic to determine if should spread
+                        if ($this->clusteringDomainService->shouldSpreadToNeighbor($currentTerrain, $sameTerrainCount, $totalNeighbors)) {
+                            $neighborToConvert = $this->clusteringDomainService->selectNeighborToConvert($neighbors, $currentTerrain);
 
-                            if ($shouldCluster && $totalNeighbors > 0) {
-                                $newMap = $this->spreadTerrainToNeighbor($newMap, $neighbors, $currentTerrain);
+                            if ($neighborToConvert) {
+                                $newMap = $this->convertNeighborTile($newMap, $neighborToConvert, $currentTerrain);
                             }
                         }
                     }
@@ -75,65 +64,13 @@ class TerrainClusteringService
     }
 
     /**
-     * Counts how many neighbors have the same terrain type
-     *
-     * @param array $neighbors Array of neighbor tiles
-     * @param string $terrainType Terrain type to count
-     * @return int Number of neighbors with same terrain type
-     */
-    private function countSameTerrainNeighbors(array $neighbors, string $terrainType): int
-    {
-        $count = 0;
-        foreach ($neighbors as $neighbor) {
-            if ($neighbor['type'] === $terrainType) {
-                $count++;
-            }
-        }
-        return $count;
-    }
-
-    /**
-     * Attempts to spread current terrain type to a neighboring tile
-     *
-     * @param array $map Current map state
-     * @param array $neighbors Array of neighbor tiles
-     * @param string $currentTerrain Current terrain type to spread
-     * @return array Updated map with potential terrain spread
-     */
-    private function spreadTerrainToNeighbor(array $map, array $neighbors, string $currentTerrain): array
-    {
-        // Find a neighbor of a different type to convert
-        foreach ($neighbors as $neighbor) {
-            if ($neighbor['type'] === $currentTerrain) {
-                continue; // Already same type
-            }
-
-            // Random chance to convert neighbor (30% chance)
-            if (mt_rand(1, 100) <= 30) {
-                $terrainType = TerrainType::from($currentTerrain);
-                $neighborRow = $neighbor['coordinates']['row'];
-                $neighborCol = $neighbor['coordinates']['col'];
-
-                $map[$neighborRow][$neighborCol] = $this->terrainGenerationService->createTerrainTile(
-                    $terrainType,
-                    $neighborRow,
-                    $neighborCol
-                );
-                break; // Only convert one neighbor per iteration
-            }
-        }
-
-        return $map;
-    }
-
-    /**
      * Gets the clustering configuration for terrain types
      *
      * @return array Terrain clustering probabilities
      */
     public function getClusteringConfiguration(): array
     {
-        return self::TERRAIN_CLUSTERS;
+        return $this->clusteringDomainService->getClusteringConfiguration();
     }
 
     /**
@@ -144,7 +81,7 @@ class TerrainClusteringService
      */
     public function shouldTerrainCluster(string $terrainType): bool
     {
-        return isset(self::TERRAIN_CLUSTERS[$terrainType]);
+        return $this->clusteringDomainService->shouldTerrainCluster(TerrainType::from($terrainType));
     }
 
     /**
@@ -155,6 +92,28 @@ class TerrainClusteringService
      */
     public function getClusteringProbability(string $terrainType): float
     {
-        return self::TERRAIN_CLUSTERS[$terrainType] ?? 0.0;
+        return $this->clusteringDomainService->getClusteringProbability(TerrainType::from($terrainType));
+    }
+
+    /**
+     * Converts neighbor tile to specified terrain type
+     *
+     * @param array $map Current map state
+     * @param array $neighbor Neighbor tile to convert
+     * @param TerrainType $targetTerrain Target terrain type
+     * @return array Updated map
+     */
+    private function convertNeighborTile(array $map, array $neighbor, TerrainType $targetTerrain): array
+    {
+        $neighborRow = $neighbor['coordinates']['row'];
+        $neighborCol = $neighbor['coordinates']['col'];
+
+        $map[$neighborRow][$neighborCol] = $this->terrainGenerationService->createTerrainTile(
+            $targetTerrain,
+            $neighborRow,
+            $neighborCol
+        );
+
+        return $map;
     }
 }

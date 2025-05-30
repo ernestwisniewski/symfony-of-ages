@@ -3,15 +3,15 @@
 namespace App\Application\Player\Controller;
 
 use App\Application\Player\Exception\PlayerServiceException;
-use App\Domain\Game\Exception\MovementNotAllowedException;
-use App\Domain\Player\Entity\Player;
 use App\Domain\Player\Exception\InvalidPlayerDataException;
 use App\Domain\Player\Exception\PlayerNotFoundException;
 use App\Domain\Player\ValueObject\Position;
+use App\Domain\Shared\ValueObject\MapConfiguration;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 /**
  * MovePlayerController handles player movement operations
@@ -36,18 +36,18 @@ class MovePlayerController extends AbstractPlayerController
 
             // Calculate possible moves for player
             $possibleMoves = $this->playerService->calculatePlayerPossibleMoves(
-                $player, 
-                $mapData, 
-                self::ROWS, 
-                self::COLS
+                $player,
+                $mapData,
+                MapConfiguration::ROWS,
+                MapConfiguration::COLS
             );
 
             // Calculate detailed movement options
             $movementOptions = $this->playerService->calculatePlayerMovementOptions(
-                $player, 
-                $mapData, 
-                self::ROWS, 
-                self::COLS
+                $player,
+                $mapData,
+                MapConfiguration::ROWS,
+                MapConfiguration::COLS
             );
 
             $this->logger->debug("Possible moves calculated", [
@@ -64,14 +64,14 @@ class MovePlayerController extends AbstractPlayerController
                 'movementOptions' => $movementOptions
             ]);
 
-        } catch (PlayerNotFoundException | PlayerServiceException $e) {
+        } catch (PlayerNotFoundException|PlayerServiceException $e) {
             return $this->handleException($e, 'possible moves calculation');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::movementCalculationFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'possible moves calculation');
         }
     }
-    
+
     /**
      * Moves player to target position
      *
@@ -87,16 +87,16 @@ class MovePlayerController extends AbstractPlayerController
     {
         try {
             $data = json_decode($request->getContent(), true);
-            
+
             // Validate JSON input
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return $this->createErrorResponse('Invalid JSON: ' . json_last_error_msg(), 400);
             }
-            
+
             if (!isset($data['row']) || !isset($data['col'])) {
                 return $this->createErrorResponse('Row and column coordinates are required', 400);
             }
-            
+
             $mapData = $this->getOrGenerateMapData($session);
             $player = $this->getPlayerFromSession($session);
             $targetPosition = new Position($data['row'], $data['col']);
@@ -133,9 +133,9 @@ class MovePlayerController extends AbstractPlayerController
 
         } catch (InvalidPlayerDataException $e) {
             return $this->createErrorResponse('Invalid movement data: ' . $e->getMessage(), 400);
-        } catch (PlayerNotFoundException | PlayerServiceException $e) {
+        } catch (PlayerNotFoundException|PlayerServiceException $e) {
             return $this->handleException($e, 'player movement');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::movementCalculationFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'player movement');
         }
@@ -153,7 +153,7 @@ class MovePlayerController extends AbstractPlayerController
     {
         try {
             $data = json_decode($request->getContent(), true);
-            
+
             // Validate JSON input
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return $this->createErrorResponse('Invalid JSON: ' . json_last_error_msg(), 400);
@@ -188,9 +188,9 @@ class MovePlayerController extends AbstractPlayerController
 
         } catch (InvalidPlayerDataException $e) {
             return $this->createErrorResponse('Invalid position data: ' . $e->getMessage(), 400);
-        } catch (PlayerNotFoundException | PlayerServiceException $e) {
+        } catch (PlayerNotFoundException|PlayerServiceException $e) {
             return $this->handleException($e, 'movement possibility check');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::movementCalculationFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'movement possibility check');
         }
@@ -208,7 +208,7 @@ class MovePlayerController extends AbstractPlayerController
     {
         try {
             $data = json_decode($request->getContent(), true);
-            
+
             // Validate JSON input
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return $this->createErrorResponse('Invalid JSON: ' . json_last_error_msg(), 400);
@@ -224,8 +224,8 @@ class MovePlayerController extends AbstractPlayerController
             $validation = $this->playerService->validatePlayerPosition(
                 $position,
                 $mapData,
-                self::ROWS,
-                self::COLS
+                MapConfiguration::ROWS,
+                MapConfiguration::COLS
             );
 
             $this->logger->debug("Position validated", [
@@ -242,9 +242,9 @@ class MovePlayerController extends AbstractPlayerController
             return $this->createErrorResponse('Invalid position data: ' . $e->getMessage(), 400);
         } catch (PlayerServiceException $e) {
             return $this->handleException($e, 'position validation');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::statusRetrievalFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'position validation');
         }
     }
-} 
+}

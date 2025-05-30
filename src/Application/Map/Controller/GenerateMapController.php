@@ -3,10 +3,12 @@
 namespace App\Application\Map\Controller;
 
 use App\Application\Map\Exception\MapGenerationException;
+use App\Domain\Shared\ValueObject\MapConfiguration;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 /**
  * GenerateMapController handles map generation operations
@@ -36,11 +38,11 @@ class GenerateMapController extends AbstractMapController
 
             $this->logger->info("Generating competitive map", [
                 'expected_players' => $expectedPlayers,
-                'rows' => self::ROWS,
-                'cols' => self::COLS
+                'rows' => MapConfiguration::ROWS,
+                'cols' => MapConfiguration::COLS
             ]);
 
-            $result = $this->mapGenerator->generateCompetitiveMap(self::ROWS, self::COLS, $expectedPlayers);
+            $result = $this->mapGenerator->generateCompetitiveMap(MapConfiguration::ROWS, MapConfiguration::COLS, $expectedPlayers);
 
             // Store in session
             $session->set('mapData', $result['map']);
@@ -65,7 +67,7 @@ class GenerateMapController extends AbstractMapController
 
         } catch (MapGenerationException $e) {
             return $this->handleException($e, 'competitive map generation');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = MapGenerationException::competitiveMapFailed($expectedPlayers ?? 2, $e);
             return $this->handleException($wrappedException, 'competitive map generation');
         }
@@ -90,11 +92,11 @@ class GenerateMapController extends AbstractMapController
 
             $this->logger->info("Generating themed map", [
                 'terrain_emphasis' => $terrainEmphasis,
-                'rows' => self::ROWS,
-                'cols' => self::COLS
+                'rows' => MapConfiguration::ROWS,
+                'cols' => MapConfiguration::COLS
             ]);
 
-            $result = $this->mapGenerator->generateThemedMap(self::ROWS, self::COLS, $terrainEmphasis);
+            $result = $this->mapGenerator->generateThemedMap(MapConfiguration::ROWS, MapConfiguration::COLS, $terrainEmphasis);
 
             // Store in session
             $session->set('mapData', $result['map']);
@@ -117,7 +119,7 @@ class GenerateMapController extends AbstractMapController
 
         } catch (MapGenerationException $e) {
             return $this->handleException($e, 'themed map generation');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = MapGenerationException::themedMapFailed($terrainEmphasis ?? [], $e);
             return $this->handleException($wrappedException, 'themed map generation');
         }
@@ -132,7 +134,7 @@ class GenerateMapController extends AbstractMapController
     private function validateTerrainEmphasis(array $terrainEmphasis): void
     {
         $validTerrains = ['plains', 'forest', 'mountain', 'water', 'desert', 'swamp'];
-        
+
         foreach ($terrainEmphasis as $terrain => $percentage) {
             if (!in_array($terrain, $validTerrains)) {
                 throw MapGenerationException::invalidTerrainEmphasis($terrain, $percentage);
@@ -143,4 +145,4 @@ class GenerateMapController extends AbstractMapController
             }
         }
     }
-} 
+}

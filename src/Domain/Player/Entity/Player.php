@@ -2,10 +2,10 @@
 
 namespace App\Domain\Player\Entity;
 
-use App\Domain\Game\ValueObject\MovementPoints;
-use App\Domain\Game\ValueObject\PlayerId;
 use App\Domain\Player\Event\PlayerMoved;
 use App\Domain\Player\Exception\InvalidPlayerDataException;
+use App\Domain\Player\ValueObject\MovementPoints;
+use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;
 
 /**
@@ -29,8 +29,7 @@ class Player
         string   $name,
         int      $maxMovementPoints = 3,
         int      $color = 0xFF6B6B
-    )
-    {
+    ) {
         $this->validateName($name);
         $this->validateColor($color);
 

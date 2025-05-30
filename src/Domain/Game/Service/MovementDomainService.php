@@ -4,6 +4,7 @@ namespace App\Domain\Game\Service;
 
 use App\Domain\Player\Enum\TerrainType;
 use App\Domain\Player\ValueObject\Position;
+use App\Domain\Shared\Service\HexGridService;
 
 /**
  * MovementDomainService handles complex movement validation logic
@@ -15,6 +16,11 @@ use App\Domain\Player\ValueObject\Position;
  */
 class MovementDomainService
 {
+    public function __construct(
+        private readonly HexGridService $hexGridService
+    ) {
+    }
+
     /**
      * Validates if movement between two positions is allowed
      *
@@ -26,8 +32,7 @@ class MovementDomainService
     public function validateMovement(Position $from, Position $to, array $terrainData): MovementValidationResult
     {
         // Check distance (can only move to adjacent hexes)
-        $distance = $from->distanceTo($to);
-        if ($distance > 1) {
+        if (!$this->hexGridService->arePositionsAdjacent($from, $to)) {
             return MovementValidationResult::invalid('Can only move to adjacent hexes', MovementValidationResult::INVALID_DISTANCE);
         }
 
@@ -63,7 +68,7 @@ class MovementDomainService
      */
     public function arePositionsAdjacent(Position $from, Position $to): bool
     {
-        return $from->distanceTo($to) <= 1;
+        return $this->hexGridService->arePositionsAdjacent($from, $to);
     }
 }
 

@@ -5,9 +5,11 @@ namespace App\Application\Player\Controller;
 use App\Application\Player\Exception\PlayerServiceException;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\Exception\PlayerNotFoundException;
+use App\Domain\Shared\ValueObject\MapConfiguration;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 /**
  * GetPlayerController handles player data retrieval operations
@@ -38,18 +40,18 @@ class GetPlayerController extends AbstractPlayerController
 
             // Calculate possible moves for player
             $possibleMoves = $this->playerService->calculatePlayerPossibleMoves(
-                $player, 
-                $mapData, 
-                self::ROWS, 
-                self::COLS
+                $player,
+                $mapData,
+                MapConfiguration::ROWS,
+                MapConfiguration::COLS
             );
 
             // Calculate detailed movement options
             $movementOptions = $this->playerService->calculatePlayerMovementOptions(
-                $player, 
-                $mapData, 
-                self::ROWS, 
-                self::COLS
+                $player,
+                $mapData,
+                MapConfiguration::ROWS,
+                MapConfiguration::COLS
             );
 
             $this->logger->debug("Player data retrieved successfully", [
@@ -66,9 +68,9 @@ class GetPlayerController extends AbstractPlayerController
 
         } catch (PlayerNotFoundException $e) {
             return $this->handleException($e, 'player data retrieval');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::movementCalculationFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'player data retrieval');
         }
     }
-} 
+}

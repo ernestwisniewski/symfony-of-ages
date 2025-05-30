@@ -1,4 +1,4 @@
-import type { SelectionData } from 'tionManager.ts';
+import type { SelectionData } from '../selection/SelectionManager.ts';
 
 /**
  * SelectionPanel handles the UI display for selected objects
@@ -50,6 +50,8 @@ export class SelectionPanel {
    * Handle selection change events
    */
   onSelectionChange(data: SelectionData | null): void {
+    console.log('🎛️ SelectionPanel.onSelectionChange:', data);
+    
     if (data) {
       this.showObject(data);
     } else {
@@ -61,12 +63,15 @@ export class SelectionPanel {
    * Show information about selected object
    */
   private showObject(data: SelectionData): void {
+    console.log('🔍 SelectionPanel.showObject:', data);
+    
     const typeElement = this.element.querySelector('.object-type') as HTMLElement;
     const nameElement = this.element.querySelector('.object-name') as HTMLElement;
     const positionElement = this.element.querySelector('.object-position') as HTMLElement;
     const detailsElement = this.element.querySelector('.object-details') as HTMLElement;
 
     if (!typeElement || !nameElement || !positionElement || !detailsElement) {
+      console.error('❌ SelectionPanel: Cannot find required DOM elements');
       return;
     }
 
@@ -79,6 +84,7 @@ export class SelectionPanel {
     detailsElement.innerHTML = this.formatObjectDetails(data.type, data.info);
 
     this.show();
+    console.log('✅ SelectionPanel shown');
   }
 
   /**
@@ -140,14 +146,16 @@ export class SelectionPanel {
    * Format player details
    */
   private formatPlayerDetails(info: any): string {
+    console.log('🎮 Formatting player details:', info);
+    
     return `
       <div class="detail-row">
         <span class="detail-label">Punkty ruchu:</span>
-        <span class="detail-value">${info.movementPoints || 0}/${info.maxMovementPoints || 0}</span>
+        <span class="detail-value">${info['Punkty ruchu'] || '0/0'}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Kolor:</span>
-        <span class="detail-value" style="color: #${info.color?.toString(16) || '000000'}">#${info.color?.toString(16) || '000000'}</span>
+        <span class="detail-value" style="color: ${info['Kolor'] || '#000000'}">${info['Kolor'] || '#000000'}</span>
       </div>
     `;
   }
@@ -180,10 +188,13 @@ export class SelectionPanel {
    * Show the selection panel
    */
   private show(): void {
+    console.log('📱 SelectionPanel.show() called. Current visibility:', this.isVisible);
+    
     if (!this.isVisible) {
       this.element.classList.remove('hidden');
       this.element.classList.add('visible');
       this.isVisible = true;
+      console.log('✅ SelectionPanel shown. Element classes:', this.element.className);
     }
   }
 
@@ -191,10 +202,13 @@ export class SelectionPanel {
    * Hide the selection panel
    */
   private hide(): void {
+    console.log('🙈 SelectionPanel.hide() called. Current visibility:', this.isVisible);
+    
     if (this.isVisible) {
       this.element.classList.remove('visible');
       this.element.classList.add('hidden');
       this.isVisible = false;
+      console.log('❌ SelectionPanel hidden. Element classes:', this.element.className);
     }
   }
 

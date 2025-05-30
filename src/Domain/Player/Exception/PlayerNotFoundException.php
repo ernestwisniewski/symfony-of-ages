@@ -24,4 +24,4 @@ class PlayerNotFoundException extends PlayerDomainException
     {
         return new self('No player found in session. Create a player first.');
     }
-} 
+}

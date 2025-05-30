@@ -2,48 +2,23 @@
 
 namespace App\Application\Map\Service;
 
+use App\Domain\Map\Service\TerrainSmoothingDomainService;
 use App\Domain\Player\Enum\TerrainType;
 
 /**
- * TerrainSmoothingService handles terrain compatibility smoothing
+ * TerrainSmoothingService handles terrain smoothing coordination
  *
- * Responsible for creating natural terrain transitions by applying
- * compatibility rules between different terrain types.
- * Follows Single Responsibility Principle by focusing only on smoothing logic.
+ * Application service that coordinates smoothing operations and delegates
+ * domain logic to TerrainSmoothingDomainService. Handles map iteration
+ * and orchestration concerns.
  */
 class TerrainSmoothingService
 {
-    /** @var array Terrain compatibility matrix for neighbor preferences */
-    private const array TERRAIN_COMPATIBILITY = [
-        TerrainType::WATER->value => [
-            TerrainType::SWAMP->value => 0.8,   // Swamps near water
-            TerrainType::PLAINS->value => 0.6,  // Plains near water
-            TerrainType::FOREST->value => 0.4,  // Some forests near water
-        ],
-        TerrainType::MOUNTAIN->value => [
-            TerrainType::FOREST->value => 0.7,  // Forests on mountain slopes
-            TerrainType::PLAINS->value => 0.5,  // Plains at mountain base
-            TerrainType::DESERT->value => 0.3,  // Some desert mountains
-        ],
-        TerrainType::FOREST->value => [
-            TerrainType::PLAINS->value => 0.8,  // Forest edges blend to plains
-            TerrainType::SWAMP->value => 0.4,   // Some swampy forests
-        ],
-        TerrainType::DESERT->value => [
-            TerrainType::PLAINS->value => 0.6,  // Desert transitions to plains
-            TerrainType::MOUNTAIN->value => 0.4, // Desert mountains
-        ],
-        TerrainType::SWAMP->value => [
-            TerrainType::WATER->value => 0.9,   // Swamps love water
-            TerrainType::FOREST->value => 0.5,  // Swampy forests
-        ]
-    ];
-
     public function __construct(
-        private readonly HexNeighborService           $neighborService,
-        private readonly BaseTerrainGenerationService $terrainGenerationService
-    )
-    {
+        private readonly HexNeighborService            $neighborService,
+        private readonly BaseTerrainGenerationService  $terrainGenerationService,
+        private readonly TerrainSmoothingDomainService $smoothingDomainService
+    ) {
     }
 
     /**
@@ -52,7 +27,6 @@ class TerrainSmoothingService
      * @param array $map Current map state
      * @param int $rows Number of rows
      * @param int $cols Number of columns
-     *
      * @return array Map with compatibility smoothing applied
      */
     public function applyCompatibilitySmoothing(array $map, int $rows, int $cols): array
@@ -61,26 +35,22 @@ class TerrainSmoothingService
 
         for ($row = 0; $row < $rows; $row++) {
             for ($col = 0; $col < $cols; $col++) {
-                $currentTerrain = $map[$row][$col]['type'];
+                $currentTerrain = TerrainType::from($map[$row][$col]['type']);
                 $neighbors = $this->neighborService->getNeighbors($map, $row, $col, $rows, $cols);
 
-                // Check compatibility with neighbors
-                if (isset(self::TERRAIN_COMPATIBILITY[$currentTerrain])) {
-                    $compatibilities = self::TERRAIN_COMPATIBILITY[$currentTerrain];
+                // Extract neighbor terrain types
+                $neighborTerrains = array_map(fn ($neighbor) => $neighbor['type'], $neighbors);
 
-                    foreach ($neighbors as $neighbor) {
-                        $neighborTerrain = $neighbor['type'];
+                // Use domain service to determine if should replace
+                if ($this->smoothingDomainService->shouldReplaceForCompatibility($currentTerrain, $neighborTerrains)) {
+                    // Count neighbor terrain types
+                    $neighborCounts = array_count_values($neighborTerrains);
 
-                        // If this terrain type is compatible with current
-                        if (isset($compatibilities[$neighborTerrain])) {
-                            $compatibilityChance = $compatibilities[$neighborTerrain];
+                    // Use domain service to find best replacement
+                    $bestReplacement = $this->smoothingDomainService->findBestReplacementTerrain($neighborCounts);
 
-                            if (mt_rand(1, 100) <= ($compatibilityChance * 100)) {
-                                $terrainType = TerrainType::from($neighborTerrain);
-                                $newMap[$row][$col] = $this->terrainGenerationService->createTerrainTile($terrainType, $row, $col);
-                                break; // Only one conversion per tile
-                            }
-                        }
+                    if ($bestReplacement) {
+                        $newMap[$row][$col] = $this->terrainGenerationService->createTerrainTile($bestReplacement, $row, $col);
                     }
                 }
             }
@@ -90,7 +60,7 @@ class TerrainSmoothingService
     }
 
     /**
-     * Gets compatibility score between two terrain types
+     * Gets compatibility score between two terrain types using domain service
      *
      * @param string $terrainType1 First terrain type
      * @param string $terrainType2 Second terrain type
@@ -98,20 +68,14 @@ class TerrainSmoothingService
      */
     public function getCompatibilityScore(string $terrainType1, string $terrainType2): float
     {
-        if (isset(self::TERRAIN_COMPATIBILITY[$terrainType1][$terrainType2])) {
-            return self::TERRAIN_COMPATIBILITY[$terrainType1][$terrainType2];
-        }
-
-        // Check reverse compatibility
-        if (isset(self::TERRAIN_COMPATIBILITY[$terrainType2][$terrainType1])) {
-            return self::TERRAIN_COMPATIBILITY[$terrainType2][$terrainType1];
-        }
-
-        return 0.0; // No compatibility defined
+        return $this->smoothingDomainService->getCompatibilityScore(
+            TerrainType::from($terrainType1),
+            TerrainType::from($terrainType2)
+        );
     }
 
     /**
-     * Checks if two terrain types are compatible
+     * Checks if two terrain types are compatible using domain service
      *
      * @param string $terrainType1 First terrain type
      * @param string $terrainType2 Second terrain type
@@ -119,42 +83,34 @@ class TerrainSmoothingService
      */
     public function areTerrainTypesCompatible(string $terrainType1, string $terrainType2): bool
     {
-        return $this->getCompatibilityScore($terrainType1, $terrainType2) > 0.0;
+        return $this->smoothingDomainService->areTerrainTypesCompatible(
+            TerrainType::from($terrainType1),
+            TerrainType::from($terrainType2)
+        );
     }
 
     /**
-     * Gets all compatible terrain types for a given terrain
+     * Gets all compatible terrain types for a given terrain using domain service
      *
      * @param string $terrainType Terrain type to check
      * @return array Array of compatible terrain types with their scores
      */
     public function getCompatibleTerrainTypes(string $terrainType): array
     {
-        $compatible = [];
+        $compatibleTypes = $this->smoothingDomainService->getCompatibleTerrainTypes(TerrainType::from($terrainType));
 
-        // Check direct compatibility
-        if (isset(self::TERRAIN_COMPATIBILITY[$terrainType])) {
-            $compatible = array_merge($compatible, self::TERRAIN_COMPATIBILITY[$terrainType]);
-        }
-
-        // Check reverse compatibility
-        foreach (self::TERRAIN_COMPATIBILITY as $otherTerrain => $compatibilities) {
-            if (isset($compatibilities[$terrainType])) {
-                $compatible[$otherTerrain] = $compatibilities[$terrainType];
-            }
-        }
-
-        return $compatible;
+        // Convert to string array for backward compatibility
+        return array_map(fn ($terrain) => $terrain->value, $compatibleTypes);
     }
 
     /**
-     * Gets the full terrain compatibility matrix
+     * Gets the full terrain compatibility matrix using domain service
      *
      * @return array Complete compatibility configuration
      */
     public function getCompatibilityMatrix(): array
     {
-        return self::TERRAIN_COMPATIBILITY;
+        return $this->smoothingDomainService->getCompatibilityMatrix();
     }
 
     /**
@@ -172,31 +128,23 @@ class TerrainSmoothingService
 
         for ($row = 0; $row < $rows; $row++) {
             for ($col = 0; $col < $cols; $col++) {
-                $currentTerrain = $map[$row][$col]['type'];
+                $currentTerrain = TerrainType::from($map[$row][$col]['type']);
 
                 // Only process if current terrain is in target list
-                if (!in_array($currentTerrain, $targetTerrains)) {
+                if (!in_array($currentTerrain->value, $targetTerrains)) {
                     continue;
                 }
 
                 $neighbors = $this->neighborService->getNeighbors($map, $row, $col, $rows, $cols);
+                $neighborTerrains = array_map(fn ($neighbor) => $neighbor['type'], $neighbors);
 
-                // Apply compatibility logic only for targeted terrain
-                if (isset(self::TERRAIN_COMPATIBILITY[$currentTerrain])) {
-                    $compatibilities = self::TERRAIN_COMPATIBILITY[$currentTerrain];
+                // Use domain service to determine if should replace
+                if ($this->smoothingDomainService->shouldReplaceForCompatibility($currentTerrain, $neighborTerrains, 0.4)) {
+                    $neighborCounts = array_count_values($neighborTerrains);
+                    $bestReplacement = $this->smoothingDomainService->findBestReplacementTerrain($neighborCounts);
 
-                    foreach ($neighbors as $neighbor) {
-                        $neighborTerrain = $neighbor['type'];
-
-                        if (isset($compatibilities[$neighborTerrain])) {
-                            $compatibilityChance = $compatibilities[$neighborTerrain];
-
-                            if (mt_rand(1, 100) <= ($compatibilityChance * 100)) {
-                                $terrainType = TerrainType::from($neighborTerrain);
-                                $newMap[$row][$col] = $this->terrainGenerationService->createTerrainTile($terrainType, $row, $col);
-                                break;
-                            }
-                        }
+                    if ($bestReplacement) {
+                        $newMap[$row][$col] = $this->terrainGenerationService->createTerrainTile($bestReplacement, $row, $col);
                     }
                 }
             }

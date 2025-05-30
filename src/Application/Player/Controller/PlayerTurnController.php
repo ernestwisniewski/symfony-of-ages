@@ -7,6 +7,7 @@ use App\Domain\Player\Exception\PlayerNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 /**
  * PlayerTurnController handles player turn management operations
@@ -53,11 +54,11 @@ class PlayerTurnController extends AbstractPlayerController
                 'message' => 'New turn started. Movement points restored.'
             ]);
 
-        } catch (PlayerNotFoundException | PlayerServiceException $e) {
+        } catch (PlayerNotFoundException|PlayerServiceException $e) {
             return $this->handleException($e, 'new turn start');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::statusRetrievalFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'new turn start');
         }
     }
-} 
+}

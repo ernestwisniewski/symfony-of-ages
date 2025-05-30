@@ -2,6 +2,8 @@
 
 namespace App\Application\Player\Exception;
 
+use Throwable;
+
 /**
  * Exception thrown when player service operations fail
  *
@@ -10,28 +12,28 @@ namespace App\Application\Player\Exception;
  */
 class PlayerServiceException extends PlayerApplicationException
 {
-    public static function creationFailed(string $reason, ?\Throwable $previous = null): self
+    public static function creationFailed(string $reason, ?Throwable $previous = null): self
     {
         return new self("Player creation failed: {$reason}", 0, $previous);
     }
 
-    public static function movementCalculationFailed(string $reason, ?\Throwable $previous = null): self
+    public static function movementCalculationFailed(string $reason, ?Throwable $previous = null): self
     {
         return new self("Movement calculation failed: {$reason}", 0, $previous);
     }
 
-    public static function statusRetrievalFailed(string $reason, ?\Throwable $previous = null): self
+    public static function statusRetrievalFailed(string $reason, ?Throwable $previous = null): self
     {
         return new self("Player status retrieval failed: {$reason}", 0, $previous);
     }
 
-    public static function tacticalAnalysisFailed(string $reason, ?\Throwable $previous = null): self
+    public static function tacticalAnalysisFailed(string $reason, ?Throwable $previous = null): self
     {
         return new self("Tactical analysis failed: {$reason}", 0, $previous);
     }
 
-    public static function sessionDataCorrupted(?\Throwable $previous = null): self
+    public static function sessionDataCorrupted(?Throwable $previous = null): self
     {
         return new self("Player session data is corrupted", 0, $previous);
     }
-} 
+}

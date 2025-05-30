@@ -48,8 +48,7 @@ class MapGenerator
         private readonly TerrainClusteringService     $clusteringService,
         private readonly TerrainSmoothingService      $smoothingService,
         private readonly MapValidationService         $validationService,
-    )
-    {
+    ) {
     }
 
     /**

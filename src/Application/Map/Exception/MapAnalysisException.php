@@ -2,6 +2,8 @@
 
 namespace App\Application\Map\Exception;
 
+use Throwable;
+
 /**
  * Exception thrown when map analysis fails
  *
@@ -10,17 +12,17 @@ namespace App\Application\Map\Exception;
  */
 class MapAnalysisException extends MapApplicationException
 {
-    public static function statisticsCalculationFailed(?\Throwable $previous = null): self
+    public static function statisticsCalculationFailed(?Throwable $previous = null): self
     {
         return new self("Failed to calculate terrain statistics", 0, $previous);
     }
 
-    public static function strategicAnalysisFailed(?\Throwable $previous = null): self
+    public static function strategicAnalysisFailed(?Throwable $previous = null): self
     {
         return new self("Failed to perform strategic analysis", 0, $previous);
     }
 
-    public static function balanceValidationFailed(?\Throwable $previous = null): self
+    public static function balanceValidationFailed(?Throwable $previous = null): self
     {
         return new self("Failed to validate map balance", 0, $previous);
     }
@@ -34,4 +36,4 @@ class MapAnalysisException extends MapApplicationException
     {
         return new self("Insufficient data for analysis: {$reason}");
     }
-} 
+}

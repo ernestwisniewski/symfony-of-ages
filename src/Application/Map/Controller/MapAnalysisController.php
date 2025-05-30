@@ -3,9 +3,11 @@
 namespace App\Application\Map\Controller;
 
 use App\Application\Map\Exception\MapAnalysisException;
+use App\Domain\Shared\ValueObject\MapConfiguration;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 /**
  * MapAnalysisController handles map analysis operations
@@ -28,15 +30,15 @@ class MapAnalysisController extends AbstractMapController
             $mapData = $this->getOrGenerateMapData($session);
 
             $this->logger->info("Starting comprehensive map analysis", [
-                'rows' => self::ROWS,
-                'cols' => self::COLS
+                'rows' => MapConfiguration::ROWS,
+                'cols' => MapConfiguration::COLS
             ]);
 
             // Get comprehensive map analysis
-            $statistics = $this->mapGenerator->getTerrainStatistics($mapData, self::ROWS, self::COLS);
-            $validation = $this->mapGenerator->validateMap($mapData, self::ROWS, self::COLS);
-            $strategicAnalysis = $this->mapGenerator->analyzeStrategicElements($mapData, self::ROWS, self::COLS);
-            $recommendations = $this->mapGenerator->getMapImprovementRecommendations($mapData, self::ROWS, self::COLS);
+            $statistics = $this->mapGenerator->getTerrainStatistics($mapData, MapConfiguration::ROWS, MapConfiguration::COLS);
+            $validation = $this->mapGenerator->validateMap($mapData, MapConfiguration::ROWS, MapConfiguration::COLS);
+            $strategicAnalysis = $this->mapGenerator->analyzeStrategicElements($mapData, MapConfiguration::ROWS, MapConfiguration::COLS);
+            $recommendations = $this->mapGenerator->getMapImprovementRecommendations($mapData, MapConfiguration::ROWS, MapConfiguration::COLS);
 
             $this->logger->info("Map analysis completed successfully", [
                 'validation_passed' => $validation['isValid'] ?? false,
@@ -61,9 +63,9 @@ class MapAnalysisController extends AbstractMapController
 
         } catch (MapAnalysisException $e) {
             return $this->handleException($e, 'map analysis');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = MapAnalysisException::strategicAnalysisFailed($e);
             return $this->handleException($wrappedException, 'map analysis');
         }
     }
-} 
+}

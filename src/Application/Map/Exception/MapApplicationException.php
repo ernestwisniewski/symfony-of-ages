@@ -3,6 +3,7 @@
 namespace App\Application\Map\Exception;
 
 use RuntimeException;
+use Throwable;
 
 /**
  * Base class for all map application exceptions
@@ -13,10 +14,10 @@ use RuntimeException;
 abstract class MapApplicationException extends RuntimeException
 {
     public function __construct(
-        string $message = '',
-        int $code = 0,
-        ?\Throwable $previous = null
+        string     $message = '',
+        int         $code = 0,
+        ?Throwable $previous = null
     ) {
         parent::__construct($message, $code, $previous);
     }
-} 
+}

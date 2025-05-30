@@ -4,10 +4,12 @@ namespace App\Application\Player\Controller;
 
 use App\Application\Player\Exception\PlayerServiceException;
 use App\Domain\Player\Exception\InvalidPlayerDataException;
+use App\Domain\Shared\ValueObject\MapConfiguration;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 /**
  * CreatePlayerController handles player creation operations
@@ -32,12 +34,12 @@ class CreatePlayerController extends AbstractPlayerController
     {
         try {
             $data = json_decode($request->getContent(), true);
-            
+
             // Validate JSON input
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return $this->createErrorResponse('Invalid JSON: ' . json_last_error_msg(), 400);
             }
-            
+
             $playerName = $data['name'] ?? 'Player';
 
             // Generate map data once and store in session for consistency
@@ -46,8 +48,8 @@ class CreatePlayerController extends AbstractPlayerController
             // Create player with random starting position using the facade
             $player = $this->playerService->createPlayer(
                 $playerName,
-                self::ROWS,
-                self::COLS,
+                MapConfiguration::ROWS,
+                MapConfiguration::COLS,
                 $mapData
             );
 
@@ -60,8 +62,8 @@ class CreatePlayerController extends AbstractPlayerController
 
             // Validate that the hex position is valid
             $terrain = null;
-            if ($position->getRow() >= 0 && $position->getRow() < self::ROWS &&
-                $position->getCol() >= 0 && $position->getCol() < self::COLS) {
+            if ($position->getRow() >= 0 && $position->getRow() < MapConfiguration::ROWS &&
+                $position->getCol() >= 0 && $position->getCol() < MapConfiguration::COLS) {
                 $terrain = $mapData[$position->getRow()][$position->getCol()];
                 $this->logger->debug("Player placed on terrain", [
                     'terrain' => $terrain['name'],
@@ -70,7 +72,7 @@ class CreatePlayerController extends AbstractPlayerController
             } else {
                 $this->logger->warning("Player position is outside map bounds", [
                     'position' => ['row' => $position->getRow(), 'col' => $position->getCol()],
-                    'map_bounds' => ['rows' => self::ROWS, 'cols' => self::COLS]
+                    'map_bounds' => ['rows' => MapConfiguration::ROWS, 'cols' => MapConfiguration::COLS]
                 ]);
             }
 
@@ -93,9 +95,9 @@ class CreatePlayerController extends AbstractPlayerController
             return $this->createErrorResponse('Invalid player data: ' . $e->getMessage(), 400);
         } catch (PlayerServiceException $e) {
             return $this->handleException($e, 'player creation');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::creationFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'player creation');
         }
     }
-} 
+}

@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Domain\Game\Factory;
+namespace App\Domain\Player\Factory;
 
-use App\Domain\Game\ValueObject\PlayerId;
 use App\Domain\Player\Entity\Player;
+use App\Domain\Player\Service\PlayerAttributeDomainService;
+use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;
 
 /**
@@ -15,17 +16,10 @@ use App\Domain\Player\ValueObject\Position;
  */
 class PlayerFactory
 {
-    /** @var array Available player colors */
-    private const array AVAILABLE_COLORS = [
-        0xFF6B6B, // Red
-        0x4ECDC4, // Teal
-        0x45B7D1, // Blue
-        0x96CEB4, // Green
-        0xFECA57, // Yellow
-        0xFF9FF3, // Pink
-        0x54A0FF, // Light Blue
-        0x5F27CD  // Purple
-    ];
+    public function __construct(
+        private readonly PlayerAttributeDomainService $attributeDomainService
+    ) {
+    }
 
     /**
      * Creates a new player with auto-generated ID and random color
@@ -39,10 +33,9 @@ class PlayerFactory
         string   $name,
         Position $position,
         int      $maxMovementPoints = 3
-    ): Player
-    {
+    ): Player {
         $playerId = PlayerId::generate();
-        $color = $this->selectRandomColor();
+        $color = $this->attributeDomainService->generatePlayerColor();
 
         return new Player(
             $playerId,
@@ -69,8 +62,7 @@ class PlayerFactory
         Position $position,
         int      $maxMovementPoints = 3,
         int      $color = 0xFF6B6B
-    ): Player
-    {
+    ): Player {
         return new Player(
             $id,
             $position,
@@ -88,32 +80,21 @@ class PlayerFactory
      * @return Player Test player instance
      */
     public function createTestPlayer(
-        string   $name = 'Test Player',
+        string    $name = 'Test Player',
         ?Position $position = null
-    ): Player
-    {
+    ): Player {
         $position = $position ?? new Position(50, 50);
 
         return $this->createPlayer($name, $position, 3);
     }
 
     /**
-     * Gets all available player colors
+     * Gets all available player colors using domain service
      *
      * @return array Array of color values
      */
     public function getAvailableColors(): array
     {
-        return self::AVAILABLE_COLORS;
-    }
-
-    /**
-     * Selects a random color from available colors
-     *
-     * @return int Random color value
-     */
-    private function selectRandomColor(): int
-    {
-        return self::AVAILABLE_COLORS[array_rand(self::AVAILABLE_COLORS)];
+        return $this->attributeDomainService->getAvailableColors();
     }
 }

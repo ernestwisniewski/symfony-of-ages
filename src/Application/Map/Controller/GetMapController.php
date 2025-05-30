@@ -3,9 +3,11 @@
 namespace App\Application\Map\Controller;
 
 use App\Application\Map\Exception\MapAnalysisException;
+use App\Domain\Shared\ValueObject\MapConfiguration;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 /**
  * GetMapController handles map data retrieval operations
@@ -34,8 +36,8 @@ class GetMapController extends AbstractMapController
             $transformedData = $this->transformMapDataForClient($mapData);
 
             $this->logger->debug("Map data retrieved successfully", [
-                'rows' => self::ROWS,
-                'cols' => self::COLS,
+                'rows' => MapConfiguration::ROWS,
+                'cols' => MapConfiguration::COLS,
                 'total_tiles' => count($mapData) * count($mapData[0])
             ]);
 
@@ -44,9 +46,9 @@ class GetMapController extends AbstractMapController
                 'data' => $transformedData
             ]);
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = MapAnalysisException::mapDataCorrupted();
             return $this->handleException($wrappedException, 'map data retrieval');
         }
     }
-} 
+}

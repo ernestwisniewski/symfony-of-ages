@@ -2,34 +2,27 @@
 
 namespace App\Application\Map\Controller;
 
-use App\Application\Map\Exception\MapApplicationException;
 use App\Application\Map\Exception\MapAnalysisException;
+use App\Application\Map\Exception\MapApplicationException;
 use App\Application\Map\Exception\MapGenerationException;
 use App\Application\Map\Service\MapGenerator;
+use App\Domain\Shared\ValueObject\MapConfiguration;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Throwable;
 
 /**
  * AbstractMapController provides common functionality for map-related controllers
  *
- * Contains shared constants, services, and helper methods used across
+ * Contains shared services and helper methods used across
  * multiple map controllers following DRY principle.
  */
 abstract class AbstractMapController extends AbstractController
 {
-    /** @var int Number of columns in the hex grid */
-    protected const int COLS = 100;
-
-    /** @var int Number of rows in the hex grid */
-    protected const int ROWS = 100;
-
-    /** @var int Size (radius) of individual hexagons in pixels */
-    protected const int SIZE = 58;
-
     public function __construct(
-        protected readonly MapGenerator $mapGenerator,
+        protected readonly MapGenerator    $mapGenerator,
         protected readonly LoggerInterface $logger
     ) {
     }
@@ -48,18 +41,18 @@ abstract class AbstractMapController extends AbstractController
         if (!$mapData) {
             try {
                 // Generate new map data if none exists in session
-                $mapData = $this->mapGenerator->generateMap(self::ROWS, self::COLS);
+                $mapData = $this->mapGenerator->generateMap(MapConfiguration::ROWS, MapConfiguration::COLS);
                 $session->set('mapData', $mapData);
                 $this->logger->info("Generated new map data for frontend", [
-                    'rows' => self::ROWS,
-                    'cols' => self::COLS
+                    'rows' => MapConfiguration::ROWS,
+                    'cols' => MapConfiguration::COLS
                 ]);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $this->logger->error("Failed to generate map data", [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
-                throw MapGenerationException::standardMapFailed(self::ROWS, self::COLS, $e);
+                throw MapGenerationException::standardMapFailed(MapConfiguration::ROWS, MapConfiguration::COLS, $e);
             }
         } else {
             $this->logger->debug("Using existing map data from session for frontend");
@@ -115,21 +108,17 @@ abstract class AbstractMapController extends AbstractController
      */
     protected function createMapConfig(array $additionalConfig = []): array
     {
-        return array_merge([
-            'rows' => self::ROWS,
-            'cols' => self::COLS,
-            'size' => self::SIZE
-        ], $additionalConfig);
+        return MapConfiguration::getConfig($additionalConfig);
     }
 
     /**
      * Handles exceptions and returns appropriate JSON response
      *
-     * @param \Throwable $exception Exception to handle
+     * @param Throwable $exception Exception to handle
      * @param string $context Context information for logging
      * @return JsonResponse Error response
      */
-    protected function handleException(\Throwable $exception, string $context): JsonResponse
+    protected function handleException(Throwable $exception, string $context): JsonResponse
     {
         $this->logger->error("Exception in {$context}", [
             'exception' => get_class($exception),
@@ -138,14 +127,12 @@ abstract class AbstractMapController extends AbstractController
         ]);
 
         return match (true) {
-            $exception instanceof MapGenerationException => 
-                $this->createErrorResponse($exception->getMessage(), 400),
-            $exception instanceof MapAnalysisException => 
-                $this->createErrorResponse($exception->getMessage(), 500),
-            $exception instanceof MapApplicationException => 
-                $this->createErrorResponse($exception->getMessage(), 500),
-            default => 
-                $this->createErrorResponse('An unexpected error occurred', 500)
+            $exception instanceof MapGenerationException =>
+            $this->createErrorResponse($exception->getMessage(), 400),
+            $exception instanceof MapAnalysisException, $exception instanceof MapApplicationException =>
+            $this->createErrorResponse($exception->getMessage(), 500),
+            default =>
+            $this->createErrorResponse('An unexpected error occurred', 500)
         };
     }
-} 
+}

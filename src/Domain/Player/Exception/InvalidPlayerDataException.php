@@ -34,4 +34,4 @@ class InvalidPlayerDataException extends PlayerDomainException
     {
         return new self("Invalid position: row={$row}, col={$col}");
     }
-} 
+}

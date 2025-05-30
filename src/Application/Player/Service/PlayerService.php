@@ -4,8 +4,10 @@ namespace App\Application\Player\Service;
 
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Player\Service\PlayerAttributeDomainService;
+use App\Domain\Player\Service\PlayerTurnDomainService;
 use App\Domain\Player\ValueObject\Position;
-use App\Application\Game\Service\MovementCalculationService;
+use App\Domain\Shared\Service\HexGridService;
 
 /**
  * PlayerService serves as a facade for player-related operations
@@ -16,22 +18,17 @@ use App\Application\Game\Service\MovementCalculationService;
  */
 class PlayerService
 {
-    /** @var array Simple grid directions for tactical analysis (placeholder for hex neighbor service) */
-    private const array GRID_DIRECTIONS = [
-        [-1, -1], [-1, 0], [-1, 1],
-        [0, -1], [0, 1],
-        [1, -1], [1, 0], [1, 1]
-    ];
-
     public function __construct(
-        private readonly PlayerCreationService       $creationService,
-        private readonly PlayerMovementService       $movementService,
-        private readonly PlayerTurnService           $turnService,
-        private readonly PlayerPositionService       $positionService,
-        private readonly PlayerAttributeService      $attributeService,
-        private readonly MovementCalculationService  $movementCalculationService
-    )
-    {
+        private readonly PlayerCreationService        $creationService,
+        private readonly PlayerMovementService        $movementService,
+        private readonly PlayerTurnService            $turnService,
+        private readonly PlayerPositionService        $positionService,
+        private readonly PlayerAttributeService       $attributeService,
+        private readonly MovementCalculationService   $movementCalculationService,
+        private readonly HexGridService               $hexGridService,
+        private readonly PlayerTurnDomainService      $turnDomainService,
+        private readonly PlayerAttributeDomainService $attributeDomainService
+    ) {
     }
 
     /**
@@ -74,11 +71,11 @@ class PlayerService
     }
 
     /**
-     * Starts a new turn for the player
+     * Starts a new turn for the player using domain service
      */
     public function startPlayerTurn(Player $player): void
     {
-        $this->turnService->startPlayerTurn($player);
+        $this->turnDomainService->startNewTurn($player);
     }
 
     /**
@@ -100,11 +97,11 @@ class PlayerService
     }
 
     /**
-     * Checks if player has movement points remaining
+     * Checks if player has movement points remaining using domain service
      */
     public function canPlayerContinueTurn(Player $player): bool
     {
-        return $this->turnService->canPlayerContinueTurn($player);
+        return $this->turnDomainService->canPlayerContinueTurn($player);
     }
 
     /**
@@ -124,11 +121,11 @@ class PlayerService
     }
 
     /**
-     * Gets available player colors
+     * Gets available player colors using domain service
      */
     public function getAvailablePlayerColors(): array
     {
-        return $this->attributeService->getAvailableColors();
+        return $this->attributeDomainService->getAvailableColors();
     }
 
     /**
@@ -161,7 +158,8 @@ class PlayerService
             'surrounding_terrain' => $surroundingAnalysis,
             'movement_options' => $movementOptions,
             'tactical_advantages' => $this->identifyTacticalAdvantages($currentTerrain, $surroundingAnalysis),
-            'recommendations' => $this->generateTacticalRecommendations($player, $movementOptions, $surroundingAnalysis)
+            'recommendations' => $this->generateTacticalRecommendations($player, $movementOptions, $surroundingAnalysis),
+            'turn_efficiency' => $this->turnDomainService->calculateMovementEfficiency($player)
         ];
     }
 
@@ -212,18 +210,20 @@ class PlayerService
             'basic_info' => [
                 'id' => $player->getId()->getValue(),
                 'name' => $player->getName(),
-                'color' => $player->getColor()
+                'color' => $player->getColor(),
+                'color_name' => $this->attributeDomainService->getColorName($player->getColor())
             ],
             'position' => $player->getPosition()->toArray(),
             'movement' => [
                 'current_points' => $player->getMovementPoints(),
                 'maximum_points' => $player->getMaxMovementPoints(),
                 'can_move' => $player->canContinueTurn(),
-                'movement_percentage' => $movementPercentage
+                'movement_percentage' => $movementPercentage,
+                'efficiency' => $this->turnDomainService->calculateMovementEfficiency($player)
             ],
             'turn_status' => [
-                'can_continue' => $this->canPlayerContinueTurn($player),
-                'should_end_turn' => $this->turnService->shouldEndTurn($player)
+                'can_continue' => $this->turnDomainService->canPlayerContinueTurn($player),
+                'should_end_turn' => $this->turnDomainService->shouldEndTurn($player)
             ]
         ];
     }
@@ -269,27 +269,15 @@ class PlayerService
         return $this->movementCalculationService->canPlayerMoveTo($player, $targetPosition, $mapData);
     }
 
-    // Private helper methods
+    // Private helper methods using centralized HexGridService
 
     /**
      * Analyzes terrain surrounding player position
      */
     private function analyzeSurroundingTerrain(Position $position, array $mapData, int $mapRows, int $mapCols): array
     {
-        $surroundingTerrain = [];
-        $terrainCounts = [];
-
-        foreach (self::GRID_DIRECTIONS as $direction) {
-            $newRow = $position->getRow() + $direction[0];
-            $newCol = $position->getCol() + $direction[1];
-
-            if ($this->isWithinBounds($newRow, $newCol, $mapRows, $mapCols)) {
-                $terrain = $mapData[$newRow][$newCol];
-                $surroundingTerrain[] = $terrain;
-                $terrainType = $terrain['type'];
-                $terrainCounts[$terrainType] = ($terrainCounts[$terrainType] ?? 0) + 1;
-            }
-        }
+        $surroundingTerrain = $this->hexGridService->getNeighborTiles($mapData, $position, $mapRows, $mapCols);
+        $terrainCounts = $this->hexGridService->getNeighborTerrainCounts($mapData, $position, $mapRows, $mapCols);
 
         return [
             'adjacent_tiles' => $surroundingTerrain,
@@ -299,7 +287,7 @@ class PlayerService
     }
 
     /**
-     * Calculates available movement options
+     * Calculates available movement options using hex grid service
      */
     private function calculateMovementOptions(Player $player, array $mapData, int $mapRows, int $mapCols): array
     {
@@ -307,22 +295,19 @@ class PlayerService
         $currentPosition = $player->getPosition();
         $currentMovementPoints = $player->getMovementPoints();
 
-        foreach (self::GRID_DIRECTIONS as $direction) {
-            $newRow = $currentPosition->getRow() + $direction[0];
-            $newCol = $currentPosition->getCol() + $direction[1];
+        $adjacentPositions = $this->hexGridService->getAdjacentPositions($currentPosition, $mapRows, $mapCols);
 
-            if ($this->isWithinBounds($newRow, $newCol, $mapRows, $mapCols)) {
-                $terrain = $mapData[$newRow][$newCol];
-                $movementCost = $this->getTerrainMovementCost($terrain);
+        foreach ($adjacentPositions as $position) {
+            $terrain = $mapData[$position->getRow()][$position->getCol()];
+            $movementCost = $this->getTerrainMovementCost($terrain);
 
-                $movementOptions[] = [
-                    'position' => ['row' => $newRow, 'col' => $newCol],
-                    'terrain' => $terrain,
-                    'movement_cost' => $movementCost,
-                    'can_move' => $movementCost > 0 && $currentMovementPoints >= $movementCost,
-                    'movement_points_after' => max(0, $currentMovementPoints - $movementCost)
-                ];
-            }
+            $movementOptions[] = [
+                'position' => $position->toArray(),
+                'terrain' => $terrain,
+                'movement_cost' => $movementCost,
+                'can_move' => $movementCost > 0 && $currentMovementPoints >= $movementCost,
+                'movement_points_after' => max(0, $currentMovementPoints - $movementCost)
+            ];
         }
 
         return $movementOptions;
@@ -360,7 +345,7 @@ class PlayerService
             return ['Start new turn to restore movement points'];
         }
 
-        $validOptions = array_filter($movementOptions, fn($option) => $option['can_move']);
+        $validOptions = array_filter($movementOptions, fn ($option) => $option['can_move']);
 
         if (empty($validOptions)) {
             return ['No valid movement options available'];
@@ -406,14 +391,6 @@ class PlayerService
             'resource' => $bestResource,
             'mobility' => $bestMobility
         ];
-    }
-
-    /**
-     * Helper method to check if coordinates are within map bounds
-     */
-    private function isWithinBounds(int $row, int $col, int $mapRows, int $mapCols): bool
-    {
-        return $row >= 0 && $row < $mapRows && $col >= 0 && $col < $mapCols;
     }
 
     /**

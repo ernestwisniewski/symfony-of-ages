@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Game\ValueObject;
+namespace App\Domain\Player\ValueObject;
 
 use InvalidArgumentException;
 

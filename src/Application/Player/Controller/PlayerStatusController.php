@@ -4,9 +4,11 @@ namespace App\Application\Player\Controller;
 
 use App\Application\Player\Exception\PlayerServiceException;
 use App\Domain\Player\Exception\PlayerNotFoundException;
+use App\Domain\Shared\ValueObject\MapConfiguration;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 /**
  * PlayerStatusController handles player status and analysis operations
@@ -45,9 +47,9 @@ class PlayerStatusController extends AbstractPlayerController
                 'player_status' => $status
             ]);
 
-        } catch (PlayerNotFoundException | PlayerServiceException $e) {
+        } catch (PlayerNotFoundException|PlayerServiceException $e) {
             return $this->handleException($e, 'player status retrieval');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::statusRetrievalFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'player status retrieval');
         }
@@ -74,8 +76,8 @@ class PlayerStatusController extends AbstractPlayerController
             $tacticalAnalysis = $this->playerService->analyzePlayerTacticalSituation(
                 $player,
                 $mapData,
-                self::ROWS,
-                self::COLS
+                MapConfiguration::ROWS,
+                MapConfiguration::COLS
             );
 
             $this->logger->info("Tactical analysis completed", [
@@ -88,11 +90,11 @@ class PlayerStatusController extends AbstractPlayerController
                 'tactical_analysis' => $tacticalAnalysis
             ]);
 
-        } catch (PlayerNotFoundException | PlayerServiceException $e) {
+        } catch (PlayerNotFoundException|PlayerServiceException $e) {
             return $this->handleException($e, 'tactical analysis');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $wrappedException = PlayerServiceException::tacticalAnalysisFailed($e->getMessage(), $e);
             return $this->handleException($wrappedException, 'tactical analysis');
         }
     }
-} 
+}

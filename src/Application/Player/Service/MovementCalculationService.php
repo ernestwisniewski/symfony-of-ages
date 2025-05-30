@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Application\Game\Service;
+namespace App\Application\Player\Service;
 
 use App\Domain\Game\Service\MovementDomainService;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\ValueObject\Position;
+use App\Domain\Shared\Service\HexGridService;
 
 /**
  * MovementCalculationService - application service for calculating possible player moves
@@ -17,7 +18,8 @@ use App\Domain\Player\ValueObject\Position;
 class MovementCalculationService
 {
     public function __construct(
-        private readonly MovementDomainService $movementDomainService
+        private readonly MovementDomainService $movementDomainService,
+        private readonly HexGridService        $hexGridService
     ) {
     }
 
@@ -34,29 +36,29 @@ class MovementCalculationService
     {
         $currentPosition = $player->getPosition();
         $availableMovementPoints = $player->getMovementPoints();
-        
+
         if ($availableMovementPoints <= 0) {
             return [];
         }
 
         $possibleMoves = [];
-        
-        // Check all adjacent positions (in hex grid)
-        $adjacentPositions = $this->getAdjacentHexPositions($currentPosition, $mapRows, $mapCols);
-        
+
+        // Check all adjacent positions (using centralized hex grid service)
+        $adjacentPositions = $this->hexGridService->getAdjacentPositions($currentPosition, $mapRows, $mapCols);
+
         foreach ($adjacentPositions as $position) {
             $terrainData = $mapData[$position->getRow()][$position->getCol()];
-            
+
             // Validate movement using domain service
             $validationResult = $this->movementDomainService->validateMovement(
                 $currentPosition,
                 $position,
                 $terrainData
             );
-            
+
             if ($validationResult->isValid()) {
                 $movementCost = $validationResult->getMovementCost();
-                
+
                 // Check if player has sufficient movement points
                 if ($availableMovementPoints >= $movementCost) {
                     $possibleMoves[] = [
@@ -69,7 +71,7 @@ class MovementCalculationService
                 }
             }
         }
-        
+
         return $possibleMoves;
     }
 
@@ -85,23 +87,23 @@ class MovementCalculationService
     public function calculateDetailedMovementOptions(Player $player, array $mapData, int $mapRows, int $mapCols): array
     {
         $possibleMoves = $this->calculatePossibleMoves($player, $mapData, $mapRows, $mapCols);
-        
+
         // Group moves by movement cost
         $movesByCost = [];
         $terrainTypeCount = [];
-        
+
         foreach ($possibleMoves as $move) {
             $cost = $move['movementCost'];
             $terrainType = $move['terrain']['type'];
-            
+
             if (!isset($movesByCost[$cost])) {
                 $movesByCost[$cost] = [];
             }
-            
+
             $movesByCost[$cost][] = $move;
             $terrainTypeCount[$terrainType] = ($terrainTypeCount[$terrainType] ?? 0) + 1;
         }
-        
+
         return [
             'totalPossibleMoves' => count($possibleMoves),
             'currentMovementPoints' => $player->getMovementPoints(),
@@ -132,7 +134,7 @@ class MovementCalculationService
         }
 
         $terrainData = $mapData[$targetPosition->getRow()][$targetPosition->getCol()];
-        
+
         // Validate movement
         $validationResult = $this->movementDomainService->validateMovement(
             $player->getPosition(),
@@ -159,48 +161,4 @@ class MovementCalculationService
             'code' => $canAfford ? 'VALID' : 'INSUFFICIENT_MOVEMENT_POINTS'
         ];
     }
-
-    /**
-     * Gets adjacent positions in hexagonal grid
-     *
-     * @param Position $position Current position
-     * @param int $mapRows Number of map rows
-     * @param int $mapCols Number of map columns
-     * @return Position[] Array of adjacent positions
-     */
-    private function getAdjacentHexPositions(Position $position, int $mapRows, int $mapCols): array
-    {
-        $row = $position->getRow();
-        $col = $position->getCol();
-        $adjacentPositions = [];
-
-        // Hex grid directions depend on whether row is even or odd
-        if ($row % 2 === 0) {
-            // Even row
-            $directions = [
-                [-1, -1], [-1, 0],  // Top-left, Top-right
-                [0, -1], [0, 1],    // Left, Right
-                [1, -1], [1, 0]     // Bottom-left, Bottom-right
-            ];
-        } else {
-            // Odd row
-            $directions = [
-                [-1, 0], [-1, 1],   // Top-left, Top-right
-                [0, -1], [0, 1],    // Left, Right
-                [1, 0], [1, 1]      // Bottom-left, Bottom-right
-            ];
-        }
-
-        foreach ($directions as $direction) {
-            $newRow = $row + $direction[0];
-            $newCol = $col + $direction[1];
-
-            // Check map boundaries
-            if ($newRow >= 0 && $newRow < $mapRows && $newCol >= 0 && $newCol < $mapCols) {
-                $adjacentPositions[] = new Position($newRow, $newCol);
-            }
-        }
-
-        return $adjacentPositions;
-    }
-} 
+}

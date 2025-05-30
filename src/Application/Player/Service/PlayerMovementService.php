@@ -18,8 +18,7 @@ class PlayerMovementService
     public function __construct(
         private readonly PlayerPositionService $positionService,
         private readonly MovementDomainService $movementDomainService
-    )
-    {
+    ) {
     }
 
     /**

@@ -31,8 +31,7 @@ class MapValidationService
     public function __construct(
         private readonly HexNeighborService           $neighborService,
         private readonly BaseTerrainGenerationService $terrainGenerationService
-    )
-    {
+    ) {
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Application\Player\Service;
 
 use App\Domain\Player\Enum\TerrainType;
 use App\Domain\Player\ValueObject\Position;
+use App\Domain\Shared\Service\HexGridService;
 
 /**
  * PlayerPositionService handles player position generation and validation
@@ -25,6 +26,11 @@ class PlayerPositionService
 
     /** @var int Maximum radius for fallback position search */
     private const int MAX_FALLBACK_RADIUS = 10;
+
+    public function __construct(
+        private readonly HexGridService $hexGridService
+    ) {
+    }
 
     /**
      * Generates a valid starting position avoiding water and other obstacles
@@ -179,7 +185,7 @@ class PlayerPositionService
                 $fallbackRow = $centerRow + $dr;
                 $fallbackCol = $centerCol + $dc;
 
-                if (!$this->isWithinBounds($fallbackRow, $fallbackCol, $mapRows, $mapCols)) {
+                if (!$this->hexGridService->isWithinBounds($fallbackRow, $fallbackCol, $mapRows, $mapCols)) {
                     continue;
                 }
 
@@ -191,13 +197,5 @@ class PlayerPositionService
         }
 
         return null;
-    }
-
-    /**
-     * Checks if coordinates are within map bounds
-     */
-    private function isWithinBounds(int $row, int $col, int $mapRows, int $mapCols): bool
-    {
-        return $row >= 0 && $row < $mapRows && $col >= 0 && $col < $mapCols;
     }
 }

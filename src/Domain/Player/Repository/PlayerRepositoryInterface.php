@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Domain\Game\Repository;
+namespace App\Domain\Player\Repository;
 
-use App\Domain\Game\ValueObject\PlayerId;
 use App\Domain\Player\Entity\Player;
+use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;
 
 /**

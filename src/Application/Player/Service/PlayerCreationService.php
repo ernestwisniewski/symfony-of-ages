@@ -2,8 +2,8 @@
 
 namespace App\Application\Player\Service;
 
-use App\Domain\Game\Factory\PlayerFactory;
 use App\Domain\Player\Entity\Player;
+use App\Domain\Player\Factory\PlayerFactory;
 use App\Domain\Player\ValueObject\Position;
 
 /**
@@ -18,8 +18,7 @@ class PlayerCreationService
     public function __construct(
         private readonly PlayerPositionService $positionService,
         private readonly PlayerFactory         $playerFactory
-    )
-    {
+    ) {
     }
 
     /**
@@ -38,8 +37,7 @@ class PlayerCreationService
         int    $mapCols,
         array  $mapData,
         int    $maxMovementPoints = 3
-    ): Player
-    {
+    ): Player {
         // Generate starting position
         $position = $this->positionService->generateValidStartingPosition($mapRows, $mapCols, $mapData);
 
@@ -61,8 +59,7 @@ class PlayerCreationService
         int    $row,
         int    $col,
         int    $maxMovementPoints = 3
-    ): Player
-    {
+    ): Player {
         $position = new Position($row, $col);
         return $this->playerFactory->createPlayer($name, $position, $maxMovementPoints);
     }

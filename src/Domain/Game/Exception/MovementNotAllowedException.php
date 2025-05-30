@@ -36,4 +36,4 @@ class MovementNotAllowedException extends GameDomainException
     {
         return new self("Invalid movement distance: {$distance}. Can only move to adjacent positions.");
     }
-} 
+}
