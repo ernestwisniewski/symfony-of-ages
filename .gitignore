@@ -2,6 +2,7 @@
 /.idea
 /tools/php-cs-fixer/vendor/
 /.php-cs-fixer.cache
+/.phpunit.result.cache
 
 ###> symfony/framework-bundle ###
 /.env.local

@@ -2,7 +2,7 @@
 
 namespace App\Domain\Map\Service;
 
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 
 /**
  * TerrainSmoothingDomainService handles terrain compatibility domain logic
@@ -148,6 +148,12 @@ class TerrainSmoothingDomainService
     {
         if (empty($neighborTerrains)) {
             return null;
+        }
+
+        // If only one terrain type, return it directly
+        if (count($neighborTerrains) === 1) {
+            $terrain = array_key_first($neighborTerrains);
+            return TerrainType::from($terrain);
         }
 
         $bestTerrain = null;

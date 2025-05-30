@@ -2,7 +2,7 @@
 
 namespace App\Domain\Player\Event;
 
-use App\Domain\Game\ValueObject\PlayerId;
+use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\ValueObject\Position;
 use DateTimeImmutable;
 

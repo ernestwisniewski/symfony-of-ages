@@ -3,7 +3,7 @@
 namespace App\Application\Map\Service;
 
 use App\Domain\Map\Service\TerrainGenerationDomainService;
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 
 /**
  * BaseTerrainGenerationService handles terrain generation coordination

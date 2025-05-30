@@ -4,11 +4,13 @@ namespace App\Tests\Unit\Application\Player\Service;
 
 use App\Application\Player\Service\PlayerMovementService;
 use App\Application\Player\Service\PlayerPositionService;
-use App\Domain\Game\Service\MovementDomainService;
-use App\Domain\Game\Service\MovementValidationResult;
-use App\Domain\Game\ValueObject\PlayerId;
+use App\Domain\Player\Service\MovementDomainService;
+use App\Domain\Player\Service\MovementValidationResult;
+use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\ValueObject\Position;
+use App\Domain\Player\Repository\PlayerRepositoryInterface;
+use App\Domain\Game\Exception\MovementNotAllowedException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

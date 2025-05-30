@@ -2,7 +2,7 @@
 
 namespace App\Domain\Map\Service;
 
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 
 /**
  * TerrainGenerationDomainService handles core terrain generation domain logic
@@ -59,8 +59,8 @@ class TerrainGenerationDomainService
 
         return [
             'type' => $terrainType->value,
-            'name' => $properties['name'],
-            'properties' => $properties,
+            'name' => $properties->getName(),
+            'properties' => $properties->toLegacyArray(),
             'coordinates' => [
                 'row' => $row,
                 'col' => $col

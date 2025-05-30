@@ -2,11 +2,11 @@
 
 namespace App\Tests\Unit\Domain\Player\Entity;
 
-use App\Domain\Game\ValueObject\PlayerId;
+use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\Event\PlayerMoved;
 use App\Domain\Player\ValueObject\Position;
-use InvalidArgumentException;
+use App\Domain\Player\Exception\InvalidPlayerDataException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -51,7 +51,7 @@ class PlayerTest extends TestCase
 
     public function testThrowsExceptionForEmptyName(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player name cannot be empty');
 
         new Player($this->playerId, $this->position, '');
@@ -59,7 +59,7 @@ class PlayerTest extends TestCase
 
     public function testThrowsExceptionForWhitespaceOnlyName(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player name cannot be empty');
 
         new Player($this->playerId, $this->position, '   ');
@@ -69,7 +69,7 @@ class PlayerTest extends TestCase
     {
         $longName = str_repeat('a', 51);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player name cannot exceed 50 characters');
 
         new Player($this->playerId, $this->position, $longName);
@@ -176,7 +176,7 @@ class PlayerTest extends TestCase
     {
         $player = new Player($this->playerId, $this->position, 'Valid Name');
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidPlayerDataException::class);
         $this->expectExceptionMessage('Player name cannot be empty');
 
         $player->changeName('');
@@ -195,8 +195,7 @@ class PlayerTest extends TestCase
     {
         $player = new Player($this->playerId, $this->position, 'Test Player');
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Color must be a valid hexadecimal value');
+        $this->expectException(InvalidPlayerDataException::class);
 
         $player->changeColor(-1);
     }
@@ -205,10 +204,9 @@ class PlayerTest extends TestCase
     {
         $player = new Player($this->playerId, $this->position, 'Test Player');
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Color must be a valid hexadecimal value');
+        $this->expectException(InvalidPlayerDataException::class);
 
-        $player->changeColor(0x1000000); // Greater than 0xFFFFFF
+        $player->changeColor(0x1000000); // 24-bit max is 0xFFFFFF
     }
 
     public function testClearDomainEventsRemovesAllEvents(): void

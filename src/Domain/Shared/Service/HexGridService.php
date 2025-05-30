@@ -169,6 +169,18 @@ class HexGridService
      */
     public function arePositionsAdjacent(Position $from, Position $to): bool
     {
-        return $this->calculateDistance($from, $to) <= 1;
+        if ($from->equals($to)) {
+            return true; // Same position is considered adjacent
+        }
+        
+        $adjacentPositions = $this->getAdjacentPositions($from, PHP_INT_MAX, PHP_INT_MAX);
+        
+        foreach ($adjacentPositions as $adjacentPosition) {
+            if ($adjacentPosition->equals($to)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

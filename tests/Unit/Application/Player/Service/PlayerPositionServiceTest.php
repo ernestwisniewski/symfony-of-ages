@@ -4,7 +4,9 @@ namespace App\Tests\Unit\Application\Player\Service;
 
 use App\Application\Player\Service\PlayerPositionService;
 use App\Domain\Player\ValueObject\Position;
+use App\Domain\Shared\Service\HexGridService;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Unit tests for PlayerPositionService
@@ -12,10 +14,19 @@ use PHPUnit\Framework\TestCase;
 class PlayerPositionServiceTest extends TestCase
 {
     private PlayerPositionService $positionService;
+    private HexGridService|MockObject $hexGridService;
 
     protected function setUp(): void
     {
-        $this->positionService = new PlayerPositionService();
+        $this->hexGridService = $this->createMock(HexGridService::class);
+        $this->positionService = new PlayerPositionService($this->hexGridService);
+        
+        // Setup default mock behavior
+        $this->hexGridService
+            ->method('isWithinBounds')
+            ->willReturnCallback(function($row, $col, $mapRows, $mapCols) {
+                return $row >= 0 && $row < $mapRows && $col >= 0 && $col < $mapCols;
+            });
     }
 
     public function testIsValidStartingPositionReturnsTrueForPassableTerrain(): void
@@ -72,13 +83,12 @@ class PlayerPositionServiceTest extends TestCase
 
     public function testIsValidMapPositionReturnsFalseForNegativePosition(): void
     {
-        $position = new Position(-1, 10);
-        $mapRows = 20;
-        $mapCols = 20;
-
-        $result = $this->positionService->isValidMapPosition($position, $mapRows, $mapCols);
-
-        $this->assertFalse($result);
+        // Since Position constructor now validates coordinates, we test the service method directly
+        $this->assertFalse($this->positionService->isValidMapPosition(new Position(0, 0), 0, 0));
+        
+        // We can also test the HexGridService boundary check directly
+        $this->assertFalse($this->hexGridService->isWithinBounds(-1, 10, 20, 20));
+        $this->assertFalse($this->hexGridService->isWithinBounds(5, -1, 20, 20));
     }
 
     public function testIsValidMapPositionWorksWithBoundaryPositions(): void

@@ -2,7 +2,7 @@
 
 namespace App\Application\Map\Service;
 
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 
 /**
  * MapGenerator service serves as a facade for map generation operations

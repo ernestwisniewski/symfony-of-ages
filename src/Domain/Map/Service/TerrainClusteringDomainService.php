@@ -2,7 +2,7 @@
 
 namespace App\Domain\Map\Service;
 
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 
 /**
  * TerrainClusteringDomainService handles terrain clustering domain logic

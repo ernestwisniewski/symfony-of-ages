@@ -2,7 +2,7 @@
 
 namespace App\Application\Player\Service;
 
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 use App\Domain\Player\ValueObject\Position;
 use App\Domain\Shared\Service\HexGridService;
 
@@ -68,11 +68,15 @@ class PlayerPositionService
      */
     public function isValidStartingPosition(Position $position, array $mapData): bool
     {
-        $terrain = $mapData[$position->getRow()][$position->getCol()];
-        $terrainType = TerrainType::from($terrain['type']);
+        $row = $position->getRow();
+        $col = $position->getCol();
 
-        // Don't start on water (impassable)
-        return $terrainType->getProperties()['movementCost'] > 0;
+        if (!isset($mapData[$row][$col])) {
+            return false;
+        }
+
+        $terrainType = TerrainType::from($mapData[$row][$col]['type']);
+        return $terrainType->isPassable();
     }
 
     /**

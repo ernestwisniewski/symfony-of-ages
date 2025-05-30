@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Domain\Game\Service;
+namespace App\Domain\Player\Service;
 
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 use App\Domain\Player\ValueObject\Position;
 use App\Domain\Shared\Service\HexGridService;
 
 /**
- * MovementDomainService handles complex movement validation logic
+ * MovementDomainService handles player movement validation logic
  *
  * This is a domain service because movement validation involves:
- * - Multiple domain concepts (Position, TerrainType, distance)
- * - Complex business rules that don't belong to a single entity
+ * - Player-specific movement constraints (movement points, position)
+ * - Map terrain considerations (passability, movement cost)
+ * - Domain business rules that don't belong to a single entity
  * - Pure domain logic without infrastructure dependencies
  */
 class MovementDomainService
@@ -31,32 +32,34 @@ class MovementDomainService
      */
     public function validateMovement(Position $from, Position $to, array $terrainData): MovementValidationResult
     {
-        // Check distance (can only move to adjacent hexes)
-        if (!$this->hexGridService->arePositionsAdjacent($from, $to)) {
-            return MovementValidationResult::invalid('Can only move to adjacent hexes', MovementValidationResult::INVALID_DISTANCE);
-        }
-
         // Check if terrain is passable
         $terrainType = TerrainType::from($terrainData['type']);
-        $movementCost = $terrainType->getProperties()['movementCost'];
-
-        if ($movementCost === 0) {
-            return MovementValidationResult::invalid('Cannot move to impassable terrain', MovementValidationResult::IMPASSABLE_TERRAIN);
+        if (!$terrainType->isPassable()) {
+            return MovementValidationResult::invalid(
+                "Cannot move to impassable terrain: {$terrainType->getName()}",
+                'IMPASSABLE_TERRAIN'
+            );
         }
 
+        // Check if positions are adjacent
+        if (!$this->arePositionsAdjacent($from, $to)) {
+            return MovementValidationResult::invalid(
+                'Target position is not adjacent to current position',
+                'NOT_ADJACENT'
+            );
+        }
+
+        $movementCost = $this->calculateMovementCost($terrainData);
         return MovementValidationResult::valid($movementCost);
     }
 
     /**
-     * Calculates movement cost for specific terrain
-     *
-     * @param array $terrainData Terrain data
-     * @return int Movement cost (0 = impassable)
+     * Calculates movement cost for terrain
      */
     public function calculateMovementCost(array $terrainData): int
     {
         $terrainType = TerrainType::from($terrainData['type']);
-        return $terrainType->getProperties()['movementCost'];
+        return $terrainType->getMovementCost();
     }
 
     /**
@@ -123,4 +126,4 @@ class MovementValidationResult
     {
         return $this->movementCost;
     }
-}
+} 

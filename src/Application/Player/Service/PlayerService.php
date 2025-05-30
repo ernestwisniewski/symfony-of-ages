@@ -3,7 +3,7 @@
 namespace App\Application\Player\Service;
 
 use App\Domain\Player\Entity\Player;
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 use App\Domain\Player\Service\PlayerAttributeDomainService;
 use App\Domain\Player\Service\PlayerTurnDomainService;
 use App\Domain\Player\ValueObject\Position;
@@ -276,14 +276,21 @@ class PlayerService
      */
     private function analyzeSurroundingTerrain(Position $position, array $mapData, int $mapRows, int $mapCols): array
     {
-        $surroundingTerrain = $this->hexGridService->getNeighborTiles($mapData, $position, $mapRows, $mapCols);
-        $terrainCounts = $this->hexGridService->getNeighborTerrainCounts($mapData, $position, $mapRows, $mapCols);
+        $surroundingTiles = $this->hexGridService->getNeighborTiles($mapData, $position, $mapRows, $mapCols);
+        $terrainAnalysis = [];
 
-        return [
-            'adjacent_tiles' => $surroundingTerrain,
-            'terrain_distribution' => $terrainCounts,
-            'dominant_terrain' => !empty($terrainCounts) ? array_keys($terrainCounts, max($terrainCounts))[0] : null
-        ];
+        foreach ($surroundingTiles as $tile) {
+            $terrainType = TerrainType::from($tile['type']);
+            $terrainAnalysis[] = [
+                'terrain' => $tile,
+                'movementCost' => $terrainType->getMovementCost(),
+                'defensiveValue' => $terrainType->getDefenseBonus(),
+                'economicValue' => $terrainType->getResourceYield(),
+                'passable' => $terrainType->isPassable()
+            ];
+        }
+
+        return $terrainAnalysis;
     }
 
     /**
@@ -291,26 +298,26 @@ class PlayerService
      */
     private function calculateMovementOptions(Player $player, array $mapData, int $mapRows, int $mapCols): array
     {
-        $movementOptions = [];
-        $currentPosition = $player->getPosition();
-        $currentMovementPoints = $player->getMovementPoints();
+        $position = $player->getPosition();
+        $adjacentTiles = $this->hexGridService->getNeighborTiles($mapData, $position, $mapRows, $mapCols);
+        $validOptions = [];
 
-        $adjacentPositions = $this->hexGridService->getAdjacentPositions($currentPosition, $mapRows, $mapCols);
+        foreach ($adjacentTiles as $tile) {
+            $terrainType = TerrainType::from($tile['type']);
+            $movementCost = $terrainType->getMovementCost();
 
-        foreach ($adjacentPositions as $position) {
-            $terrain = $mapData[$position->getRow()][$position->getCol()];
-            $movementCost = $this->getTerrainMovementCost($terrain);
-
-            $movementOptions[] = [
-                'position' => $position->toArray(),
-                'terrain' => $terrain,
-                'movement_cost' => $movementCost,
-                'can_move' => $movementCost > 0 && $currentMovementPoints >= $movementCost,
-                'movement_points_after' => max(0, $currentMovementPoints - $movementCost)
-            ];
+            if ($terrainType->isPassable() && $player->canMoveTo($movementCost)) {
+                $validOptions[] = [
+                    'terrain' => $tile,
+                    'movementCost' => $movementCost,
+                    'defensiveValue' => $terrainType->getDefenseBonus(),
+                    'economicValue' => $terrainType->getResourceYield(),
+                    'remainingMovement' => $player->getMovementPoints() - $movementCost
+                ];
+            }
         }
 
-        return $movementOptions;
+        return $validOptions;
     }
 
     /**
@@ -319,19 +326,27 @@ class PlayerService
     private function identifyTacticalAdvantages(array $currentTerrain, array $surroundingAnalysis): array
     {
         $advantages = [];
-        $terrainType = TerrainType::from($currentTerrain['type']);
-        $properties = $terrainType->getProperties();
+        $currentTerrainType = TerrainType::from($currentTerrain['type']);
 
-        $this->addAdvantageIfMet($advantages, $properties['defense'] > 2, 'High defensive position');
-        $this->addAdvantageIfMet($advantages, $properties['resources'] > 2, 'Resource-rich location');
-        $this->addAdvantageIfMet($advantages, $properties['movementCost'] === 1, 'High mobility terrain');
+        // High defensive position
+        $this->addAdvantageIfMet($advantages, $currentTerrainType->getDefenseBonus() >= 3, 'High ground advantage');
 
-        $dominantTerrain = $surroundingAnalysis['dominant_terrain'] ?? null;
-        $this->addAdvantageIfMet(
-            $advantages,
-            $dominantTerrain === TerrainType::WATER->value,
-            'Near water (strategic chokepoint)'
-        );
+        // Economic opportunity nearby
+        $hasResourceRichNeighbor = false;
+        foreach ($surroundingAnalysis as $tile) {
+            if ($tile['economicValue'] >= 3) {
+                $hasResourceRichNeighbor = true;
+                break;
+            }
+        }
+        $this->addAdvantageIfMet($advantages, $hasResourceRichNeighbor, 'Resource-rich area nearby');
+
+        // Multiple movement options
+        $passableNeighbors = array_filter($surroundingAnalysis, fn($tile) => $tile['passable']);
+        $this->addAdvantageIfMet($advantages, count($passableNeighbors) >= 4, 'High mobility options');
+
+        // Chokepoint control
+        $this->addAdvantageIfMet($advantages, count($passableNeighbors) <= 2, 'Strategic chokepoint');
 
         return $advantages;
     }
@@ -341,21 +356,29 @@ class PlayerService
      */
     private function generateTacticalRecommendations(Player $player, array $movementOptions, array $surroundingAnalysis): array
     {
-        if ($player->getMovementPoints() === 0) {
-            return ['Start new turn to restore movement points'];
-        }
-
-        $validOptions = array_filter($movementOptions, fn ($option) => $option['can_move']);
-
-        if (empty($validOptions)) {
-            return ['No valid movement options available'];
-        }
-
         $recommendations = [];
-        $bestOptions = $this->findBestMovementOptions($validOptions);
 
-        $this->addRecommendationIfDifferent($recommendations, $bestOptions['defensive'], 'defense');
-        $this->addRecommendationIfDifferent($recommendations, $bestOptions['resource'], 'resources');
+        // Find best defensive position
+        $bestDefensiveOption = null;
+        $maxDefense = 0;
+        foreach ($movementOptions as $option) {
+            if ($option['defensiveValue'] > $maxDefense) {
+                $maxDefense = $option['defensiveValue'];
+                $bestDefensiveOption = $option;
+            }
+        }
+        $this->addRecommendationIfDifferent($recommendations, $bestDefensiveOption, 'Move to high ground for defense');
+
+        // Find best economic position
+        $bestEconomicOption = null;
+        $maxEconomicValue = 0;
+        foreach ($movementOptions as $option) {
+            if ($option['economicValue'] > $maxEconomicValue) {
+                $maxEconomicValue = $option['economicValue'];
+                $bestEconomicOption = $option;
+            }
+        }
+        $this->addRecommendationIfDifferent($recommendations, $bestEconomicOption, 'Move to resource-rich terrain');
 
         return $recommendations;
     }
@@ -365,32 +388,18 @@ class PlayerService
      */
     private function findBestMovementOptions(array $validOptions): array
     {
-        $bestDefensive = null;
-        $bestResource = null;
-        $bestMobility = null;
-
-        foreach ($validOptions as $option) {
-            $terrainType = TerrainType::from($option['terrain']['type']);
-            $properties = $terrainType->getProperties();
-
-            if (!$bestDefensive || $properties['defense'] > $this->getTerrainProperty($bestDefensive, 'defense')) {
-                $bestDefensive = $option;
-            }
-
-            if (!$bestResource || $properties['resources'] > $this->getTerrainProperty($bestResource, 'resources')) {
-                $bestResource = $option;
-            }
-
-            if (!$bestMobility || $properties['movementCost'] < $this->getTerrainProperty($bestMobility, 'movementCost')) {
-                $bestMobility = $option;
-            }
+        if (empty($validOptions)) {
+            return [];
         }
 
-        return [
-            'defensive' => $bestDefensive,
-            'resource' => $bestResource,
-            'mobility' => $bestMobility
-        ];
+        // Sort by combined value (defensive + economic - movement cost)
+        usort($validOptions, function ($a, $b) {
+            $scoreA = $a['defensiveValue'] + $a['economicValue'] - $a['movementCost'];
+            $scoreB = $b['defensiveValue'] + $b['economicValue'] - $b['movementCost'];
+            return $scoreB <=> $scoreA;
+        });
+
+        return array_slice($validOptions, 0, 3); // Return top 3 options
     }
 
     /**
@@ -408,8 +417,8 @@ class PlayerService
      */
     private function addRecommendationIfDifferent(array &$recommendations, ?array $option, string $type): void
     {
-        if ($option) {
-            $recommendations[] = "Consider moving to {$option['terrain']['name']} for better {$type}";
+        if ($option && !in_array($option, $recommendations)) {
+            $recommendations[] = "{$type}: " . $option['terrain']['name'];
         }
     }
 
@@ -418,6 +427,6 @@ class PlayerService
      */
     private function getTerrainProperty(array $option, string $property): mixed
     {
-        return TerrainType::from($option['terrain']['type'])->getProperties()[$property];
+        return TerrainType::from($option['terrain']['type'])->getProperties()->{$property}();
     }
 }

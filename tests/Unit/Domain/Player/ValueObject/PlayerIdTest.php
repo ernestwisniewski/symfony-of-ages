@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Tests\Unit\Domain\Game\ValueObject;
+namespace Tests\Unit\Domain\Player\ValueObject;
 
-use App\Domain\Game\ValueObject\PlayerId;
+use App\Domain\Player\ValueObject\PlayerId;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

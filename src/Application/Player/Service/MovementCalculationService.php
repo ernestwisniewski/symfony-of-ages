@@ -2,7 +2,7 @@
 
 namespace App\Application\Player\Service;
 
-use App\Domain\Game\Service\MovementDomainService;
+use App\Domain\Player\Service\MovementDomainService;
 use App\Domain\Player\Entity\Player;
 use App\Domain\Player\ValueObject\Position;
 use App\Domain\Shared\Service\HexGridService;

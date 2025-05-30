@@ -3,7 +3,7 @@
 namespace App\Application\Map\Service;
 
 use App\Domain\Map\Service\TerrainSmoothingDomainService;
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 
 /**
  * TerrainSmoothingService handles terrain smoothing coordination

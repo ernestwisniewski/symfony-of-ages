@@ -2,7 +2,7 @@
 
 namespace App\Application\Map\Service;
 
-use App\Domain\Player\Enum\TerrainType;
+use App\Domain\Map\Enum\TerrainType;
 
 /**
  * MapValidationService handles map validation and polishing
@@ -392,7 +392,7 @@ class MapValidationService
         for ($row = 0; $row < $rows; $row++) {
             for ($col = 0; $col < $cols; $col++) {
                 $terrainType = TerrainType::from($map[$row][$col]['type']);
-                if ($terrainType->getProperties()['movementCost'] > 0) {
+                if ($terrainType->isPassable()) {
                     $passableCount++;
                 }
             }

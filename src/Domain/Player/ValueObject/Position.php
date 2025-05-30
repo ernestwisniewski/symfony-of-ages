@@ -2,6 +2,8 @@
 
 namespace App\Domain\Player\ValueObject;
 
+use InvalidArgumentException;
+
 /**
  * Position value object representing coordinates on the hexagonal grid
  *
@@ -16,6 +18,14 @@ class Position
 
     public function __construct(int $row, int $col)
     {
+        if ($row < 0) {
+            throw new InvalidArgumentException('Row cannot be negative');
+        }
+        
+        if ($col < 0) {
+            throw new InvalidArgumentException('Column cannot be negative');
+        }
+        
         $this->row = $row;
         $this->col = $col;
     }
@@ -52,20 +62,14 @@ class Position
      */
     public function distanceTo(Position $other): int
     {
-        // Hexagonal distance calculation
-        $dx = $this->col - $other->col;
-        $dy = $this->row - $other->row;
-
-        // Adjust for hexagonal coordinate system
-        if (($this->row % 2) !== ($other->row % 2)) {
-            if ($this->row % 2 === 0) {
-                $dx += 0.5;
-            } else {
-                $dx -= 0.5;
-            }
-        }
-
-        return max(abs($dx), abs($dy), abs($dx + $dy));
+        // Proper hexagonal distance calculation using axial coordinates
+        $q1 = $this->col - ($this->row + ($this->row & 1)) / 2;
+        $r1 = $this->row;
+        
+        $q2 = $other->col - ($other->row + ($other->row & 1)) / 2;
+        $r2 = $other->row;
+        
+        return intval((abs($q1 - $q2) + abs($q1 + $r1 - $q2 - $r2) + abs($r1 - $r2)) / 2);
     }
 
     /**
@@ -84,6 +88,14 @@ class Position
      */
     public static function fromArray(array $data): self
     {
+        if (!isset($data['row'])) {
+            throw new InvalidArgumentException('Row is required');
+        }
+        
+        if (!isset($data['col'])) {
+            throw new InvalidArgumentException('Column is required');
+        }
+        
         return new self($data['row'], $data['col']);
     }
 

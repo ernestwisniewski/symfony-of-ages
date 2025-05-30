@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Tests\Unit\Domain\Game\ValueObject;
+namespace Tests\Unit\Domain\Player\ValueObject;
 
-use App\Domain\Game\ValueObject\MovementPoints;
+use App\Domain\Player\ValueObject\MovementPoints;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
