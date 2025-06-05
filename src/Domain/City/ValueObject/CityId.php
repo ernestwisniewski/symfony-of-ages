@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Domain\Player\ValueObject;
+namespace App\Domain\City\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
-class PlayerId
+final class CityId
 {
     private Uuid $uuid;
 
@@ -16,10 +16,5 @@ class PlayerId
     public function __toString(): string
     {
         return $this->uuid->toRfc4122();
-    }
-
-    public function isEqual(PlayerId $playerId): bool
-    {
-        return $this->id === (string) $playerId;
     }
 }

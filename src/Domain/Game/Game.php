@@ -82,8 +82,8 @@ class Game
     {
         return [
             new GameWasCreated(
-                $command->gameId->__toString(),
-                $command->playerId->__toString(),
+                (string) $command->gameId,
+                (string) $command->playerId,
                 $command->name,
                 $command->createdAt->format()
             )];
@@ -107,7 +107,7 @@ class Game
 
         return [
             new GameWasStarted(
-                $command->gameId->__toString(),
+                (string) $command->gameId,
                 $command->startedAt->format()
             )
         ];
@@ -122,7 +122,7 @@ class Game
 
         if ($this->hasPlayer($command->playerId)) {
             throw new \DomainException(
-                sprintf('Player %s has already joined this game.', $command->playerId->__toString())
+                sprintf('Player %s has already joined this game.', (string) $command->playerId)
             );
         }
 
@@ -134,8 +134,8 @@ class Game
 
         return [
             new PlayerWasJoined(
-                $command->gameId->__toString(),
-                $command->playerId->__toString(),
+                (string) $command->gameId,
+                (string) $command->playerId,
             )
         ];
     }
@@ -151,16 +151,16 @@ class Game
             throw new \DomainException(
                 sprintf(
                     'It is not player %s\'s turn. Current active player is %s.',
-                    $command->playerId->__toString(),
-                    $this->activePlayer->__toString()
+                    (string) $command->playerId,
+                    (string) $this->activePlayer
                 )
             );
         }
 
         return [
             new PlayerEndedTurn(
-                $command->gameId->__toString(),
-                $command->playerId->__toString(),
+                (string) $command->gameId,
+                (string) $command->playerId,
                 $command->endedAt->format()
             )
         ];
@@ -229,7 +229,7 @@ class Game
         throw new \DomainException(
             sprintf(
                 'Active player %s not found in player list. Game state is corrupted.',
-                $this->activePlayer->__toString()
+                (string) $this->activePlayer
             )
         );
     }

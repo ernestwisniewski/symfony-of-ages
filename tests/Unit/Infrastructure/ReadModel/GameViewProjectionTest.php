@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Unit\Domain\Infrastructure\ReadModel;
+namespace App\Tests\Unit\Infrastructure\ReadModel;
 
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Domain\Game\Event\GameWasCreated;

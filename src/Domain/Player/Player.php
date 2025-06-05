@@ -6,7 +6,6 @@ use App\Application\Player\Command\CreatePlayerCommand;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\Event\PlayerWasCreated;
 use App\Domain\Player\ValueObject\PlayerId;
-use App\Domain\Player\ValueObject\PlayerName;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
@@ -35,8 +34,8 @@ class Player
     {
         return [
             new PlayerWasCreated(
-                $command->playerId->__toString(),
-                $command->gameId->__toString()
+                (string) $command->playerId,
+                (string) $command->gameId
             )
         ];
     }
