@@ -43,7 +43,8 @@ final class CityTest extends TestCase
                 cityId: $cityId,
                 ownerId: $playerId,
                 name: (string)$cityName,
-                position: ['x' => 10, 'y' => 5]
+                x: $position->x,
+                y: $position->y
             )
         ], $recordedEvents);
     }

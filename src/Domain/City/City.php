@@ -33,7 +33,8 @@ class City
                 (string) $command->cityId,
                 (string) $command->ownerId,
                 (string)$command->name,
-                $command->position->toArray()
+                $command->position->x,
+                $command->position->y
             )
         ];
     }
@@ -44,6 +45,6 @@ class City
         $this->cityId = new CityId($event->cityId);
         $this->ownerId = new PlayerId($event->ownerId);
         $this->name = new CityName($event->name);
-        $this->position = Position::fromArray($event->position);
+        $this->position = new Position($event->x, $event->y);
     }
 }

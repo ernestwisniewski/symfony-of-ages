@@ -8,7 +8,8 @@ final readonly class CityWasFounded
         public string $cityId,
         public string $ownerId,
         public string $name,
-        public array  $position
+        public int    $x,
+        public int    $y
     )
     {
     }

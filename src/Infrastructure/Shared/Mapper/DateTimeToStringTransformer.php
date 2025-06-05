@@ -6,8 +6,8 @@ use App\Domain\Shared\ValueObject\Timestamp;
 
 final class DateTimeToStringTransformer
 {
-    public static function format(\DateTimeImmutable $value, object $source): string
+    public static function format(?\DateTimeImmutable $value, object $source): ?string
     {
-        return new Timestamp($value)->format();
+        return $value ? new Timestamp($value)->format() : null;
     }
 }
