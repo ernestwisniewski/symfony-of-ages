@@ -22,3 +22,13 @@ services:
     Enqueue\Dbal\DbalConnectionFactory:
         factory: [ 'Ecotone\Dbal\DbalConnection', 'createForManagerRegistry' ]
         arguments: [ "@doctrine","default" ]
+
+    # Domain Policies configuration
+    App\Domain\Game\Policy\GameStartPolicy:
+        arguments:
+            $minPlayersRequired: 2
+
+    App\Domain\Game\Policy\PlayerJoinPolicy:
+        arguments:
+            $maxPlayersAllowed: 4
+

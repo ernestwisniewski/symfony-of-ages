@@ -12,6 +12,9 @@ use App\Domain\Game\Event\GameWasStarted;
 use App\Domain\Game\Event\MapWasGenerated;
 use App\Domain\Game\Event\PlayerEndedTurn;
 use App\Domain\Game\Event\PlayerWasJoined;
+use App\Domain\Game\Policy\GameStartPolicy;
+use App\Domain\Game\Policy\PlayerJoinPolicy;
+use App\Domain\Game\Policy\TurnEndPolicy;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Game\ValueObject\GameName;
 use App\Domain\Game\ValueObject\GameStatus;
@@ -99,20 +102,13 @@ class Game
     }
 
     #[CommandHandler]
-    public function start(StartGameCommand $command): array
+    public function start(StartGameCommand $command, GameStartPolicy $gameStartPolicy): array
     {
-        if (null !== $this->startedAt) {
-            throw new \DomainException('Game was already started.');
-        }
-
-        if (count($this->players) < self::MIN_PLAYERS) {
-            throw new \DomainException(
-                sprintf('Minimum %d players required, but only %d joined.',
-                    self::MIN_PLAYERS,
-                    count($this->players)
-                )
-            );
-        }
+        $gameStartPolicy->validateStart(
+            $this->gameId,
+            count($this->players),
+            $this->startedAt
+        );
 
         return [
             new GameWasStarted(
@@ -123,23 +119,14 @@ class Game
     }
 
     #[CommandHandler]
-    public function join(JoinGameCommand $command): array
+    public function join(JoinGameCommand $command, PlayerJoinPolicy $playerJoinPolicy): array
     {
-        if (null !== $this->startedAt) {
-            throw new \DomainException('Game has already started.');
-        }
-
-        if ($this->hasPlayer($command->playerId)) {
-            throw new \DomainException(
-                sprintf('Player %s has already joined this game.', (string)$command->playerId)
-            );
-        }
-
-        if (count($this->players) >= self::MAX_PLAYERS) {
-            throw new \DomainException(
-                sprintf('Maximum %d players allowed, game is full.', self::MAX_PLAYERS)
-            );
-        }
+        $playerJoinPolicy->validateJoin(
+            $this->gameId,
+            $command->playerId,
+            $this->players,
+            $this->startedAt
+        );
 
         return [
             new PlayerWasJoined(
@@ -150,21 +137,14 @@ class Game
     }
 
     #[CommandHandler]
-    public function endTurn(EndTurnCommand $command): array
+    public function endTurn(EndTurnCommand $command, TurnEndPolicy $turnEndPolicy): array
     {
-        if (null === $this->startedAt) {
-            throw new \DomainException('Game has not been started yet.');
-        }
-
-        if (false === $this->activePlayer->isEqual($command->playerId)) {
-            throw new \DomainException(
-                sprintf(
-                    'It is not player %s\'s turn. Current active player is %s.',
-                    (string)$command->playerId,
-                    (string)$this->activePlayer
-                )
-            );
-        }
+        $turnEndPolicy->validateEndTurn(
+            $this->gameId,
+            $command->playerId,
+            $this->activePlayer,
+            $this->startedAt
+        );
 
         return [
             new PlayerEndedTurn(
@@ -260,7 +240,7 @@ class Game
     {
         foreach ($this->players as $i => $player) {
             if ($player->isEqual($this->activePlayer)) {
-                return $this->players[($i + 1) % count($this->players) - 1];
+                return $this->players[($i + 1) % count($this->players)];
             }
         }
 

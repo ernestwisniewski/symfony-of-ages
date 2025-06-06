@@ -4,6 +4,7 @@ namespace App\Domain\City;
 
 use App\Application\City\Command\FoundCityCommand;
 use App\Domain\City\Event\CityWasFounded;
+use App\Domain\City\Policy\CityFoundingPolicy;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
 use App\Domain\City\ValueObject\Position;
@@ -26,13 +27,21 @@ class City
     public Position $position;
 
     #[CommandHandler]
-    public static function found(FoundCityCommand $command): array
-    {
+    public static function found(
+        FoundCityCommand $command,
+        CityFoundingPolicy $cityFoundingPolicy
+    ): array {
+        $cityFoundingPolicy->validateCityFounding(
+            $command->position,
+            $command->terrain,
+            $command->existingCityPositions
+        );
+
         return [
             new CityWasFounded(
                 (string) $command->cityId,
                 (string) $command->ownerId,
-                (string)$command->name,
+                (string) $command->name,
                 $command->position->x,
                 $command->position->y
             )

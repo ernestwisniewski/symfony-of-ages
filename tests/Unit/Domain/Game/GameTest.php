@@ -10,7 +10,16 @@ use App\Domain\Game\Event\GameWasCreated;
 use App\Domain\Game\Event\GameWasStarted;
 use App\Domain\Game\Event\PlayerEndedTurn;
 use App\Domain\Game\Event\PlayerWasJoined;
+use App\Domain\Game\Exception\GameAlreadyStartedException;
+use App\Domain\Game\Exception\GameFullException;
+use App\Domain\Game\Exception\GameNotStartedException;
+use App\Domain\Game\Exception\InsufficientPlayersException;
+use App\Domain\Game\Exception\NotPlayerTurnException;
+use App\Domain\Game\Exception\PlayerAlreadyJoinedException;
 use App\Domain\Game\Game;
+use App\Domain\Game\Policy\GameStartPolicy;
+use App\Domain\Game\Policy\PlayerJoinPolicy;
+use App\Domain\Game\Policy\TurnEndPolicy;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Game\ValueObject\GameName;
 use App\Domain\Player\ValueObject\PlayerId;
@@ -21,6 +30,17 @@ use Symfony\Component\Uid\Uuid;
 
 class GameTest extends TestCase
 {
+    private function getTestSupport()
+    {
+        return EcotoneLite::bootstrapFlowTesting([
+            Game::class,
+        ], [
+            new GameStartPolicy(minPlayersRequired: 2),
+            new PlayerJoinPolicy(maxPlayersAllowed: 4),
+            new TurnEndPolicy(),
+        ]);
+    }
+
     public function testCreatesGameAndEmitsEvent(): void
     {
         // Given
@@ -37,9 +57,7 @@ class GameTest extends TestCase
         );
 
         // When
-        $testSupport = EcotoneLite::bootstrapFlowTesting([
-            Game::class,
-        ]);
+        $testSupport = $this->getTestSupport();
 
         $recordedEvents = $testSupport
             ->sendCommand($command)
@@ -63,7 +81,7 @@ class GameTest extends TestCase
         $creatorId = Uuid::v4()->toRfc4122();
         $newPlayerId = Uuid::v4()->toRfc4122();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport
             ->withEventsFor($gameId, Game::class, [
@@ -89,7 +107,7 @@ class GameTest extends TestCase
         $gameId = Uuid::v4()->toRfc4122();
         $playerId = Uuid::v4()->toRfc4122();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport
             ->withEventsFor($gameId, Game::class, [
@@ -101,8 +119,8 @@ class GameTest extends TestCase
                 ),
             ]);
 
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('Player');
+        $this->expectException(PlayerAlreadyJoinedException::class);
+        $this->expectExceptionMessage("Player {$playerId} has already joined this game.");
 
         $testSupport->sendCommand(new JoinGameCommand(
             new GameId($gameId),
@@ -118,7 +136,7 @@ class GameTest extends TestCase
 
         $now = Timestamp::now()->__toString();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport
             ->withEventsFor($gameId, Game::class, [
@@ -134,8 +152,8 @@ class GameTest extends TestCase
                 )
             ]);
 
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('already started');
+        $this->expectException(GameAlreadyStartedException::class);
+        $this->expectExceptionMessage("Game {$gameId} was already started.");
 
         $testSupport->sendCommand(new JoinGameCommand(
             new GameId($gameId),
@@ -162,12 +180,12 @@ class GameTest extends TestCase
             $events[] = new PlayerWasJoined($gameId, $playerId);
         }
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport->withEventsFor($gameId, Game::class, $events);
 
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('game is full');
+        $this->expectException(GameFullException::class);
+        $this->expectExceptionMessage('Maximum 4 players allowed, game is full.');
 
         $testSupport->sendCommand(new JoinGameCommand(
             new GameId($gameId),
@@ -182,7 +200,7 @@ class GameTest extends TestCase
         $player2 = Uuid::v4()->toRfc4122();
         $now = Timestamp::now();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport
             ->withEventsFor($gameId, Game::class, [
@@ -206,7 +224,7 @@ class GameTest extends TestCase
         $player2 = Uuid::v4()->toRfc4122();
         $now = Timestamp::now();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport->withEventsFor($gameId, Game::class, [
             new GameWasCreated($gameId, $player1, 'Test', (string)$now),
@@ -214,8 +232,8 @@ class GameTest extends TestCase
             new GameWasStarted($gameId, (string)$now),
         ]);
 
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('already started');
+        $this->expectException(GameAlreadyStartedException::class);
+        $this->expectExceptionMessage("Game {$gameId} was already started.");
 
         $testSupport->sendCommand(new StartGameCommand(
             new GameId($gameId),
@@ -229,14 +247,14 @@ class GameTest extends TestCase
         $player1 = Uuid::v4()->toRfc4122();
         $now = Timestamp::now();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport->withEventsFor($gameId, Game::class, [
             new GameWasCreated($gameId, $player1, 'Test', (string)$now),
         ]);
 
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('Minimum 2 players required');
+        $this->expectException(InsufficientPlayersException::class);
+        $this->expectExceptionMessage('Minimum 2 players required, but only 1 joined.');
 
         $testSupport->sendCommand(new StartGameCommand(
             new GameId($gameId),
@@ -251,7 +269,7 @@ class GameTest extends TestCase
         $player2 = Uuid::v4()->toRfc4122();
         $now = Timestamp::now();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport
             ->withEventsFor($gameId, Game::class, [
@@ -276,14 +294,14 @@ class GameTest extends TestCase
         $player1 = Uuid::v4()->toRfc4122();
         $now = Timestamp::now();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport->withEventsFor($gameId, Game::class, [
             new GameWasCreated($gameId, $player1, 'Test Game', (string)$now),
         ]);
 
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('not been started');
+        $this->expectException(GameNotStartedException::class);
+        $this->expectExceptionMessage("Game {$gameId} has not been started yet.");
 
         $testSupport->sendCommand(new EndTurnCommand(
             new GameId($gameId),
@@ -299,7 +317,7 @@ class GameTest extends TestCase
         $player2 = Uuid::v4()->toRfc4122();
         $now = Timestamp::now();
 
-        $testSupport = EcotoneLite::bootstrapFlowTesting([Game::class]);
+        $testSupport = $this->getTestSupport();
 
         $testSupport->withEventsFor($gameId, Game::class, [
             new GameWasCreated($gameId, $player1, 'Test Game', (string)$now),
@@ -307,8 +325,8 @@ class GameTest extends TestCase
             new GameWasStarted($gameId, (string)$now),
         ]);
 
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('not player');
+        $this->expectException(NotPlayerTurnException::class);
+        $this->expectExceptionMessage("It is not player {$player2}'s turn. Current active player is {$player1}.");
 
         $testSupport->sendCommand(new EndTurnCommand(
             new GameId($gameId),
