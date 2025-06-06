@@ -14,6 +14,7 @@ use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Game\ValueObject\GameName;
 use App\Domain\Game\ValueObject\GameStatus;
 use App\Domain\Game\ValueObject\Turn;
+use App\Domain\Map\Event\MapWasGenerated;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
 use Ecotone\Modelling\Attribute\CommandHandler;
@@ -61,6 +62,11 @@ class Game
             return $this->activePlayer;
         }
     }
+    public array $mapTiles {
+        get {
+            return $this->mapTiles;
+        }
+    }
     public Timestamp $createdAt {
         get {
             return $this->createdAt;
@@ -82,11 +88,12 @@ class Game
     {
         return [
             new GameWasCreated(
-                (string) $command->gameId,
-                (string) $command->playerId,
+                (string)$command->gameId,
+                (string)$command->playerId,
                 $command->name,
                 $command->createdAt->format()
-            )];
+            )
+        ];
     }
 
     #[CommandHandler]
@@ -107,7 +114,7 @@ class Game
 
         return [
             new GameWasStarted(
-                (string) $command->gameId,
+                (string)$command->gameId,
                 $command->startedAt->format()
             )
         ];
@@ -122,7 +129,7 @@ class Game
 
         if ($this->hasPlayer($command->playerId)) {
             throw new \DomainException(
-                sprintf('Player %s has already joined this game.', (string) $command->playerId)
+                sprintf('Player %s has already joined this game.', (string)$command->playerId)
             );
         }
 
@@ -134,8 +141,8 @@ class Game
 
         return [
             new PlayerWasJoined(
-                (string) $command->gameId,
-                (string) $command->playerId,
+                (string)$command->gameId,
+                (string)$command->playerId,
             )
         ];
     }
@@ -151,16 +158,16 @@ class Game
             throw new \DomainException(
                 sprintf(
                     'It is not player %s\'s turn. Current active player is %s.',
-                    (string) $command->playerId,
-                    (string) $this->activePlayer
+                    (string)$command->playerId,
+                    (string)$this->activePlayer
                 )
             );
         }
 
         return [
             new PlayerEndedTurn(
-                (string) $command->gameId,
-                (string) $command->playerId,
+                (string)$command->gameId,
+                (string)$command->playerId,
                 $command->endedAt->format()
             )
         ];
@@ -218,18 +225,24 @@ class Game
         ]));
     }
 
+    #[EventSourcingHandler]
+    public function whenMapWasGenerated(MapWasGenerated $event): void
+    {
+        $this->mapTiles = $event->tiles;
+    }
+
     private function getNextPlayer(): PlayerId
     {
         foreach ($this->players as $i => $player) {
             if ($player->isEqual($this->activePlayer)) {
-                return $this->players[($i + 1) % count($this->players)];
+                return $this->players[($i + 1) % count($this->players)-1];
             }
         }
 
         throw new \DomainException(
             sprintf(
                 'Active player %s not found in player list. Game state is corrupted.',
-                (string) $this->activePlayer
+                (string)$this->activePlayer
             )
         );
     }

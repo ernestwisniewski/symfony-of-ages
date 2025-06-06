@@ -7,7 +7,7 @@ use App\Domain\City\City;
 use App\Domain\City\Event\CityWasFounded;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
-use App\Domain\Map\ValueObject\Position;
+use App\Domain\City\ValueObject\Position;
 use App\Domain\Player\ValueObject\PlayerId;
 use Ecotone\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;

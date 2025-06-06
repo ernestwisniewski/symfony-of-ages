@@ -6,7 +6,7 @@ use App\Application\City\Command\FoundCityCommand;
 use App\Domain\City\Event\CityWasFounded;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
-use App\Domain\Map\ValueObject\Position;
+use App\Domain\City\ValueObject\Position;
 use App\Domain\Player\ValueObject\PlayerId;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;

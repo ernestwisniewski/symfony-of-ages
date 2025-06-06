@@ -4,7 +4,7 @@ namespace App\Application\City\Command;
 
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
-use App\Domain\Map\ValueObject\Position;
+use App\Domain\City\ValueObject\Position;
 use App\Domain\Player\ValueObject\PlayerId;
 
 final readonly class FoundCityCommand

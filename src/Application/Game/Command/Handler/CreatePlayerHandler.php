@@ -10,7 +10,7 @@ use App\Domain\Player\ValueObject\PlayerId;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\CommandBus;
 
-readonly class JoinGameHandler
+readonly class CreatePlayerHandler
 {
     public function __construct(
         private CommandBus $bus,
