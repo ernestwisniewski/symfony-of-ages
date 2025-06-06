@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Map\Service;
+namespace App\Domain\Map\Service;
 
 use App\Domain\Map\ValueObject\TerrainType;
 use App\UI\Map\ViewModel\MapTileView;

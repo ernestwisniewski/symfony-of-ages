@@ -3,7 +3,7 @@
 namespace App\Infrastructure\Map\ReadModel;
 
 use App\Application\Map\Query\GetMapTilesQuery;
-use App\Domain\Game\Event\GameWasCreated;
+use App\Domain\Game\Event\MapWasGenerated;
 use App\Domain\Game\Game;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapTileViewEntity;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapTileViewRepository;
@@ -37,18 +37,12 @@ readonly class MapProjection
     }
 
     #[EventHandler]
-    public function onGameCreated(GameWasCreated $event): void
+    public function onMapGenerated(MapWasGenerated $event): void
     {
-        $width = 10;
-        $height = 10;
-        $terrains = ['plains', 'forest', 'mountain', 'desert', 'swamp', 'water'];
 
-        for ($x = 0; $x < $width; $x++) {
-            for ($y = 0; $y < $height; $y++) {
-                $terrain = $terrains[random_int(0, count($terrains) - 1)];
-                $tile = new MapTileViewEntity($event->gameId, $x, $y, $terrain);
-                $this->entityManager->persist($tile);
-            }
+        foreach (json_decode($event->tiles, true) as $tileData) {
+            $tile = new MapTileViewEntity($event->gameId, $tileData['x'], $tileData['y'], $tileData['terrain']);
+            $this->entityManager->persist($tile);
         }
 
         $this->entityManager->flush();

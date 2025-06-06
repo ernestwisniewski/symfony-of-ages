@@ -3,9 +3,9 @@
 namespace App\Application\Map\Event\Handler;
 
 use App\Application\Map\Command\GenerateMapCommand;
-use App\Application\Map\Service\MapGeneratorService;
 use App\Domain\Game\Event\GameWasCreated;
 use App\Domain\Game\ValueObject\GameId;
+use App\Domain\Map\Service\MapGeneratorService;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\CommandBus;
 

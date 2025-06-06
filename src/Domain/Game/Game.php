@@ -184,7 +184,6 @@ class Game
                 'x' => $tile->x,
                 'y' => $tile->y,
                 'terrain' => $tile->terrain,
-                'isOccupied' => $tile->isOccupied,
             ],
             $command->tiles,
         );
@@ -192,9 +191,9 @@ class Game
         return [
             new MapWasGenerated(
                 gameId: $command->gameId,
-                tiles: $tiles,
-                width: 10,
-                height: 10
+                tiles: json_encode($tiles, true),
+                width: $command->width,
+                height: $command->height
             )
         ];
     }
@@ -241,7 +240,7 @@ class Game
     #[EventSourcingHandler]
     public function whenMapWasGenerated(MapWasGenerated $event): void
     {
-        $this->mapTiles = $event->tiles;
+        $this->mapTiles = json_decode($event->tiles, true);
     }
 
     private function hasPlayer(PlayerId $playerId): bool
