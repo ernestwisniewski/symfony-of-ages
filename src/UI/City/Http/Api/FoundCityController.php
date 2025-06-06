@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Uid\Uuid;
 
 #[AsController]
 readonly class FoundCityController
@@ -30,7 +31,7 @@ readonly class FoundCityController
 
         $this->commandBus->send(
             new FoundCityCommand(
-                new CityId(UuidV4::fromString($gameId)->toString()),
+                new CityId(Uuid::v4()->toRfc4122()),
                 new PlayerId($playerId),
                 new CityName($cities[0]),
                 new Position(10, 20)

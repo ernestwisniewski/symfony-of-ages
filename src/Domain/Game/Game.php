@@ -6,17 +6,19 @@ use App\Application\Game\Command\CreateGameCommand;
 use App\Application\Game\Command\EndTurnCommand;
 use App\Application\Game\Command\JoinGameCommand;
 use App\Application\Game\Command\StartGameCommand;
+use App\Application\Map\Command\GenerateMapCommand;
 use App\Domain\Game\Event\GameWasCreated;
 use App\Domain\Game\Event\GameWasStarted;
+use App\Domain\Game\Event\MapWasGenerated;
 use App\Domain\Game\Event\PlayerEndedTurn;
 use App\Domain\Game\Event\PlayerWasJoined;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Game\ValueObject\GameName;
 use App\Domain\Game\ValueObject\GameStatus;
 use App\Domain\Game\ValueObject\Turn;
-use App\Domain\Map\Event\MapWasGenerated;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use App\UI\Map\ViewModel\MapTileView;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
@@ -173,6 +175,30 @@ class Game
         ];
     }
 
+    #[CommandHandler]
+    public function generateMap(GenerateMapCommand $command): array
+    {
+
+        $tiles = array_map(
+            fn(MapTileView $tile) => [
+                'x' => $tile->x,
+                'y' => $tile->y,
+                'terrain' => $tile->terrain,
+                'isOccupied' => $tile->isOccupied,
+            ],
+            $command->tiles,
+        );
+
+        return [
+            new MapWasGenerated(
+                gameId: $command->gameId,
+                tiles: $tiles,
+                width: 10,
+                height: 10
+            )
+        ];
+    }
+
     #[EventSourcingHandler]
     public function whenGameWasCreated(GameWasCreated $event): void
     {
@@ -212,6 +238,12 @@ class Game
         $this->currentTurnAt = Timestamp::fromString($event->endedAt);
     }
 
+    #[EventSourcingHandler]
+    public function whenMapWasGenerated(MapWasGenerated $event): void
+    {
+        $this->mapTiles = $event->tiles;
+    }
+
     private function hasPlayer(PlayerId $playerId): bool
     {
         return array_any($this->players, fn($player) => $player->isEqual($playerId));
@@ -225,17 +257,11 @@ class Game
         ]));
     }
 
-    #[EventSourcingHandler]
-    public function whenMapWasGenerated(MapWasGenerated $event): void
-    {
-        $this->mapTiles = $event->tiles;
-    }
-
     private function getNextPlayer(): PlayerId
     {
         foreach ($this->players as $i => $player) {
             if ($player->isEqual($this->activePlayer)) {
-                return $this->players[($i + 1) % count($this->players)-1];
+                return $this->players[($i + 1) % count($this->players) - 1];
             }
         }
 
