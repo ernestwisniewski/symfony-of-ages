@@ -24,9 +24,11 @@ final readonly class GameOrchestrationService
     public function __construct(
         private GameManagementService $gameManagementService,
         private CityManagementService $cityManagementService,
-        private CommandBus $commandBus,
-        private QueryBus $queryBus
-    ) {}
+        private CommandBus            $commandBus,
+        private QueryBus              $queryBus
+    )
+    {
+    }
 
     public function joinGameIfPossible(GameId $gameId, PlayerId $playerId): array
     {
@@ -66,13 +68,14 @@ final readonly class GameOrchestrationService
     }
 
     public function foundCityAtBestPosition(
-        GameId $gameId,
+        GameId   $gameId,
         PlayerId $playerId,
         CityName $cityName
-    ): array {
+    ): array
+    {
         // Get map tiles for the game
         $mapTiles = $this->queryBus->send(new GetMapTilesQuery($gameId));
-        
+
         // Get existing city positions (this should come from a repository)
         $existingCityPositions = []; // TODO: Get from city repository
 
@@ -91,7 +94,7 @@ final readonly class GameOrchestrationService
 
         // Choose the first suitable position (in real app, you might have more sophisticated logic)
         $chosenPosition = $suitablePositions[0];
-        
+
         // Determine terrain at that position
         $terrain = $this->getTerrainAtPosition($mapTiles, $chosenPosition);
 
@@ -123,4 +126,4 @@ final readonly class GameOrchestrationService
         // Fallback to plains if not found
         return TerrainType::PLAINS;
     }
-} 
+}

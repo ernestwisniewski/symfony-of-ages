@@ -2,6 +2,8 @@
 
 namespace App\Domain\City\ValueObject;
 
+use DomainException;
+
 final readonly class CityName
 {
     const int MAX_LENGTH = 255;
@@ -9,7 +11,7 @@ final readonly class CityName
     public function __construct(public string $name)
     {
         if (trim($name) === '' || mb_strlen($name) > self::MAX_LENGTH) {
-            throw new \DomainException('Invalid city name.');
+            throw new DomainException('Invalid city name.');
         }
     }
 

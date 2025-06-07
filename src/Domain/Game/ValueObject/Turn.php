@@ -2,12 +2,14 @@
 
 namespace App\Domain\Game\ValueObject;
 
+use InvalidArgumentException;
+
 final readonly class Turn
 {
     public function __construct(private int $number)
     {
         if ($this->number < 0) {
-            throw new \InvalidArgumentException("Turn number cannot be negative.");
+            throw new InvalidArgumentException("Turn number cannot be negative.");
         }
     }
 

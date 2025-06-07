@@ -4,6 +4,7 @@ namespace App\Infrastructure\Game\ReadModel\Doctrine;
 
 use App\Infrastructure\Shared\Mapper\DateTimeToStringTransformer;
 use App\UI\Game\ViewModel\GameView;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 
@@ -27,7 +28,7 @@ class GameViewEntity
 
     #[Map(transform: [DateTimeToStringTransformer::class, 'format'])]
     #[ORM\Column(type: 'datetime_immutable')]
-    public \DateTimeImmutable $createdAt;
+    public DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'string', length: 20)]
     public string $status;
@@ -37,11 +38,11 @@ class GameViewEntity
 
     #[Map(transform: [DateTimeToStringTransformer::class, 'format'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    public ?\DateTimeImmutable $startedAt = null;
+    public ?DateTimeImmutable $startedAt = null;
 
     #[Map(transform: [DateTimeToStringTransformer::class, 'format'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    public ?\DateTimeImmutable $currentTurnAt = null;
+    public ?DateTimeImmutable $currentTurnAt = null;
 
 
     public function __construct(
@@ -49,7 +50,7 @@ class GameViewEntity
         string             $name,
         string             $activePlayer,
         int                $currentTurn,
-        \DateTimeImmutable $createdAt,
+        DateTimeImmutable $createdAt,
         string             $status,
         array              $players
     )

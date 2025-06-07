@@ -7,6 +7,7 @@ use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Game\ValueObject\GameName;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use DateTimeImmutable;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,7 +30,7 @@ readonly class CreateGameController
                 new GameId(Uuid::v4()->toRfc4122()),
                 new PlayerId(Uuid::v4()->toRfc4122()),
                 new GameName('Test Game'),
-                new Timestamp(new \DateTimeImmutable())
+                new Timestamp(new DateTimeImmutable())
             )
         );
 

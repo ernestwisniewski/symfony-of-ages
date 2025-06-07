@@ -21,16 +21,17 @@ class City
     use WithAggregateVersioning;
 
     #[Identifier]
-    public CityId $cityId;
-    public PlayerId $ownerId;
-    public CityName $name;
-    public Position $position;
+    private CityId $cityId;
+    private PlayerId $ownerId;
+    private CityName $name;
+    private Position $position;
 
     #[CommandHandler]
     public static function found(
-        FoundCityCommand $command,
+        FoundCityCommand   $command,
         CityFoundingPolicy $cityFoundingPolicy
-    ): array {
+    ): array
+    {
         $cityFoundingPolicy->validateCityFounding(
             $command->position,
             $command->terrain,
@@ -39,9 +40,9 @@ class City
 
         return [
             new CityWasFounded(
-                (string) $command->cityId,
-                (string) $command->ownerId,
-                (string) $command->name,
+                (string)$command->cityId,
+                (string)$command->ownerId,
+                (string)$command->name,
                 $command->position->x,
                 $command->position->y
             )

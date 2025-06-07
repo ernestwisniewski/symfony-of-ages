@@ -13,24 +13,28 @@ final readonly class PlayerJoinPolicy
 {
     public function __construct(
         private int $maxPlayersAllowed = 4
-    ) {}
+    )
+    {
+    }
 
     public function canJoin(
-        PlayerId $playerId,
-        array $existingPlayers,
+        PlayerId   $playerId,
+        array      $existingPlayers,
         ?Timestamp $startedAt
-    ): bool {
-        return $startedAt === null 
+    ): bool
+    {
+        return $startedAt === null
             && !$this->hasPlayer($playerId, $existingPlayers)
             && count($existingPlayers) < $this->maxPlayersAllowed;
     }
 
     public function validateJoin(
-        GameId $gameId,
-        PlayerId $playerId,
-        array $existingPlayers,
+        GameId     $gameId,
+        PlayerId   $playerId,
+        array      $existingPlayers,
         ?Timestamp $startedAt
-    ): void {
+    ): void
+    {
         if ($startedAt !== null) {
             throw GameAlreadyStartedException::create($gameId);
         }
@@ -48,4 +52,4 @@ final readonly class PlayerJoinPolicy
     {
         return array_any($players, fn($player) => $player->isEqual($playerId));
     }
-} 
+}

@@ -18,24 +18,16 @@ class Player
     use WithAggregateVersioning;
 
     #[Identifier]
-    public PlayerId $playerId {
-        get {
-            return $this->playerId;
-        }
-    }
-    public GameId $gameId {
-        get {
-            return $this->gameId;
-        }
-    }
+    private PlayerId $playerId;
+    private GameId $gameId;
 
     #[CommandHandler]
     public static function create(CreatePlayerCommand $command): array
     {
         return [
             new PlayerWasCreated(
-                (string) $command->playerId,
-                (string) $command->gameId
+                (string)$command->playerId,
+                (string)$command->gameId
             )
         ];
     }
@@ -45,6 +37,5 @@ class Player
     {
         $this->playerId = new PlayerId($event->playerId);
         $this->gameId = new GameId($event->gameId);
-
     }
 }

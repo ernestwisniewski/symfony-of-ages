@@ -42,7 +42,7 @@ final class GameStartPolicyTest extends TestCase
     public function testValidateStartThrowsExceptionWhenGameAlreadyStarted(): void
     {
         $gameId = new GameId('123e4567-e89b-12d3-a456-426614174000');
-        
+
         $this->expectException(GameAlreadyStartedException::class);
         $this->expectExceptionMessage("Game {$gameId} was already started.");
 
@@ -52,7 +52,7 @@ final class GameStartPolicyTest extends TestCase
     public function testValidateStartThrowsExceptionWhenInsufficientPlayers(): void
     {
         $gameId = new GameId('123e4567-e89b-12d3-a456-426614174000');
-        
+
         $this->expectException(InsufficientPlayersException::class);
         $this->expectExceptionMessage('Minimum 2 players required, but only 1 joined.');
 
@@ -62,10 +62,10 @@ final class GameStartPolicyTest extends TestCase
     public function testValidateStartPassesWithValidConditions(): void
     {
         $gameId = new GameId('123e4567-e89b-12d3-a456-426614174000');
-        
+
         // Should not throw any exception
         $this->policy->validateStart($gameId, playersCount: 2, startedAt: null);
 
         $this->assertTrue(true); // If we reach here, test passed
     }
-} 
+}

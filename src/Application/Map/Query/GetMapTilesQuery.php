@@ -6,5 +6,7 @@ use App\Domain\Game\ValueObject\GameId;
 
 final readonly class GetMapTilesQuery
 {
-    public function __construct(public GameId $gameId) {}
+    public function __construct(public GameId $gameId)
+    {
+    }
 }

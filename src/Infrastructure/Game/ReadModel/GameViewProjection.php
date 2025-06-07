@@ -12,10 +12,12 @@ use App\Domain\Game\ValueObject\GameStatus;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewEntity;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewRepository;
 use App\UI\Game\ViewModel\GameView;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Projection("game_view", Game::class)]
@@ -45,7 +47,7 @@ readonly class GameViewProjection
             name: $event->name,
             activePlayer: $event->playerId,
             currentTurn: 0,
-            createdAt: new \DateTimeImmutable($event->createdAt),
+            createdAt: new DateTimeImmutable($event->createdAt),
             status: GameStatus::WAITING_FOR_PLAYERS->value,
             players: [$event->playerId],
         );
@@ -68,9 +70,9 @@ readonly class GameViewProjection
     public function applyGameWasStarted(GameWasStarted $event): void
     {
         $gameView = $this->find($event->gameId);
-        $gameView->startedAt = new \DateTimeImmutable($event->startedAt);
+        $gameView->startedAt = new DateTimeImmutable($event->startedAt);
         $gameView->currentTurn = 1;
-        $gameView->currentTurnAt = new \DateTimeImmutable($event->startedAt);
+        $gameView->currentTurnAt = new DateTimeImmutable($event->startedAt);
         $gameView->activePlayer = $gameView->players[0];
         $gameView->status = GameStatus::IN_PROGRESS->value;
 
@@ -86,13 +88,13 @@ readonly class GameViewProjection
         $index = array_search($current, $players, true);
 
         if ($index === false) {
-            throw new \RuntimeException("Active player {$current} not found in players list");
+            throw new RuntimeException("Active player {$current} not found in players list");
         }
 
         $next = $players[($index + 1) % count($players)];
 
         $gameView->activePlayer = $next;
-        $gameView->currentTurnAt = new \DateTimeImmutable($event->endedAt);
+        $gameView->currentTurnAt = new DateTimeImmutable($event->endedAt);
 
         if ($index === count($players) - 1) {
             $gameView->currentTurn = $gameView->currentTurn + 1;
@@ -106,7 +108,7 @@ readonly class GameViewProjection
         $gameView = $this->gameViewRepository->find($gameId);
 
         if (!$gameView) {
-            throw new \RuntimeException("GameViewEntity for ID $gameId not found");
+            throw new RuntimeException("GameViewEntity for ID $gameId not found");
         }
 
         return $gameView;

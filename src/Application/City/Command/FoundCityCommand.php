@@ -11,12 +11,12 @@ use App\Domain\Player\ValueObject\PlayerId;
 final readonly class FoundCityCommand
 {
     public function __construct(
-        public CityId     $cityId,
-        public PlayerId   $ownerId,
-        public CityName   $name,
-        public Position   $position,
+        public CityId      $cityId,
+        public PlayerId    $ownerId,
+        public CityName    $name,
+        public Position    $position,
         public TerrainType $terrain,
-        public array      $existingCityPositions = []
+        public array       $existingCityPositions = []
     )
     {
     }

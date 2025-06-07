@@ -2,14 +2,16 @@
 
 namespace App\Domain\Game\ValueObject;
 
+use DomainException;
+
 final class GameName
 {
     const int MAX_LENGTH = 120;
 
     public function __construct(public string $name)
     {
-        if(self::MAX_LENGTH < mb_strlen($this->name)) {
-            throw new \DomainException('Game name is too long.');
+        if (self::MAX_LENGTH < mb_strlen($this->name)) {
+            throw new DomainException('Game name is too long.');
         }
     }
 

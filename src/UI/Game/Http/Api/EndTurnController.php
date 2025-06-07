@@ -6,6 +6,7 @@ use App\Application\Game\Command\EndTurnCommand;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use DateTimeImmutable;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +27,7 @@ readonly class EndTurnController
             new EndTurnCommand(
                 new GameId($gameId),
                 new PlayerId($playerId),
-                new Timestamp(new \DateTimeImmutable())
+                new Timestamp(new DateTimeImmutable())
             )
         );
 

@@ -5,6 +5,7 @@ namespace App\UI\Game\Http\Api;
 use App\Application\Game\Command\StartGameCommand;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use DateTimeImmutable;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +25,7 @@ readonly class StartGameController
         $this->commandBus->send(
             new StartGameCommand(
                 new GameId($gameId),
-                new Timestamp(new \DateTimeImmutable())
+                new Timestamp(new DateTimeImmutable())
             )
         );
 

@@ -13,8 +13,10 @@ use App\Infrastructure\Game\ReadModel\Doctrine\GameViewEntity;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewRepository;
 use App\Infrastructure\Game\ReadModel\GameViewProjection;
 use App\UI\Game\ViewModel\GameView;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 class GameViewProjectionTest extends TestCase
@@ -23,7 +25,7 @@ class GameViewProjectionTest extends TestCase
     {
         $gameId = 'game-1';
         $playerId = 'player-1';
-        $now = new \DateTimeImmutable()->format(DATE_ATOM);
+        $now = new DateTimeImmutable()->format(DATE_ATOM);
 
         $entityManager = $this->createMock(EntityManagerInterface::class);
         $repository = $this->createMock(GameViewRepository::class);
@@ -50,7 +52,7 @@ class GameViewProjectionTest extends TestCase
         $repository = $this->createMock(GameViewRepository::class);
         $repository->method('find')->willReturn(null);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('GameViewEntity for ID 11111111-1111-1111-1111-111111111111 not found');
 
         $projection = new GameViewProjection(
@@ -65,7 +67,7 @@ class GameViewProjectionTest extends TestCase
     public function testUpdatesPlayersOnPlayerJoined(): void
     {
         $gameId = 'game-2';
-        $existingEntity = new GameViewEntity($gameId, 'Test', 'player-1', 0, new \DateTimeImmutable(), GameStatus::WAITING_FOR_PLAYERS->value, ['player-1']);
+        $existingEntity = new GameViewEntity($gameId, 'Test', 'player-1', 0, new DateTimeImmutable(), GameStatus::WAITING_FOR_PLAYERS->value, ['player-1']);
 
         $repository = $this->createMock(GameViewRepository::class);
         $repository->method('find')->willReturn($existingEntity);
@@ -85,14 +87,14 @@ class GameViewProjectionTest extends TestCase
     public function testStartsGameAndUpdateFields(): void
     {
         $gameId = '11111111-1111-1111-1111-111111111111';
-        $startedAt = new \DateTimeImmutable('2025-06-01T12:00:00+00:00');
+        $startedAt = new DateTimeImmutable('2025-06-01T12:00:00+00:00');
 
         $gameView = new GameViewEntity(
             id: $gameId,
             name: 'Test Game',
             activePlayer: 'player-1',
             currentTurn: 0,
-            createdAt: new \DateTimeImmutable('2025-06-01T11:00:00+00:00'),
+            createdAt: new DateTimeImmutable('2025-06-01T11:00:00+00:00'),
             status: GameStatus::WAITING_FOR_PLAYERS->value,
             players: ['player-1', 'player-2']
         );
@@ -126,14 +128,14 @@ class GameViewProjectionTest extends TestCase
         $gameId = '11111111-1111-1111-1111-111111111111';
         $players = ['p1', 'p2', 'p3'];
         $currentTurn = 3;
-        $endedAt = new \DateTimeImmutable('2025-06-05T15:00:00+00:00');
+        $endedAt = new DateTimeImmutable('2025-06-05T15:00:00+00:00');
 
         $gameView = new GameViewEntity(
             id: $gameId,
             name: 'Multi-turn test',
             activePlayer: 'p3',
             currentTurn: $currentTurn,
-            createdAt: new \DateTimeImmutable(),
+            createdAt: new DateTimeImmutable(),
             status: GameStatus::IN_PROGRESS->value,
             players: $players
         );
@@ -170,12 +172,12 @@ class GameViewProjectionTest extends TestCase
             name: 'Test Game',
             activePlayer: 'player-1',
             currentTurn: 2,
-            createdAt: new \DateTimeImmutable('2025-06-01T12:00:00+00:00'),
+            createdAt: new DateTimeImmutable('2025-06-01T12:00:00+00:00'),
             status: 'in_progress',
             players: ['player-1', 'player-2']
         );
-        $entity->startedAt = new \DateTimeImmutable('2025-06-01T12:05:00+00:00');
-        $entity->currentTurnAt = new \DateTimeImmutable('2025-06-01T12:15:00+00:00');
+        $entity->startedAt = new DateTimeImmutable('2025-06-01T12:05:00+00:00');
+        $entity->currentTurnAt = new DateTimeImmutable('2025-06-01T12:15:00+00:00');
 
         $repository = $this->createMock(GameViewRepository::class);
         $repository->method('find')->willReturn($entity);

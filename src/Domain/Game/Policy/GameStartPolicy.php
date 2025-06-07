@@ -11,7 +11,9 @@ final readonly class GameStartPolicy
 {
     public function __construct(
         private int $minPlayersRequired = 2
-    ) {}
+    )
+    {
+    }
 
     public function canStart(int $playersCount, ?Timestamp $startedAt): bool
     {
@@ -28,4 +30,4 @@ final readonly class GameStartPolicy
             throw InsufficientPlayersException::create($this->minPlayersRequired, $playersCount);
         }
     }
-} 
+}

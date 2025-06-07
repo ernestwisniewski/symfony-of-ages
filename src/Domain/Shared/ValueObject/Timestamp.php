@@ -2,20 +2,22 @@
 
 namespace App\Domain\Shared\ValueObject;
 
+use DateTimeImmutable;
+
 final readonly class Timestamp
 {
-    public function __construct(private \DateTimeImmutable $date)
+    public function __construct(private DateTimeImmutable $date)
     {
     }
 
     public static function now(): self
     {
-        return new self(new \DateTimeImmutable());
+        return new self(new DateTimeImmutable());
     }
 
     public static function fromString(string $value): self
     {
-        return new self(new \DateTimeImmutable($value));
+        return new self(new DateTimeImmutable($value));
     }
 
     public function format(string $format = DATE_ATOM): string
@@ -23,7 +25,7 @@ final readonly class Timestamp
         return $this->date->format($format);
     }
 
-    public function get(): \DateTimeImmutable
+    public function get(): DateTimeImmutable
     {
         return $this->date;
     }

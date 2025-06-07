@@ -32,7 +32,7 @@ readonly class FoundCityController
         // 1. Get map tiles for the game to find suitable terrain
         // 2. Get existing cities to check for position conflicts
         // 3. Let user choose position via POST with coordinates
-        
+
         // For demo purposes, using plains terrain at random position
         $position = new Position(rand(5, 15), rand(5, 15));
         $terrain = TerrainType::PLAINS; // Safe terrain for city founding

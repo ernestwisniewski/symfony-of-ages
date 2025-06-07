@@ -20,6 +20,6 @@ class PlayerId
 
     public function isEqual(PlayerId $playerId): bool
     {
-        return $this->id === (string) $playerId;
+        return $this->id === (string)$playerId;
     }
 }

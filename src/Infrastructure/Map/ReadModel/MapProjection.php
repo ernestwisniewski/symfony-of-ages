@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Projection("map_view", Game::class)]
@@ -53,7 +54,7 @@ readonly class MapProjection
         $mapView = $this->mapTileViewRepository->findByGameId($gameId);
 
         if (!$mapView) {
-            throw new \RuntimeException("MapViewEntity for game ID $gameId not found");
+            throw new RuntimeException("MapViewEntity for game ID $gameId not found");
         }
 
         return $mapView;

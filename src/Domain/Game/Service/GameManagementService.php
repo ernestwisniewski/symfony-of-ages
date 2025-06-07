@@ -12,34 +12,39 @@ use App\Domain\Shared\ValueObject\Timestamp;
 final readonly class GameManagementService
 {
     public function __construct(
-        private GameStartPolicy $gameStartPolicy,
+        private GameStartPolicy  $gameStartPolicy,
         private PlayerJoinPolicy $playerJoinPolicy,
-        private TurnEndPolicy $turnEndPolicy
-    ) {}
+        private TurnEndPolicy    $turnEndPolicy
+    )
+    {
+    }
 
     public function validateGameStart(
-        GameId $gameId,
-        int $playersCount,
+        GameId     $gameId,
+        int        $playersCount,
         ?Timestamp $startedAt
-    ): void {
+    ): void
+    {
         $this->gameStartPolicy->validateStart($gameId, $playersCount, $startedAt);
     }
 
     public function validatePlayerJoin(
-        GameId $gameId,
-        PlayerId $playerId,
-        array $existingPlayers,
+        GameId     $gameId,
+        PlayerId   $playerId,
+        array      $existingPlayers,
         ?Timestamp $startedAt
-    ): void {
+    ): void
+    {
         $this->playerJoinPolicy->validateJoin($gameId, $playerId, $existingPlayers, $startedAt);
     }
 
     public function validateTurnEnd(
-        GameId $gameId,
-        PlayerId $playerId,
-        PlayerId $activePlayer,
+        GameId     $gameId,
+        PlayerId   $playerId,
+        PlayerId   $activePlayer,
         ?Timestamp $startedAt
-    ): void {
+    ): void
+    {
         $this->turnEndPolicy->validateEndTurn($gameId, $playerId, $activePlayer, $startedAt);
     }
 
@@ -49,18 +54,20 @@ final readonly class GameManagementService
     }
 
     public function canPlayerJoin(
-        PlayerId $playerId,
-        array $existingPlayers,
+        PlayerId   $playerId,
+        array      $existingPlayers,
         ?Timestamp $startedAt
-    ): bool {
+    ): bool
+    {
         return $this->playerJoinPolicy->canJoin($playerId, $existingPlayers, $startedAt);
     }
 
     public function canEndTurn(
-        PlayerId $playerId,
-        PlayerId $activePlayer,
+        PlayerId   $playerId,
+        PlayerId   $activePlayer,
         ?Timestamp $startedAt
-    ): bool {
+    ): bool
+    {
         return $this->turnEndPolicy->canEndTurn($playerId, $activePlayer, $startedAt);
     }
-} 
+}

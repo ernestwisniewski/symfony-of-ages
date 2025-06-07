@@ -2,12 +2,14 @@
 
 namespace App\Domain\City\ValueObject;
 
+use DomainException;
+
 final readonly class Position
 {
     public function __construct(public int $x, public int $y)
     {
         if ($x < 0 || $y < 0) {
-            throw new \DomainException("Invalid position");
+            throw new DomainException("Invalid position");
         }
     }
 

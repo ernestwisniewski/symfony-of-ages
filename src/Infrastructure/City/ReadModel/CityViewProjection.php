@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Projection("city_view", City::class)]
@@ -31,7 +32,7 @@ readonly class CityViewProjection
         $entity = $this->repository->find((string)$query->cityId);
 
         if (!$entity) {
-            throw new \RuntimeException("CityView for ID {$query->cityId} not found.");
+            throw new RuntimeException("CityView for ID {$query->cityId} not found.");
         }
 
         return $this->mapper->map($entity, CityView::class);

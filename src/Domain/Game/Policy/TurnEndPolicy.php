@@ -11,19 +11,21 @@ use App\Domain\Shared\ValueObject\Timestamp;
 final readonly class TurnEndPolicy
 {
     public function canEndTurn(
-        PlayerId $playerId,
-        PlayerId $activePlayer,
+        PlayerId   $playerId,
+        PlayerId   $activePlayer,
         ?Timestamp $startedAt
-    ): bool {
+    ): bool
+    {
         return $startedAt !== null && $activePlayer->isEqual($playerId);
     }
 
     public function validateEndTurn(
-        GameId $gameId,
-        PlayerId $playerId,
-        PlayerId $activePlayer,
+        GameId     $gameId,
+        PlayerId   $playerId,
+        PlayerId   $activePlayer,
         ?Timestamp $startedAt
-    ): void {
+    ): void
+    {
         if ($startedAt === null) {
             throw GameNotStartedException::create($gameId);
         }
@@ -32,4 +34,4 @@ final readonly class TurnEndPolicy
             throw NotPlayerTurnException::create($playerId, $activePlayer);
         }
     }
-} 
+}

@@ -16,19 +16,21 @@ final readonly class CityFoundingPolicy
     ];
 
     public function canFoundCity(
-        Position $position,
+        Position    $position,
         TerrainType $terrain,
-        array $existingCityPositions = []
-    ): bool {
+        array       $existingCityPositions = []
+    ): bool
+    {
         return $this->isTerrainAllowed($terrain)
             && !$this->isPositionOccupied($position, $existingCityPositions);
     }
 
     public function validateCityFounding(
-        Position $position,
+        Position    $position,
         TerrainType $terrain,
-        array $existingCityPositions = []
-    ): void {
+        array       $existingCityPositions = []
+    ): void
+    {
         if (!$this->isTerrainAllowed($terrain)) {
             throw InvalidTerrainException::create($position, $terrain);
         }
@@ -50,4 +52,4 @@ final readonly class CityFoundingPolicy
             fn(Position $existingPosition) => $position->isEqual($existingPosition)
         );
     }
-} 
+}

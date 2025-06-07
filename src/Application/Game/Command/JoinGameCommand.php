@@ -8,7 +8,7 @@ use App\Domain\Player\ValueObject\PlayerId;
 final readonly class JoinGameCommand
 {
     public function __construct(
-        public GameId $gameId,
+        public GameId   $gameId,
         public PlayerId $playerId,
     )
     {

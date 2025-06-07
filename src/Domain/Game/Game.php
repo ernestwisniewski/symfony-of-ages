@@ -22,6 +22,7 @@ use App\Domain\Game\ValueObject\Turn;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
 use App\UI\Map\ViewModel\MapTileView;
+use DomainException;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
@@ -37,56 +38,16 @@ class Game
     const int MAX_PLAYERS = 4;
 
     #[Identifier]
-    public GameId $gameId {
-        get {
-            return $this->gameId;
-        }
-    }
-    public GameName $name {
-        get {
-            return $this->name;
-        }
-    }
-    public GameStatus $status {
-        get {
-            return $this->status;
-        }
-    }
-    public array $players = [] {
-        get {
-            return $this->players;
-        }
-    }
-    public Turn $currentTurn {
-        get {
-            return $this->currentTurn;
-        }
-    }
-    public PlayerId $activePlayer {
-        get {
-            return $this->activePlayer;
-        }
-    }
-    public array $mapTiles {
-        get {
-            return $this->mapTiles;
-        }
-    }
-    public Timestamp $createdAt {
-        get {
-            return $this->createdAt;
-        }
-    }
-    public ?Timestamp $startedAt = null {
-        get {
-            return $this->startedAt;
-        }
-    }
-    public ?Timestamp $currentTurnAt = null {
-        get {
-            return $this->currentTurnAt;
-        }
-    }
+    private GameId $gameId;
+    private GameName $name;
+    private GameStatus $status;
+    private array $players = [];
+    private Turn $currentTurn;
+    private PlayerId $activePlayer;
+    private array $mapTiles;
+    private Timestamp $createdAt;
+    private ?Timestamp $startedAt = null;
+    private ?Timestamp $currentTurnAt = null;
 
     #[CommandHandler]
     public static function create(CreateGameCommand $command): array
@@ -244,7 +205,7 @@ class Game
             }
         }
 
-        throw new \DomainException(
+        throw new DomainException(
             sprintf(
                 'Active player %s not found in player list. Game state is corrupted.',
                 (string)$this->activePlayer

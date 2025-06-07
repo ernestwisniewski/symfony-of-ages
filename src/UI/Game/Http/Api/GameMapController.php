@@ -2,12 +2,8 @@
 
 namespace App\UI\Game\Http\Api;
 
-use App\Application\Game\Command\StartGameCommand;
-use App\Application\Game\Query\GetGameViewQuery;
 use App\Application\Map\Query\GetMapTilesQuery;
 use App\Domain\Game\ValueObject\GameId;
-use App\Domain\Shared\ValueObject\Timestamp;
-use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

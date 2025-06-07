@@ -10,28 +10,33 @@ final readonly class CityManagementService
 {
     public function __construct(
         private CityFoundingPolicy $cityFoundingPolicy
-    ) {}
+    )
+    {
+    }
 
     public function validateCityFounding(
-        Position $position,
+        Position    $position,
         TerrainType $terrain,
-        array $existingCityPositions = []
-    ): void {
+        array       $existingCityPositions = []
+    ): void
+    {
         $this->cityFoundingPolicy->validateCityFounding($position, $terrain, $existingCityPositions);
     }
 
     public function canFoundCity(
-        Position $position,
+        Position    $position,
         TerrainType $terrain,
-        array $existingCityPositions = []
-    ): bool {
+        array       $existingCityPositions = []
+    ): bool
+    {
         return $this->cityFoundingPolicy->canFoundCity($position, $terrain, $existingCityPositions);
     }
 
     public function findSuitablePositions(
         array $mapTiles,
         array $existingCityPositions = []
-    ): array {
+    ): array
+    {
         $suitablePositions = [];
 
         foreach ($mapTiles as $tile) {
@@ -45,4 +50,4 @@ final readonly class CityManagementService
 
         return $suitablePositions;
     }
-} 
+}
