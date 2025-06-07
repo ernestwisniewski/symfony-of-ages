@@ -217,12 +217,13 @@ class UnitTest extends TestCase
                     $attackerType->getMaxHealth(),
                     $createdAt->format()
                 ),
-            ])
-            ->sendCommand(new AttackUnitCommand(
-                new UnitId($attackerId),
-                $defenderDto,
-                $attackedAt
-            ));
+            ]);
+
+        $testSupport->sendCommand(new AttackUnitCommand(
+            new UnitId($attackerId),
+            $defenderDto,
+            $attackedAt
+        ));
 
         // Then
         $expectedDamage = max(1, $attackerType->getAttackPower() - $defenderType->getDefensePower());
