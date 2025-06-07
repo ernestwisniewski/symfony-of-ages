@@ -93,6 +93,7 @@ class Game
             new PlayerWasJoined(
                 (string)$command->gameId,
                 (string)$command->playerId,
+                $command->joinedAt->format()
             )
         ];
     }
@@ -134,7 +135,8 @@ class Game
                 gameId: $command->gameId,
                 tiles: json_encode($tiles, true),
                 width: $command->width,
-                height: $command->height
+                height: $command->height,
+                generatedAt: $command->generatedAt->format()
             )
         ];
     }

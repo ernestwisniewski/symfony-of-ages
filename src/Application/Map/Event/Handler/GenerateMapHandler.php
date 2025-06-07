@@ -6,6 +6,7 @@ use App\Application\Map\Command\GenerateMapCommand;
 use App\Domain\Game\Event\GameWasCreated;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Map\Service\MapGeneratorService;
+use App\Domain\Shared\ValueObject\Timestamp;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\CommandBus;
 
@@ -25,6 +26,7 @@ readonly class GenerateMapHandler
                 tiles: $this->mapGeneratorService->generateTiles(10, 10),
                 width: 10,
                 height: 10,
+                generatedAt: Timestamp::now()
             )
         );
 

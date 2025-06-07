@@ -6,8 +6,10 @@ use App\Application\City\Command\FoundCityCommand;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
 use App\Domain\City\ValueObject\Position;
+use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Map\ValueObject\TerrainType;
 use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\Timestamp;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,9 +44,11 @@ readonly class FoundCityController
             new FoundCityCommand(
                 new CityId(Uuid::v4()->toRfc4122()),
                 new PlayerId($playerId),
+                new GameId($gameId),
                 new CityName($cities[0]),
                 $position,
                 $terrain,
+                Timestamp::now(),
                 $existingCityPositions
             )
         );

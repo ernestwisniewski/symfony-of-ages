@@ -14,4 +14,22 @@ class CityViewRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, CityViewEntity::class);
     }
+
+    public function findByGameId(string $gameId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.gameId = :gameId')
+            ->setParameter('gameId', $gameId)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByOwner(string $ownerId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.ownerId = :ownerId')
+            ->setParameter('ownerId', $ownerId)
+            ->getQuery()
+            ->getResult();
+    }
 }

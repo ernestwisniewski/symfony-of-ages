@@ -2,17 +2,16 @@
 
 namespace App\Application\Unit\Command;
 
+use App\Application\Unit\DTO\TargetUnitDto;
 use App\Domain\Shared\ValueObject\Timestamp;
 use App\Domain\Unit\ValueObject\UnitId;
-use App\UI\Unit\ViewModel\UnitView;
-use Ecotone\Modelling\Attribute\TargetIdentifier;
 
 final readonly class AttackUnitCommand
 {
     public function __construct(
-        public UnitId    $attackerUnitId,
-        public UnitView  $targetUnitView,
-        public Timestamp $attackedAt,
+        public UnitId        $attackerUnitId,
+        public TargetUnitDto $targetUnit,
+        public Timestamp     $attackedAt,
     )
     {
     }

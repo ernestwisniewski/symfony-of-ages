@@ -44,7 +44,7 @@ final readonly class GameOrchestrationService
             ];
         }
 
-        $this->commandBus->send(new JoinGameCommand($gameId, $playerId));
+        $this->commandBus->send(new JoinGameCommand($gameId, $playerId, Timestamp::now()));
 
         return ['success' => true, 'message' => 'Player joined successfully'];
     }
@@ -101,9 +101,11 @@ final readonly class GameOrchestrationService
         $this->commandBus->send(new FoundCityCommand(
             new CityId(Uuid::v4()->toRfc4122()),
             $playerId,
+            $gameId,
             $cityName,
             $chosenPosition,
             $terrain,
+            Timestamp::now(),
             $existingCityPositions
         ));
 

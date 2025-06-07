@@ -94,11 +94,12 @@ class GameTest extends TestCase
             ])
             ->sendCommand(new JoinGameCommand(
                 new GameId($gameId),
-                new PlayerId($newPlayerId)
+                new PlayerId($newPlayerId),
+                Timestamp::now()
             ));
 
         $this->assertEquals([
-            new PlayerWasJoined($gameId, $newPlayerId)
+            new PlayerWasJoined($gameId, $newPlayerId, Timestamp::now()->format())
         ], $testSupport->getRecordedEvents());
     }
 
@@ -124,7 +125,8 @@ class GameTest extends TestCase
 
         $testSupport->sendCommand(new JoinGameCommand(
             new GameId($gameId),
-            new PlayerId($playerId)
+            new PlayerId($playerId),
+            Timestamp::now()
         ));
     }
 
@@ -157,7 +159,8 @@ class GameTest extends TestCase
 
         $testSupport->sendCommand(new JoinGameCommand(
             new GameId($gameId),
-            new PlayerId($newPlayerId)
+            new PlayerId($newPlayerId),
+            Timestamp::now()
         ));
     }
 
@@ -177,7 +180,7 @@ class GameTest extends TestCase
         ];
 
         foreach (array_slice($existingPlayerIds, 1) as $playerId) {
-            $events[] = new PlayerWasJoined($gameId, $playerId);
+            $events[] = new PlayerWasJoined($gameId, $playerId, Timestamp::now()->format());
         }
 
         $testSupport = $this->getTestSupport();
@@ -189,7 +192,8 @@ class GameTest extends TestCase
 
         $testSupport->sendCommand(new JoinGameCommand(
             new GameId($gameId),
-            new PlayerId($newPlayerId)
+            new PlayerId($newPlayerId),
+            Timestamp::now()
         ));
     }
 
@@ -205,7 +209,7 @@ class GameTest extends TestCase
         $testSupport
             ->withEventsFor($gameId, Game::class, [
                 new GameWasCreated($gameId, $player1, 'Test', (string)$now),
-                new PlayerWasJoined($gameId, $player2)
+                new PlayerWasJoined($gameId, $player2, $now->format())
             ])
             ->sendCommand(new StartGameCommand(
                 new GameId($gameId),
@@ -228,7 +232,7 @@ class GameTest extends TestCase
 
         $testSupport->withEventsFor($gameId, Game::class, [
             new GameWasCreated($gameId, $player1, 'Test', (string)$now),
-            new PlayerWasJoined($gameId, $player2),
+            new PlayerWasJoined($gameId, $player2, $now->format()),
             new GameWasStarted($gameId, (string)$now),
         ]);
 
@@ -274,7 +278,7 @@ class GameTest extends TestCase
         $testSupport
             ->withEventsFor($gameId, Game::class, [
                 new GameWasCreated($gameId, $player1, 'Test Game', (string)$now),
-                new PlayerWasJoined($gameId, $player2),
+                new PlayerWasJoined($gameId, $player2, $now->format()),
                 new GameWasStarted($gameId, (string)$now),
             ])
             ->sendCommand(new EndTurnCommand(
@@ -321,7 +325,7 @@ class GameTest extends TestCase
 
         $testSupport->withEventsFor($gameId, Game::class, [
             new GameWasCreated($gameId, $player1, 'Test Game', (string)$now),
-            new PlayerWasJoined($gameId, $player2),
+            new PlayerWasJoined($gameId, $player2, $now->format()),
             new GameWasStarted($gameId, (string)$now),
         ]);
 

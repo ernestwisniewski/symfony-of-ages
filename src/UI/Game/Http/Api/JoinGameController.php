@@ -5,6 +5,7 @@ namespace App\UI\Game\Http\Api;
 use App\Application\Game\Command\JoinGameCommand;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\Timestamp;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +27,7 @@ readonly class JoinGameController
             new JoinGameCommand(
                 new GameId($gameId),
                 new PlayerId(Uuid::v4()->toRfc4122()),
+                Timestamp::now()
             )
         );
 

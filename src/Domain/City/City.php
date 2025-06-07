@@ -8,6 +8,7 @@ use App\Domain\City\Policy\CityFoundingPolicy;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
 use App\Domain\City\ValueObject\Position;
+use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
@@ -23,6 +24,7 @@ class City
     #[Identifier]
     private CityId $cityId;
     private PlayerId $ownerId;
+    private GameId $gameId;
     private CityName $name;
     private Position $position;
 
@@ -42,9 +44,11 @@ class City
             new CityWasFounded(
                 (string)$command->cityId,
                 (string)$command->ownerId,
+                (string)$command->gameId,
                 (string)$command->name,
                 $command->position->x,
-                $command->position->y
+                $command->position->y,
+                $command->foundedAt->format()
             )
         ];
     }
@@ -54,6 +58,7 @@ class City
     {
         $this->cityId = new CityId($event->cityId);
         $this->ownerId = new PlayerId($event->ownerId);
+        $this->gameId = new GameId($event->gameId);
         $this->name = new CityName($event->name);
         $this->position = new Position($event->x, $event->y);
     }

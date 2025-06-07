@@ -7,9 +7,11 @@ final readonly class CityWasFounded
     public function __construct(
         public string $cityId,
         public string $ownerId,
+        public string $gameId,
         public string $name,
         public int    $x,
-        public int    $y
+        public int    $y,
+        public string $foundedAt
     )
     {
     }

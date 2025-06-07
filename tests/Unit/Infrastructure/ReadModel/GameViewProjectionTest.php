@@ -77,7 +77,7 @@ class GameViewProjectionTest extends TestCase
 
         $projection = new GameViewProjection($entityManager, $repository, $this->createMock(ObjectMapperInterface::class));
 
-        $projection->applyPlayerWasJoined(new PlayerWasJoined($gameId, 'player-2'));
+        $projection->applyPlayerWasJoined(new PlayerWasJoined($gameId, 'player-2', (new \DateTimeImmutable())->format(DATE_ATOM)));
 
         $this->assertCount(2, $existingEntity->players);
         $this->assertContains('player-1', $existingEntity->players);

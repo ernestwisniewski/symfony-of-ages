@@ -8,7 +8,8 @@ final readonly class MapWasGenerated
         public string $gameId,
         public string $tiles,
         public int    $width,
-        public int    $height
+        public int    $height,
+        public string $generatedAt
     )
     {
     }

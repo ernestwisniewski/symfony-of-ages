@@ -104,26 +104,26 @@ class Unit
             throw UnitAlreadyDeadException::create($this->unitId);
         }
 
-        $target = $command->targetUnitView;
+        $target = $command->targetUnit;
 
         $combatPolicy->validateAttack(
             $this->unitId,
             $this->position,
             $this->ownerId,
-            $this->unitId,
-            new Position($target->position['x'], $target->position['y']),
-            new PlayerId($target->ownerId),
-            $targetHealth = new Health($target->currentHealth, $target->maxHealth)
+            $target->unitId,
+            $target->position,
+            $target->ownerId,
+            $target->health
         );
 
-        $damage = $combatPolicy->calculateDamage($this->type, UnitType::from($target->type));
-        $newHealth = $targetHealth->takeDamage($damage);
+        $damage = $combatPolicy->calculateDamage($this->type, $target->type);
+        $newHealth = $target->health->takeDamage($damage);
         $wasDestroyed = $newHealth->isDead();
 
         $events = [
             new UnitWasAttacked(
                 attackerUnitId: (string)$this->unitId,
-                defenderUnitId: $target->id,
+                defenderUnitId: (string)$target->unitId,
                 damage: $damage,
                 remainingHealth: $newHealth->current,
                 wasDestroyed: $wasDestroyed,
@@ -133,7 +133,7 @@ class Unit
 
         if ($wasDestroyed) {
             $events[] = new UnitWasDestroyed(
-                unitId: $target->id,
+                unitId: (string)$target->unitId,
                 destroyedAt: $command->attackedAt->format()
             );
         }

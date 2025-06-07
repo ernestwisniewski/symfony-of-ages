@@ -44,6 +44,7 @@ readonly class CityViewProjection
         $city = new CityViewEntity(
             $event->cityId,
             $event->ownerId,
+            $event->gameId,
             $event->name,
             $event->x,
             $event->y

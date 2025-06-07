@@ -19,6 +19,9 @@ class CityViewEntity
     #[ORM\Column(type: 'string', length: 36)]
     public string $ownerId;
 
+    #[ORM\Column(type: 'string', length: 36)]
+    public string $gameId;
+
     #[ORM\Column(type: 'string', length: 100)]
     public string $name;
 
@@ -29,10 +32,11 @@ class CityViewEntity
     #[ORM\Column(type: 'integer')]
     public int $y;
 
-    public function __construct(string $id, string $ownerId, string $name, int $x, int $y)
+    public function __construct(string $id, string $ownerId, string $gameId, string $name, int $x, int $y)
     {
         $this->id = $id;
         $this->ownerId = $ownerId;
+        $this->gameId = $gameId;
         $this->name = $name;
         $this->x = $x;
         $this->y = $y;
