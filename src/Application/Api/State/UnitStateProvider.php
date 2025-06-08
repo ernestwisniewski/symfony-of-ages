@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Application\Api\State;
+
+use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\ProviderInterface;
+use App\Application\Api\Resource\UnitResource;
+use App\Application\Unit\Query\GetUnitViewQuery;
+use App\Domain\Unit\ValueObject\UnitId;
+use App\Infrastructure\Unit\Query\FindUnitById;
+use App\Infrastructure\Unit\Query\FindUnitsByGame;
+use App\Infrastructure\Unit\ReadModel\Doctrine\UnitViewRepository;
+use App\UI\Unit\ViewModel\UnitView;
+use Ecotone\Modelling\QueryBus;
+use Exception;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
+
+final readonly class UnitStateProvider implements ProviderInterface
+{
+    public function __construct(
+        private QueryBus              $queryBus,
+        private UnitViewRepository    $unitViewRepository,
+        private ObjectMapperInterface $objectMapper,
+    )
+    {
+    }
+
+    /**
+     * @return UnitResource|array<UnitResource>|null
+     */
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
+    {
+        $uriTemplate = $operation->getUriTemplate();
+
+        return match (true) {
+            str_contains($uriTemplate, '/units/{unitId}') => $this->getUnit($uriVariables['unitId']),
+            str_contains($uriTemplate, '/games/{gameId}/units') => $this->getUnitsByGame($uriVariables['gameId']),
+            default => null,
+        };
+    }
+
+    private function getUnit(string $unitId): ?UnitResource
+    {
+        try {
+            /** @var UnitView $unitView */
+            $unitView = $this->queryBus->send(new GetUnitViewQuery(new UnitId($unitId)));
+
+            return $this->objectMapper->map($unitView, UnitResource::class);
+        } catch (Exception) {
+            return null;
+        }
+    }
+
+    /**
+     * @return array<UnitResource>
+     */
+    private function getUnitsByGame(string $gameId): array
+    {
+        $unitViewEntities = $this->unitViewRepository->findByGameId($gameId);
+
+        return array_map(
+            fn($entity) => $this->objectMapper->map($entity, UnitResource::class),
+            $unitViewEntities
+        );
+    }
+}

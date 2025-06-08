@@ -2,7 +2,7 @@
 
 namespace App\Domain\Unit\Exception;
 
-use App\Domain\City\ValueObject\Position;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\ValueObject\UnitId;
 
 final class InvalidAttackException extends UnitException
@@ -26,4 +26,4 @@ final class InvalidAttackException extends UnitException
     {
         return new self("Cannot attack unit {$targetId} - target is already dead.");
     }
-} 
+}

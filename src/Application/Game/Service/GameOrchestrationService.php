@@ -9,11 +9,11 @@ use App\Application\Map\Query\GetMapTilesQuery;
 use App\Domain\City\Service\CityManagementService;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Game\Service\GameManagementService;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Map\ValueObject\TerrainType;
 use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Shared\ValueObject\Timestamp;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
@@ -104,7 +104,6 @@ final readonly class GameOrchestrationService
             $gameId,
             $cityName,
             $chosenPosition,
-            $terrain,
             Timestamp::now(),
             $existingCityPositions
         ));

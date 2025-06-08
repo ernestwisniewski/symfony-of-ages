@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Unit\ReadModel\Doctrine;
 
-use App\Infrastructure\Shared\Mapper\PositionToArrayTransformer;
+use App\Infrastructure\Shared\Mapper\UnitPositionToArrayTransformer;
 use App\UI\Unit\ViewModel\UnitView;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\ObjectMapper\Attribute\Map;
@@ -25,7 +25,7 @@ class UnitViewEntity
     #[ORM\Column(type: 'string', length: 50)]
     public string $type;
 
-    #[Map(target: 'position', transform: PositionToArrayTransformer::class)]
+    #[Map(target: 'position', transform: UnitPositionToArrayTransformer::class)]
     #[ORM\Column(type: 'integer')]
     public int $x;
 

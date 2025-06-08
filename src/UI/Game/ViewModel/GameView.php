@@ -6,6 +6,7 @@ final class GameView
 {
     public string $id;
     public string $name;
+    public string $status;
     public string $activePlayer;
     public int $currentTurn;
     public string $createdAt;

@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 
 #[ORM\Entity(repositoryClass: MapTileViewRepository::class)]
-#[ORM\Table(name: 'map_view')]
+#[ORM\Table(name: 'map_tile_view')]
 class MapTileViewEntity
 {
     #[ORM\Id]

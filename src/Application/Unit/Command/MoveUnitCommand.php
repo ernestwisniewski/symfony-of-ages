@@ -2,7 +2,7 @@
 
 namespace App\Application\Unit\Command;
 
-use App\Domain\City\ValueObject\Position;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Shared\ValueObject\Timestamp;
 use App\Domain\Unit\ValueObject\UnitId;
 

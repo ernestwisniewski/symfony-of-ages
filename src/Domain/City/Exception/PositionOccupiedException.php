@@ -2,7 +2,7 @@
 
 namespace App\Domain\City\Exception;
 
-use App\Domain\City\ValueObject\Position;
+use App\Domain\Shared\ValueObject\Position;
 
 final class PositionOccupiedException extends CityException
 {
@@ -10,4 +10,4 @@ final class PositionOccupiedException extends CityException
     {
         return new self("Position ({$position->x}, {$position->y}) is already occupied.");
     }
-} 
+}

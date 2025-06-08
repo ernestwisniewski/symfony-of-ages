@@ -2,8 +2,8 @@
 
 namespace App\Domain\City\Exception;
 
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Map\ValueObject\TerrainType;
+use App\Domain\Shared\ValueObject\Position;
 
 final class InvalidTerrainException extends CityException
 {
@@ -11,4 +11,4 @@ final class InvalidTerrainException extends CityException
     {
         return new self("Cannot found city on {$terrain->value} terrain at position ({$position->x}, {$position->y}).");
     }
-} 
+}

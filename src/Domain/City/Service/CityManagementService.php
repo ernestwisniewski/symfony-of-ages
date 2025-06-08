@@ -3,8 +3,8 @@
 namespace App\Domain\City\Service;
 
 use App\Domain\City\Policy\CityFoundingPolicy;
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Map\ValueObject\TerrainType;
+use App\Domain\Shared\ValueObject\Position;
 
 final readonly class CityManagementService
 {

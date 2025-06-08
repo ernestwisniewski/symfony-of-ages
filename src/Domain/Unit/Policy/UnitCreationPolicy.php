@@ -2,8 +2,8 @@
 
 namespace App\Domain\Unit\Policy;
 
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Map\ValueObject\TerrainType;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\Exception\InvalidMovementException;
 
 final readonly class UnitCreationPolicy

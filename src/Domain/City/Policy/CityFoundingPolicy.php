@@ -4,8 +4,8 @@ namespace App\Domain\City\Policy;
 
 use App\Domain\City\Exception\InvalidTerrainException;
 use App\Domain\City\Exception\PositionOccupiedException;
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Map\ValueObject\TerrainType;
+use App\Domain\Shared\ValueObject\Position;
 
 final readonly class CityFoundingPolicy
 {

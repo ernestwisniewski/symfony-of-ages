@@ -2,8 +2,8 @@
 
 namespace App\Application\Unit\DTO;
 
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\ValueObject\Health;
 use App\Domain\Unit\ValueObject\UnitId;
 use App\Domain\Unit\ValueObject\UnitType;

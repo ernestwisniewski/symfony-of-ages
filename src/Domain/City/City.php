@@ -7,9 +7,10 @@ use App\Domain\City\Event\CityWasFounded;
 use App\Domain\City\Policy\CityFoundingPolicy;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Game\ValueObject\GameId;
+use App\Domain\Map\ValueObject\TerrainType;
 use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\Position;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
@@ -36,7 +37,7 @@ class City
     {
         $cityFoundingPolicy->validateCityFounding(
             $command->position,
-            $command->terrain,
+            TerrainType::FOREST, // @todo
             $command->existingCityPositions
         );
 

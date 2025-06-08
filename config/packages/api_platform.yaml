@@ -1,0 +1,21 @@
+api_platform:
+    title: 'Strategy Game API'
+    version: 1.0.0
+    description: 'A modern strategy game API built with Event Sourcing and CQRS'
+    mapping:
+        paths: ['%kernel.project_dir%/src/Application/Api/Resource']
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+        extra_properties:
+            standard_put: false
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+    docs_formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+        html: ['text/html']
+    swagger:
+        versions: [3] 

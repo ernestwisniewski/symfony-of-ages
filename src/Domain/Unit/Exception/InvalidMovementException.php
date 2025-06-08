@@ -2,7 +2,7 @@
 
 namespace App\Domain\Unit\Exception;
 
-use App\Domain\City\ValueObject\Position;
+use App\Domain\Shared\ValueObject\Position;
 
 final class InvalidMovementException extends UnitException
 {
@@ -21,4 +21,4 @@ final class InvalidMovementException extends UnitException
     {
         return new self("Unit cannot move to position ({$position->x}, {$position->y}) due to impassable terrain.");
     }
-} 
+}

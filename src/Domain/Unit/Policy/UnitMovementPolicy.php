@@ -2,7 +2,7 @@
 
 namespace App\Domain\Unit\Policy;
 
-use App\Domain\City\ValueObject\Position;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\Exception\InvalidMovementException;
 use App\Domain\Unit\ValueObject\UnitType;
 

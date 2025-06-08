@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\City\ValueObject;
+namespace App\Domain\Shared\ValueObject;
 
 use DomainException;
 
