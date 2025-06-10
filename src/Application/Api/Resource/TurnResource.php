@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use App\Application\Api\State\TurnStateProcessor;
+use App\Application\Api\State\TurnStateProvider;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -27,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             normalizationContext: ['groups' => ['turn:read']],
             denormalizationContext: ['groups' => ['turn:end']],
             validationContext: ['groups' => ['turn:end']],
-            processor: TurnStateProcessor::class,
+            processor: TurnStateProvider::class,
         )
     ],
     paginationEnabled: false,

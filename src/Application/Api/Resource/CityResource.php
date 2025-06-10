@@ -35,7 +35,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriVariables: [
                 'gameId' => new Link(fromClass: GameResource::class)
             ],
-            status: 200,
+            status: 201,
             normalizationContext: ['groups' => ['city:read']],
             denormalizationContext: ['groups' => ['city:create']],
             validationContext: ['groups' => ['city:create']],

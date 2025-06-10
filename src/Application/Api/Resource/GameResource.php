@@ -28,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/games',
-            status: 201,
+            status: 202,
             normalizationContext: ['groups' => ['game:read']],
             denormalizationContext: ['groups' => ['game:create']],
             validationContext: ['groups' => ['game:create']],
@@ -37,7 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/games/{gameId}/start',
-            status: 200,
+            status: 202,
             normalizationContext: ['groups' => ['game:read']],
             denormalizationContext: ['groups' => ['game:start']],
             output: false,
@@ -45,7 +45,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/games/{gameId}/join',
-            status: 201,
+            status: 202,
             normalizationContext: ['groups' => ['game:read']],
             denormalizationContext: ['groups' => ['game:join']],
             validationContext: ['groups' => ['game:join']],
