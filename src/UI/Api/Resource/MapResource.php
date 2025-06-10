@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Api\Resource;
+namespace App\UI\Api\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;

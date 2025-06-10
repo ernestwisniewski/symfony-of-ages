@@ -7,6 +7,7 @@ use App\Domain\Game\Event\GameWasCreated;
 use App\Domain\Game\Event\PlayerWasJoined;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\UserId;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\CommandBus;
 
@@ -21,7 +22,8 @@ readonly class CreatePlayerHandler
     {
         $this->bus->send(new CreatePlayerCommand(
             new PlayerId($event->playerId),
-            new GameId($event->gameId)
+            new GameId($event->gameId),
+            new UserId($event->userId)
         ));
     }
 }

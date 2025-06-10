@@ -4,11 +4,11 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Application\Api\Resource\TurnResource;
 use App\Application\Game\Command\EndTurnCommand;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use App\UI\Api\Resource\TurnResource;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 

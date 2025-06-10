@@ -3,7 +3,7 @@ api_platform:
     version: 1.0.0
     description: 'A modern strategy game API built with Event Sourcing and CQRS'
     mapping:
-        paths: ['%kernel.project_dir%/src/Application/Api/Resource']
+        paths: ['%kernel.project_dir%/src/UI/Api/Resource']
     defaults:
         stateless: true
         cache_headers:

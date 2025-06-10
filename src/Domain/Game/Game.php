@@ -57,6 +57,7 @@ class Game
                 (string)$command->gameId,
                 (string)$command->playerId,
                 $command->name,
+                $command->userId->id,
                 $command->createdAt->format()
             )
         ];
@@ -93,6 +94,7 @@ class Game
             new PlayerWasJoined(
                 (string)$command->gameId,
                 (string)$command->playerId,
+                $command->userId->id,
                 $command->joinedAt->format()
             )
         ];

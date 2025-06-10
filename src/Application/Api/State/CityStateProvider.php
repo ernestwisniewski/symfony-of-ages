@@ -4,10 +4,10 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\Application\Api\Resource\CityResource;
 use App\Application\City\Query\GetCityViewQuery;
 use App\Domain\City\ValueObject\CityId;
 use App\Infrastructure\City\ReadModel\Doctrine\CityViewRepository;
+use App\UI\Api\Resource\CityResource;
 use App\UI\City\ViewModel\CityView;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;

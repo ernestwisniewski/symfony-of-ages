@@ -4,9 +4,9 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\Application\Api\Resource\TurnResource;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Domain\Game\ValueObject\GameId;
+use App\UI\Api\Resource\TurnResource;
 use App\UI\Game\ViewModel\GameView;
 use App\UI\Turn\ViewModel\TurnView;
 use Ecotone\Modelling\QueryBus;

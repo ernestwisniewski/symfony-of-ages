@@ -8,6 +8,7 @@ final readonly class GameWasCreated
         public string $gameId,
         public string $playerId,
         public string $name,
+        public int    $userId,
         public string $createdAt
     )
     {

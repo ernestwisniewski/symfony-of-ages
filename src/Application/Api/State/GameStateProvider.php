@@ -4,11 +4,11 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\Application\Api\Resource\GameResource;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Domain\Game\ValueObject\GameId;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewEntity;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewRepository;
+use App\UI\Api\Resource\GameResource;
 use App\UI\Game\ViewModel\GameView;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;

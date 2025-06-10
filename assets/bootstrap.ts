@@ -1,4 +1,4 @@
-import {startStimulusApp, registerControllers} from "vite-plugin-symfony/dist/stimulus/helpers/index";
+import {startStimulusApp, registerControllers} from "vite-plugin-symfony/stimulus/helpers";
 
 const app = startStimulusApp();
 registerControllers(

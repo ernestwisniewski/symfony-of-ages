@@ -4,10 +4,10 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\Application\Api\Resource\UnitResource;
 use App\Application\Unit\Query\GetUnitViewQuery;
 use App\Domain\Unit\ValueObject\UnitId;
 use App\Infrastructure\Unit\ReadModel\Doctrine\UnitViewRepository;
+use App\UI\Api\Resource\UnitResource;
 use App\UI\Unit\ViewModel\UnitView;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;

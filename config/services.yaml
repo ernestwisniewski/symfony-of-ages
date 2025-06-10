@@ -23,7 +23,7 @@ services:
         factory: [ 'Ecotone\Dbal\DbalConnection', 'createForManagerRegistry' ]
         arguments: [ "@doctrine","default" ]
 
-    # Domain Policies configuration
+    # Generic Policies configuration
     App\Domain\Game\Policy\GameStartPolicy:
         arguments:
             $minPlayersRequired: 2

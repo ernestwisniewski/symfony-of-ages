@@ -27,7 +27,8 @@ class Player
         return [
             new PlayerWasCreated(
                 (string)$command->playerId,
-                (string)$command->gameId
+                (string)$command->gameId,
+                $command->userId->id
             )
         ];
     }

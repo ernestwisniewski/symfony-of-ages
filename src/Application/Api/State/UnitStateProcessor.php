@@ -4,7 +4,6 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Application\Api\Resource\UnitResource;
 use App\Application\Unit\Command\AttackUnitCommand;
 use App\Application\Unit\Command\CreateUnitCommand;
 use App\Application\Unit\Command\MoveUnitCommand;
@@ -17,6 +16,7 @@ use App\Domain\Shared\ValueObject\Timestamp;
 use App\Domain\Unit\ValueObject\Health;
 use App\Domain\Unit\ValueObject\UnitId;
 use App\Domain\Unit\ValueObject\UnitType;
+use App\UI\Api\Resource\UnitResource;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;

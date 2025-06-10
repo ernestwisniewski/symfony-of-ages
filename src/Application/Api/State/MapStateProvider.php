@@ -4,9 +4,9 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\Application\Api\Resource\MapResource;
 use App\Application\Map\Query\GetMapViewQuery;
 use App\Domain\Game\ValueObject\GameId;
+use App\UI\Api\Resource\MapResource;
 use App\UI\Map\ViewModel\MapView;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
