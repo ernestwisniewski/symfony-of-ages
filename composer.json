@@ -19,6 +19,7 @@
         "ecotone/jms-converter": "^1.254",
         "ecotone/pdo-event-sourcing": "^1.254",
         "ecotone/symfony-bundle": "*",
+        "lexik/jwt-authentication-bundle": "^3.1",
         "nelmio/cors-bundle": "^2.5",
         "pentatrion/vite-bundle": "^8.1",
         "phpdocumentor/reflection-docblock": "^5.6",

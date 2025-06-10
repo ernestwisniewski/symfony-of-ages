@@ -24,12 +24,6 @@ final readonly class CityStateProvider implements ProviderInterface
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
-        $resourceClass = $operation->getClass();
-
-        if ($resourceClass !== CityResource::class) {
-            return null;
-        }
-
         if (isset($uriVariables['cityId'])) {
             return $this->provideCity($uriVariables['cityId']);
         }

@@ -13,21 +13,42 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+            
+        login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+                
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+            
         main:
             lazy: true
             provider: app_user_provider
-            stateless: true
-
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/api, roles: ROLE_USER }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/docs, roles: PUBLIC_ACCESS }        # Dokumentacja API
+        - { path: ^/api$, roles: PUBLIC_ACCESS }             # Strona główna API
+        - { path: ^/api\.json, roles: PUBLIC_ACCESS }        # JSON Schema  
+        - { path: ^/api\.jsonld, roles: PUBLIC_ACCESS }      # JSON-LD Schema
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/login,     roles: PUBLIC_ACCESS }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Infrastructure\Map\Query;
+namespace App\Application\Map\Query;
 
 final readonly class FindMapByGame
 {

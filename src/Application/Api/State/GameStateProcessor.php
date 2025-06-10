@@ -31,17 +31,7 @@ final readonly class GameStateProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
-        if (!$data instanceof GameResource) {
-            throw new BadRequestHttpException('Expected GameResource');
-        }
-
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            // For testing purposes, use a default user ID
-            $userId = new UserId(1);
-        } else {
-            $userId = new UserId($user->getId());
-        }
+        $userId = new UserId($this->security->getUser()->getId());
 
         match ($operation->getUriTemplate()) {
             '/games' => $this->createGame($data, $userId),

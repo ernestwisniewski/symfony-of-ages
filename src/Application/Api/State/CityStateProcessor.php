@@ -26,10 +26,6 @@ final readonly class CityStateProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
-        if (!$data instanceof CityResource) {
-            throw new BadRequestHttpException('Expected CityResource');
-        }
-
         match ($operation->getUriTemplate()) {
             '/games/{gameId}/cities' => $this->foundCity($uriVariables['gameId'], $data),
             default => throw new BadRequestHttpException('Unsupported operation'),

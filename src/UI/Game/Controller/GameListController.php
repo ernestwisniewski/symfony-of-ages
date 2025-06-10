@@ -18,14 +18,14 @@ use Symfony\Component\Routing\Attribute\Route;
 class GameListController extends AbstractController
 {
     public function __construct(
-        private QueryBus $queryBus,
-        private Security $security,
+        private readonly QueryBus $queryBus,
+        private readonly Security $security,
     )
     {
 
     }
 
-    #[Route('/games', name: 'app_games')]
+    #[Route('/games', name: 'app_games', methods: ['GET'])]
     public function index(): Response
     {
         /** @var GameView[] $games */

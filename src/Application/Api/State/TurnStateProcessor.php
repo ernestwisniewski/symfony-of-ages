@@ -8,42 +8,26 @@ use App\Application\Game\Command\EndTurnCommand;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
-use App\UI\Api\Resource\TurnResource;
 use Ecotone\Modelling\CommandBus;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final readonly class TurnStateProcessor implements ProcessorInterface
 {
     public function __construct(
-        private CommandBus        $commandBus,
-        private TurnStateProvider $stateProvider,
+        private CommandBus $commandBus,
     )
     {
     }
 
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): TurnResource|null
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
-        if (!$data instanceof TurnResource) {
-            throw new BadRequestHttpException('Invalid data type');
-        }
-
-        $gameId = $uriVariables['gameId'] ?? null;
-        if (!$gameId) {
-            throw new BadRequestHttpException('Game ID is required');
-        }
-
-
-        $endedAt = Timestamp::now();
+        $gameId = $uriVariables['gameId'];
 
         $command = new EndTurnCommand(
             gameId: new GameId($gameId),
             playerId: new PlayerId($data->playerId),
-            endedAt: $endedAt
+            endedAt: Timestamp::now()
         );
 
         $this->commandBus->send($command);
-
-        // CQRS: Commands should not return data, only execute actions
-        return null;
     }
 }

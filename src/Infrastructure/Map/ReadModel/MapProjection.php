@@ -2,11 +2,11 @@
 
 namespace App\Infrastructure\Map\ReadModel;
 
+use App\Application\Map\Query\FindMapByGame;
 use App\Application\Map\Query\GetMapTilesQuery;
 use App\Application\Map\Query\GetMapViewQuery;
 use App\Domain\Game\Event\MapWasGenerated;
 use App\Domain\Game\Game;
-use App\Infrastructure\Map\Query\FindMapByGame;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapTileViewEntity;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapTileViewRepository;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapViewEntity;
