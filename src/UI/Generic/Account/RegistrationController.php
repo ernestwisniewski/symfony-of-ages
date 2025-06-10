@@ -3,6 +3,7 @@
 namespace App\UI\Generic\Account;
 
 use App\Infrastructure\Generic\Account\Doctrine\User;
+use App\UI\Generic\Account\EmailVerifier;
 use App\UI\Generic\Account\Form\RegistrationForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -44,7 +45,7 @@ class RegistrationController extends AbstractController
                     ->from(new Address('mailer@your-domain.com', 'SOA'))
                     ->to((string) $user->getEmail())
                     ->subject('Please Confirm your Email')
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
+                    ->htmlTemplate('account/confirmation_email.html.twig')
             );
 
             // do anything else you need here, like send an email
@@ -52,7 +53,7 @@ class RegistrationController extends AbstractController
             return $security->login($user, 'form_login', 'main');
         }
 
-        return $this->render('registration/register.html.twig', [
+        return $this->render('account/register.html.twig', [
             'registrationForm' => $form,
         ]);
     }

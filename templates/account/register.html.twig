@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Found Your Civilization - SOA{% endblock %}
+
+{% block body %}
+<div class="auth-page">
+    <div class="auth-background">
+        <div class="auth-gradient"></div>
+        <div class="auth-particles"></div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <a href="/" class="auth-logo">
+                <h2>SOA</h2>
+            </a>
+                         <div class="auth-nav">
+                 <span>Veteran strategist?</span>
+                 <a href="{{ path('app_login') }}" class="auth-link">Resume Campaign</a>
+             </div>
+        </div>
+
+        <div class="auth-form-container">
+                         <div class="auth-form-header">
+                 <h1>Found Your Civilization</h1>
+                 <p>Begin your epic journey through 6000 years of technological and cultural evolution</p>
+             </div>
+
+            {% for flash_error in app.flashes('verify_email_error') %}
+                <div class="auth-error">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                    </svg>
+                    {{ flash_error }}
+                </div>
+            {% endfor %}
+
+            {% for flash_success in app.flashes('success') %}
+                <div class="auth-success">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                    </svg>
+                    {{ flash_success }}
+                </div>
+            {% endfor %}
+
+            {{ form_start(registrationForm, {'attr': {'class': 'auth-form'}}) }}
+                {% if form_errors(registrationForm) %}
+                    <div class="auth-error">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                        </svg>
+                        {{ form_errors(registrationForm) }}
+                    </div>
+                {% endif %}
+
+                                 <div class="form-group">
+                     {{ form_label(registrationForm.email, 'Leader Identity') }}
+                     {{ form_widget(registrationForm.email) }}
+                     {{ form_errors(registrationForm.email) }}
+                 </div>
+
+                 <div class="form-group">
+                     {{ form_label(registrationForm.plainPassword, 'Civilization Encryption') }}
+                     {{ form_widget(registrationForm.plainPassword) }}
+                     {{ form_errors(registrationForm.plainPassword) }}
+                 </div>
+
+                <div class="form-group checkbox-group">
+                    {{ form_widget(registrationForm.agreeTerms) }}
+                                         {{ form_label(registrationForm.agreeTerms, 'I accept the 4X Strategy Codex & Multiplayer Civilization Protocols') }}
+                    {{ form_errors(registrationForm.agreeTerms) }}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V7.5L12,11L5,7.5V5H19M5,19V9.67L11.07,12.95C11.67,13.27 12.33,13.27 12.93,12.95L19,9.67V19H5Z"/>
+                    </svg>
+                                         Begin Civilization
+                </button>
+            {{ form_end(registrationForm) }}
+
+                         <div class="auth-footer">
+                 <p>Already leading a civilization? <a href="{{ path('app_login') }}">Continue your campaign</a></p>
+             </div>
+        </div>
+
+        <div class="auth-visual">
+            <div class="empire-preview">
+                <div class="empire-screen">
+                                         <div class="empire-header">
+                         <div class="status-indicator building"></div>
+                         <span>CIVILIZATION FOUNDED</span>
+                     </div>
+                    <div class="empire-map">
+                        <div class="territory available" style="top: 25%; left: 20%;"></div>
+                        <div class="territory available" style="top: 40%; left: 50%;"></div>
+                        <div class="territory available" style="top: 60%; left: 35%;"></div>
+                        <div class="territory expanding" style="top: 45%; left: 70%;"></div>
+                        <div class="empire-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

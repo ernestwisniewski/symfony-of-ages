@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SOA - Symfony of Ages{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="homepage">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <div class="hero-gradient"></div>
+        </div>
+
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <h2>SOA</h2>
+                </div>
+                <div class="nav-menu">
+                    <a href="#features" class="nav-link">Tech Tree</a>
+                    <a href="#about" class="nav-link">Civilizations</a>
+                    <a href="#contact" class="nav-link">Multiplayer</a>
+                    <a href="/login" class="nav-cta">Play Now</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    <span class="title-main">Symfony of Ages</span>
+                    <span class="title-sub">Build empires that span centuries</span>
+                </h1>
+                <p class="hero-description">
+                    Experience deep 4X gameplay with tech trees, diplomatic intrigue, and strategic resource management.
+                    From Ancient Era to Information Age - expand your civilization, exploit natural resources,
+                    exterminate rivals, and explore uncharted territories in persistent multiplayer campaigns.
+                </p>
+                <div class="hero-actions">
+                    <a href="/register" class="btn btn-primary">Found Your Civilization</a>
+                    <a href="#features" class="btn btn-secondary">Study the Mechanics</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="game-preview">
+                    <div class="preview-screen">
+                        <div class="world-map-preview">
+                            <div class="continent europe"></div>
+                            <div class="continent asia"></div>
+                            <div class="continent africa"></div>
+                            <div class="continent americas"></div>
+                            <div class="territory-marker controlled" style="top: 25%; left: 30%;"></div>
+                            <div class="territory-marker enemy" style="top: 45%; left: 60%;"></div>
+                            <div class="territory-marker neutral" style="top: 35%; left: 20%;"></div>
+                            <div class="territory-marker contested" style="top: 55%; left: 45%;"></div>
+                            <div class="battle-indicator" style="top: 50%; left: 50%;"></div>
+                            <div class="coordinate-grid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Advanced Strategy Mechanics</h2>
+                <p>Deep systems for players who demand tactical complexity and strategic depth</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                            <path d="M2 17L12 22L22 17"/>
+                            <path d="M2 12L12 17L22 12"/>
+                        </svg>
+                    </div>
+                    <h3>Tech Tree Progression</h3>
+                    <p>Research from Bronze Working to Nuclear Fission. Unlock unique units, buildings, and government civics. Beeline critical technologies or pursue balanced development across multiple tech branches.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                            <path d="M2 17L12 22L22 17"/>
+                            <path d="M2 12L12 17L22 12"/>
+                        </svg>
+                    </div>
+                    <h3>Hexagonal Movement</h3>
+                    <p>Master zone of control, stacking limits, and flanking maneuvers. Plan multi-turn campaigns with supply lines, siege warfare, and combined arms tactics on authentic hex grids.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.38,8.57L12,1L3.62,8.57L12,16.14L20.38,8.57M12,18.42L1,7.57L12,22L23,7.57L12,18.42Z"/>
+                        </svg>
+                    </div>
+                    <h3>Victory Conditions</h3>
+                    <p>Pursue Domination, Science, Culture, Religious, or Diplomatic victories. Each path demands different city specializations, wonder priorities, and great person strategies.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                        </svg>
+                    </div>
+                    <h3>Diplomacy & Trade</h3>
+                    <p>Negotiate research agreements, defensive pacts, and joint wars. Establish trade routes, monitor diplomatic favor, and leverage World Congress resolutions for strategic advantage.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Technologies</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">28</div>
+                    <div class="stat-label">Unique Civilizations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Victory Paths</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">6000</div>
+                    <div class="stat-label">Years of History</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready for the Ultimate Challenge?</h2>
+                <p>Join veteran strategists who demand complexity, depth, and authentic 4X mechanics</p>
+                <div class="cta-actions">
+                    <a href="/register" class="btn btn-primary btn-large">Choose Your Civ</a>
+                    <a href="/login" class="btn btn-outline btn-large">Resume Campaign</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>SOA</h3>
+                    <p>Symfony of Ages - Where empires rise and fall through the ages</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Strategy</h4>
+                        <a href="/civilopedia">Civilopedia</a>
+                        <a href="/tech-tree">Tech Tree</a>
+                        <a href="/unit-guide">Unit Guide</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Community</h4>
+                        <a href="/strategy-forum">Strategy Forum</a>
+                        <a href="/discord">Discord</a>
+                        <a href="/hall-of-fame">Hall of Fame</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <a href="/game-manual">Game Manual</a>
+                        <a href="/api">API</a>
+                        <a href="/patch-notes">Patch Notes</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                    <p>&copy; {{ "now"|date("Y") }} Symfony of Ages. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+{% endblock %}

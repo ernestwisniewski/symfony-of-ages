@@ -29,6 +29,7 @@
 1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
 2. Run `docker compose build --pull --no-cache` to build fresh images
 3. Run `docker compose up --wait` to set up and start a fresh Symfony project
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Open `https://localhost/api` (API documentation)
-6. Run `docker compose down --remove-orphans` to stop the Docker containers.
+4. Run `npm run build` or `npm run dev`
+5. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
+6. Open `https://localhost/api` (API documentation)
+7. Run `docker compose down --remove-orphans` to stop the Docker containers.

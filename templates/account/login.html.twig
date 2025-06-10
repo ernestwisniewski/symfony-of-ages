@@ -1,59 +1,94 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Civilization Login - SOA{% endblock %}
 
 {% block body %}
-    <form method="post">
-        {% if error %}
-            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'account') }}</div>
-        {% endif %}
-
-        {% if app.user %}
-            <div class="mb-3">
-                You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
-            </div>
-        {% endif %}
-
-        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-        <label for="username">Email</label>
-        <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
-        <label for="password">Password</label>
-        <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
-        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
-
-        {#
-            Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
-            See https://symfony.com/doc/current/account/remember_me.html
-
-            <div class="checkbox mb-3">
-                <input type="checkbox" name="_remember_me" id="_remember_me">
-                <label for="_remember_me">Remember me</label>
-            </div>
-        #}
-
-        <button class="btn btn-lg btn-primary" type="submit">
-            Sign in
-        </button>
-    </form>
-
-    <div class="mt-4 p-4 bg-light rounded">
-        <h4>API Authentication (JWT)</h4>
-        <p>For API access, use JWT authentication:</p>
-        <div class="mb-2">
-            <strong>Endpoint:</strong> <code>POST /api/login_check</code>
-        </div>
-        <div class="mb-2">
-            <strong>Test credentials:</strong>
-        </div>
-        <pre class="bg-dark text-light p-2 rounded">
-{
-    "username": "test@example.com",
-    "password": "password123"
-}
-        </pre>
-        <div class="mb-2">
-            <strong>Usage:</strong> Include the token in Authorization header
-        </div>
-        <code>Authorization: Bearer YOUR_JWT_TOKEN</code>
+<div class="auth-page">
+    <div class="auth-background">
+        <div class="auth-gradient"></div>
+        <div class="auth-particles"></div>
     </div>
+    
+    <div class="auth-container">
+        <div class="auth-header">
+            <a href="/" class="auth-logo">
+                <h2>SOA</h2>
+            </a>
+                         <div class="auth-nav">
+                 <span>New to the game?</span>
+                 <a href="{{ path('app_register') }}" class="auth-link">Choose Civilization</a>
+             </div>
+        </div>
+        
+        <div class="auth-form-container">
+                         <div class="auth-form-header">
+                 <h1>Resume Your Campaign</h1>
+                 <p>Continue your journey from Ancient Era to Information Age</p>
+             </div>
+            
+            {% if error %}
+                <div class="auth-error">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                    </svg>
+                    {{ error.messageKey|trans(error.messageData, 'account') }}
+                </div>
+            {% endif %}
+
+            {% if app.user %}
+                <div class="auth-success">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                    </svg>
+                                         Civilization leader {{ app.user.userIdentifier }} is online. 
+                     <a href="{{ path('app_logout') }}">End turn</a>
+                </div>
+            {% endif %}
+
+            <form method="post" class="auth-form">
+                                 <div class="form-group">
+                     <label for="username">Leader Credentials</label>
+                     <input type="email" value="{{ last_username }}" name="_username" id="username" 
+                            autocomplete="email" required autofocus>
+                 </div>
+                 
+                 <div class="form-group">
+                     <label for="password">Civilization Code</label>
+                     <input type="password" name="_password" id="password" 
+                            autocomplete="current-password" required>
+                 </div>
+                
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button class="btn btn-primary btn-full" type="submit">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                    </svg>
+                                         Continue Campaign
+                </button>
+            </form>
+            
+                         <div class="auth-footer">
+                 <p>New to 4X strategy? <a href="{{ path('app_register') }}">Found your civilization</a></p>
+             </div>
+        </div>
+        
+        <div class="auth-visual">
+            <div class="command-preview">
+                <div class="command-screen">
+                                         <div class="command-header">
+                         <div class="status-indicator active"></div>
+                         <span>CIVILIZATION STATUS</span>
+                     </div>
+                    <div class="command-map">
+                        <div class="sector secured" style="top: 20%; left: 25%;"></div>
+                        <div class="sector contested" style="top: 35%; left: 60%;"></div>
+                        <div class="sector neutral" style="top: 55%; left: 40%;"></div>
+                        <div class="command-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
