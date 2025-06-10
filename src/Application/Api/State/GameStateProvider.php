@@ -4,10 +4,9 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Application\Game\Query\GetAllGamesQuery;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Domain\Game\ValueObject\GameId;
-use App\Infrastructure\Game\ReadModel\Doctrine\GameViewEntity;
-use App\Infrastructure\Game\ReadModel\Doctrine\GameViewRepository;
 use App\UI\Api\Resource\GameResource;
 use App\UI\Game\ViewModel\GameView;
 use Ecotone\Modelling\QueryBus;
@@ -17,7 +16,6 @@ final readonly class GameStateProvider implements ProviderInterface
 {
     public function __construct(
         private QueryBus              $queryBus,
-        private GameViewRepository    $gameViewRepository,
         private ObjectMapperInterface $objectMapper,
     )
     {
@@ -48,14 +46,12 @@ final readonly class GameStateProvider implements ProviderInterface
 
     private function provideGames(): array
     {
-        $gameViewEntities = $this->gameViewRepository->findAll();
+        /** @var GameView[] $gameViews */
+        $gameViews = $this->queryBus->send(new Get());
 
         return array_map(
-            fn(GameViewEntity $entity): GameResource => $this->objectMapper->map(
-                $this->objectMapper->map($entity, GameView::class),
-                GameResource::class
-            ),
-            $gameViewEntities
+            fn(GameView $gameView): GameResource => $this->objectMapper->map($gameView, GameResource::class),
+            $gameViews
         );
     }
 }

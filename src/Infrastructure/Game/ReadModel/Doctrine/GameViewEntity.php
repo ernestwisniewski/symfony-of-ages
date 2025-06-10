@@ -36,6 +36,9 @@ class GameViewEntity
     #[ORM\Column(type: 'json')]
     public array $players;
 
+    #[ORM\Column(type: 'integer')]
+    public int $userId;
+
     #[Map(transform: [DateTimeToStringTransformer::class, 'format'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     public ?DateTimeImmutable $startedAt = null;
@@ -52,7 +55,8 @@ class GameViewEntity
         int               $currentTurn,
         DateTimeImmutable $createdAt,
         string            $status,
-        array             $players
+        array             $players,
+        int               $userId
     )
     {
         $this->id = $id;
@@ -62,5 +66,6 @@ class GameViewEntity
         $this->createdAt = $createdAt;
         $this->status = $status;
         $this->players = $players;
+        $this->userId = $userId;
     }
 }

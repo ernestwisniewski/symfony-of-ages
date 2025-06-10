@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\UI\Game\Controller;
 
-use App\Infrastructure\Game\ReadModel\Doctrine\GameViewEntity;
-use App\Infrastructure\Game\ReadModel\Doctrine\GameViewRepository;
+use App\Application\Game\Query\GetUserGamesQuery;
+use App\Domain\Shared\ValueObject\UserId;
 use App\UI\Game\ViewModel\GameView;
+use Ecotone\Modelling\QueryBus;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
-use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-class GameListController
+class GameListController extends AbstractController
 {
     public function __construct(
-        private GameViewRepository    $gameViewRepository,
-        private Security              $security,
-        private ObjectMapperInterface $objectMapper
+        private QueryBus $queryBus,
+        private Security $security,
     )
     {
 
@@ -28,9 +28,10 @@ class GameListController
     #[Route('/games', name: 'app_games')]
     public function index(): Response
     {
-        $games = array_map(function (GameViewEntity $gameViewEntity) {
-            return $this->objectMapper->map($gameViewEntity, GameView::class);
-        }, $this->gameViewRepository->findByUser($this->security->getUser()));
+        /** @var GameView[] $games */
+        $games = $this->queryBus->send(new GetUserGamesQuery(
+                new UserId($this->security->getUser()->getId()))
+        );
 
         return $this->render('game/index.html.twig', ['games' => $games]);
     }

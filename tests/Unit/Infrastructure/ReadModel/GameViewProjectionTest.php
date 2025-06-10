@@ -44,7 +44,7 @@ class GameViewProjectionTest extends TestCase
 
         $projection = new GameViewProjection($entityManager, $repository, $mapper);
 
-        $projection->applyGameWasCreated(new GameWasCreated($gameId, $playerId, 'Test Game', $now));
+        $projection->applyGameWasCreated(new GameWasCreated($gameId, $playerId, 'Test Game', 1, $now));
     }
 
     public function testItThrowWhenGameViewEntityNotFound(): void
@@ -67,7 +67,7 @@ class GameViewProjectionTest extends TestCase
     public function testUpdatesPlayersOnPlayerJoined(): void
     {
         $gameId = 'game-2';
-        $existingEntity = new GameViewEntity($gameId, 'Test', 'player-1', 0, new DateTimeImmutable(), GameStatus::WAITING_FOR_PLAYERS->value, ['player-1']);
+        $existingEntity = new GameViewEntity($gameId, 'Test', 'player-1', 0, new DateTimeImmutable(), GameStatus::WAITING_FOR_PLAYERS->value, ['player-1'], 1);
 
         $repository = $this->createMock(GameViewRepository::class);
         $repository->method('find')->willReturn($existingEntity);
@@ -77,7 +77,7 @@ class GameViewProjectionTest extends TestCase
 
         $projection = new GameViewProjection($entityManager, $repository, $this->createMock(ObjectMapperInterface::class));
 
-        $projection->applyPlayerWasJoined(new PlayerWasJoined($gameId, 'player-2', (new \DateTimeImmutable())->format(DATE_ATOM)));
+        $projection->applyPlayerWasJoined(new PlayerWasJoined($gameId, 'player-2', 1, (new \DateTimeImmutable())->format(DATE_ATOM)));
 
         $this->assertCount(2, $existingEntity->players);
         $this->assertContains('player-1', $existingEntity->players);
@@ -96,7 +96,8 @@ class GameViewProjectionTest extends TestCase
             currentTurn: 0,
             createdAt: new DateTimeImmutable('2025-06-01T11:00:00+00:00'),
             status: GameStatus::WAITING_FOR_PLAYERS->value,
-            players: ['player-1', 'player-2']
+            players: ['player-1', 'player-2'],
+            userId: 1
         );
 
         $repository = $this->createMock(GameViewRepository::class);
@@ -137,7 +138,8 @@ class GameViewProjectionTest extends TestCase
             currentTurn: $currentTurn,
             createdAt: new DateTimeImmutable(),
             status: GameStatus::IN_PROGRESS->value,
-            players: $players
+            players: $players,
+            userId: 1
         );
 
         $repository = $this->createMock(GameViewRepository::class);
@@ -174,7 +176,8 @@ class GameViewProjectionTest extends TestCase
             currentTurn: 2,
             createdAt: new DateTimeImmutable('2025-06-01T12:00:00+00:00'),
             status: 'in_progress',
-            players: ['player-1', 'player-2']
+            players: ['player-1', 'player-2'],
+            userId: 1
         );
         $entity->startedAt = new DateTimeImmutable('2025-06-01T12:05:00+00:00');
         $entity->currentTurnAt = new DateTimeImmutable('2025-06-01T12:15:00+00:00');
@@ -189,6 +192,7 @@ class GameViewProjectionTest extends TestCase
         $expectedView->currentTurn = 2;
         $expectedView->createdAt = '2025-06-01T12:00:00+00:00';
         $expectedView->players = ['player-1', 'player-2'];
+        $expectedView->userId = 1;
         $expectedView->startedAt = '2025-06-01T12:05:00+00:00';
         $expectedView->currentTurnAt = '2025-06-01T12:15:00+00:00';
 

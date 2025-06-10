@@ -2,7 +2,9 @@
 
 namespace App\Infrastructure\Game\ReadModel;
 
+use App\Application\Game\Query\GetAllGamesQuery;
 use App\Application\Game\Query\GetGameViewQuery;
+use App\Application\Game\Query\GetUserGamesQuery;
 use App\Domain\Game\Event\GameWasCreated;
 use App\Domain\Game\Event\GameWasStarted;
 use App\Domain\Game\Event\PlayerEndedTurn;
@@ -39,6 +41,32 @@ readonly class GameViewProjection
         return $this->objectMapper->map($gameView, GameView::class);
     }
 
+    #[QueryHandler]
+    public function getUserGames(GetUserGamesQuery $query): array
+    {
+        $gameViewEntities = $this->gameViewRepository->createQueryBuilder('g')
+            ->where('g.userId = :userId')
+            ->setParameter('userId', $query->userId->id)
+            ->getQuery()
+            ->getResult();
+
+        return array_map(
+            fn(GameViewEntity $entity): GameView => $this->objectMapper->map($entity, GameView::class),
+            $gameViewEntities
+        );
+    }
+
+    #[QueryHandler]
+    public function getAllGames(GetAllGamesQuery $query): array
+    {
+        $gameViewEntities = $this->gameViewRepository->findAll();
+
+        return array_map(
+            fn(GameViewEntity $entity): GameView => $this->objectMapper->map($entity, GameView::class),
+            $gameViewEntities
+        );
+    }
+
     #[EventHandler]
     public function applyGameWasCreated(GameWasCreated $event): void
     {
@@ -50,6 +78,7 @@ readonly class GameViewProjection
             createdAt: new DateTimeImmutable($event->createdAt),
             status: GameStatus::WAITING_FOR_PLAYERS->value,
             players: [$event->playerId],
+            userId: $event->userId
         );
 
         $this->save($gameView);
