@@ -46,13 +46,13 @@ class GameViewEntity
 
 
     public function __construct(
-        string             $id,
-        string             $name,
-        string             $activePlayer,
-        int                $currentTurn,
+        string            $id,
+        string            $name,
+        string            $activePlayer,
+        int               $currentTurn,
         DateTimeImmutable $createdAt,
-        string             $status,
-        array              $players
+        string            $status,
+        array             $players
     )
     {
         $this->id = $id;

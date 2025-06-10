@@ -14,6 +14,7 @@ class CityViewEntity
 {
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
+    #[Map(target: 'cityId')]
     public string $id;
 
     #[ORM\Column(type: 'string', length: 36)]

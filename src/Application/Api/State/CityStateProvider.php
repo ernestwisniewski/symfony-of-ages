@@ -10,7 +10,6 @@ use App\Domain\City\ValueObject\CityId;
 use App\Infrastructure\City\ReadModel\Doctrine\CityViewRepository;
 use App\UI\City\ViewModel\CityView;
 use Ecotone\Modelling\QueryBus;
-use Exception;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class CityStateProvider implements ProviderInterface
@@ -40,14 +39,10 @@ final readonly class CityStateProvider implements ProviderInterface
 
     private function provideCity(string $cityId): ?CityResource
     {
-        try {
-            /** @var CityView $cityView */
-            $cityView = $this->queryBus->send(new GetCityViewQuery(new CityId($cityId)));
+        /** @var CityView $cityView */
+        $cityView = $this->queryBus->send(new GetCityViewQuery(new CityId($cityId)));
 
-            return $this->objectMapper->map($cityView, CityResource::class);
-        } catch (Exception) {
-            return null;
-        }
+        return $this->objectMapper->map($cityView, CityResource::class);
     }
 
     private function provideCitiesForGame(string $gameId): array
@@ -55,7 +50,7 @@ final readonly class CityStateProvider implements ProviderInterface
         $cityViewEntities = $this->cityViewRepository->findByGameId($gameId);
 
         return array_map(
-            fn($entity) => $this->objectMapper->map($entity, CityResource::class),
+            fn($cityView) => $this->objectMapper->map($cityView, CityResource::class),
             $cityViewEntities
         );
     }

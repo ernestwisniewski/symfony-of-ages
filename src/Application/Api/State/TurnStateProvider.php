@@ -10,7 +10,6 @@ use App\Domain\Game\ValueObject\GameId;
 use App\UI\Game\ViewModel\GameView;
 use App\UI\Turn\ViewModel\TurnView;
 use Ecotone\Modelling\QueryBus;
-use Exception;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class TurnStateProvider implements ProviderInterface
@@ -24,26 +23,15 @@ final readonly class TurnStateProvider implements ProviderInterface
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?TurnResource
     {
-        $gameId = $uriVariables['gameId'] ?? null;
+        /** @var GameView $gameView */
+        $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($uriVariables['gameId'])));
 
-        if (!$gameId) {
-            return null;
-        }
+        $turnView = new TurnView();
+        $turnView->gameId = $gameView->id;
+        $turnView->activePlayer = $gameView->activePlayer;
+        $turnView->currentTurn = $gameView->currentTurn;
+        $turnView->turnEndedAt = $gameView->currentTurnAt ?? '';
 
-        try {
-            /** @var GameView $gameView */
-            $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($gameId)));
-
-            // Create TurnView from GameView
-            $turnView = new TurnView();
-            $turnView->gameId = $gameView->id;
-            $turnView->activePlayer = $gameView->activePlayer;
-            $turnView->currentTurn = $gameView->currentTurn;
-            $turnView->turnEndedAt = $gameView->currentTurnAt ?? '';
-
-            return $this->objectMapper->map($turnView, TurnResource::class);
-        } catch (Exception) {
-            return null;
-        }
+        return $this->objectMapper->map($turnView, TurnResource::class);
     }
-} 
+}

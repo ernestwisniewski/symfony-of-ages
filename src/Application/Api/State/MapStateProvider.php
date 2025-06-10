@@ -7,10 +7,8 @@ use ApiPlatform\State\ProviderInterface;
 use App\Application\Api\Resource\MapResource;
 use App\Application\Map\Query\GetMapViewQuery;
 use App\Domain\Game\ValueObject\GameId;
-use App\Infrastructure\Map\Query\FindMapByGame;
 use App\UI\Map\ViewModel\MapView;
 use Ecotone\Modelling\QueryBus;
-use Exception;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class MapStateProvider implements ProviderInterface
@@ -26,17 +24,9 @@ final readonly class MapStateProvider implements ProviderInterface
     {
         $gameId = $uriVariables['gameId'] ?? null;
 
-        if (!$gameId) {
-            return null;
-        }
+        /** @var MapView $mapView */
+        $mapView = $this->queryBus->send(new GetMapViewQuery(new GameId($gameId)));
 
-        try {
-            /** @var MapView $mapView */
-            $mapView = $this->queryBus->send(new GetMapViewQuery(new GameId($gameId)));
-
-            return $this->objectMapper->map($mapView, MapResource::class);
-        } catch (Exception) {
-            return null;
-        }
+        return $this->objectMapper->map($mapView, MapResource::class);
     }
-} 
+}

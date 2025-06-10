@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Domain\Unit\Policy;
 
-use App\Domain\City\ValueObject\Position;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\Exception\InvalidMovementException;
 use App\Domain\Unit\Policy\UnitMovementPolicy;
 use App\Domain\Unit\ValueObject\UnitType;
@@ -173,4 +173,4 @@ class UnitMovementPolicyTest extends TestCase
 
         $this->assertTrue($result); // Distance 0 is within any range
     }
-} 
+}

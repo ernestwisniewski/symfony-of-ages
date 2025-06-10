@@ -44,7 +44,6 @@ final readonly class GameStateProvider implements ProviderInterface
         $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($gameId)));
 
         return $this->objectMapper->map($gameView, GameResource::class);
-
     }
 
     private function provideGames(): array

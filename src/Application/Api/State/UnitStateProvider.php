@@ -7,12 +7,9 @@ use ApiPlatform\State\ProviderInterface;
 use App\Application\Api\Resource\UnitResource;
 use App\Application\Unit\Query\GetUnitViewQuery;
 use App\Domain\Unit\ValueObject\UnitId;
-use App\Infrastructure\Unit\Query\FindUnitById;
-use App\Infrastructure\Unit\Query\FindUnitsByGame;
 use App\Infrastructure\Unit\ReadModel\Doctrine\UnitViewRepository;
 use App\UI\Unit\ViewModel\UnitView;
 use Ecotone\Modelling\QueryBus;
-use Exception;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class UnitStateProvider implements ProviderInterface
@@ -41,14 +38,10 @@ final readonly class UnitStateProvider implements ProviderInterface
 
     private function getUnit(string $unitId): ?UnitResource
     {
-        try {
-            /** @var UnitView $unitView */
-            $unitView = $this->queryBus->send(new GetUnitViewQuery(new UnitId($unitId)));
+        /** @var UnitView $unitView */
+        $unitView = $this->queryBus->send(new GetUnitViewQuery(new UnitId($unitId)));
 
-            return $this->objectMapper->map($unitView, UnitResource::class);
-        } catch (Exception) {
-            return null;
-        }
+        return $this->objectMapper->map($unitView, UnitResource::class);
     }
 
     /**

@@ -6,6 +6,7 @@ final readonly class FindMapByGame
 {
     public function __construct(
         public string $gameId
-    ) {
+    )
+    {
     }
-} 
+}

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Domain\Unit\Policy;
 
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\Exception\InvalidAttackException;
 use App\Domain\Unit\Policy\UnitCombatPolicy;
 use App\Domain\Unit\ValueObject\Health;

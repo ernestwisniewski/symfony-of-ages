@@ -9,8 +9,8 @@ use App\Domain\Shared\ValueObject\Timestamp;
 final readonly class JoinGameCommand
 {
     public function __construct(
-        public GameId   $gameId,
-        public PlayerId $playerId,
+        public GameId    $gameId,
+        public PlayerId  $playerId,
         public Timestamp $joinedAt
     )
     {

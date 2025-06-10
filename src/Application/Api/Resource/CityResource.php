@@ -48,7 +48,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class CityResource
 {
     #[Groups(['city:read'])]
-    #[Map(source: 'id')]
     #[ApiProperty(identifier: true)]
     public ?string $cityId = null;
 
@@ -69,13 +68,16 @@ final class CityResource
     #[Groups(['city:create'])]
     #[Assert\NotBlank(message: 'Player ID is required', groups: ['city:create'])]
     #[Assert\Uuid(groups: ['city:create'])]
+    #[Map(if: false)]
     public ?string $playerId = null;
 
+    #[Map(if: false)]
     #[Groups(['city:create'])]
     #[Assert\NotNull(message: 'X position is required', groups: ['city:create'])]
     #[Assert\GreaterThanOrEqual(0, groups: ['city:create'])]
     public ?int $x = null;
 
+    #[Map(if: false)]
     #[Groups(['city:create'])]
     #[Assert\NotNull(message: 'Y position is required', groups: ['city:create'])]
     #[Assert\GreaterThanOrEqual(0, groups: ['city:create'])]

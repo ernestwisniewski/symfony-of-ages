@@ -4,6 +4,7 @@ namespace App\Application\Api\Resource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use App\Application\Api\State\TurnStateProcessor;
@@ -13,6 +14,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     shortName: 'Turn',
     operations: [
+        new Get(
+            uriTemplate: '/games/{gameId}/current-turn',
+            normalizationContext: ['groups' => ['turn:read']],
+            provider: TurnStateProcessor::class,
+        ),
         new Post(
             uriTemplate: '/games/{gameId}/end-turn',
             uriVariables: [
@@ -22,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             denormalizationContext: ['groups' => ['turn:end']],
             validationContext: ['groups' => ['turn:end']],
             processor: TurnStateProcessor::class,
-        ),
+        )
     ],
     paginationEnabled: false,
 )]

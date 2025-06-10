@@ -5,8 +5,8 @@ namespace App\Tests\Unit\Domain\City\Policy;
 use App\Domain\City\Exception\InvalidTerrainException;
 use App\Domain\City\Exception\PositionOccupiedException;
 use App\Domain\City\Policy\CityFoundingPolicy;
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Map\ValueObject\TerrainType;
+use App\Domain\Shared\ValueObject\Position;
 use PHPUnit\Framework\TestCase;
 
 final class CityFoundingPolicyTest extends TestCase
@@ -130,4 +130,4 @@ final class CityFoundingPolicyTest extends TestCase
 
         $this->policy->validateCityFounding($position, $terrain, $existingPositions);
     }
-} 
+}

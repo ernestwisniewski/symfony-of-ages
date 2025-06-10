@@ -29,15 +29,16 @@ class MapViewEntity
 
     public function __construct(
         string $gameId,
-        int $width,
-        int $height,
-        array $tiles,
+        int    $width,
+        int    $height,
+        array  $tiles,
         string $generatedAt
-    ) {
+    )
+    {
         $this->gameId = $gameId;
         $this->width = $width;
         $this->height = $height;
         $this->tiles = $tiles;
         $this->generatedAt = $generatedAt;
     }
-} 
+}

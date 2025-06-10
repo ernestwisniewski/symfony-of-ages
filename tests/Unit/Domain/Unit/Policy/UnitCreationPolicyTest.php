@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Domain\Unit\Policy;
 
-use App\Domain\City\ValueObject\Position;
 use App\Domain\Map\ValueObject\TerrainType;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\Exception\InvalidMovementException;
 use App\Domain\Unit\Policy\UnitCreationPolicy;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -135,4 +135,4 @@ class UnitCreationPolicyTest extends TestCase
 
         $this->assertFalse($result);
     }
-} 
+}
