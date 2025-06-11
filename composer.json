@@ -42,6 +42,8 @@
         "symfony/stimulus-bundle": "*",
         "symfony/twig-bundle": "7.3.*",
         "symfony/uid": "7.3.*",
+        "symfony/ux-icons": "^2.26",
+        "symfony/ux-live-component": "^2.26",
         "symfony/validator": "7.3.*",
         "symfony/yaml": "7.3.*",
         "symfonycasts/verify-email-bundle": "^1.17"
