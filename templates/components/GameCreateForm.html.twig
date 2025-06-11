@@ -8,8 +8,6 @@
         {{ form_start(form, {
             'attr': {
                 'class': 'form',
-                'data-turbo-frame': 'game-create-form',
-                'data-live-action-param:save': 'prevent',
                 'novalidate': true
             }
         }) }}
@@ -32,46 +30,20 @@
             {% endif %}
         </div>
 
-        <!-- Live preview section -->
-        {% if form.name.vars.value %}
-            <div class="game-preview">
-                <div class="preview-header">
-                    <h4>Game Preview</h4>
-                </div>
-                <div class="preview-content">
-                    <div class="game-card-preview bg-preview-gradient">
-                        <h5>{{ form.name.vars.value }}</h5>
-                        <div class="game-meta">
-                            <span class="status-badge waiting">Waiting for Players</span>
-                            <span class="player-count">1/4 Players</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-
-        <button
-            type="submit"
-            data-action="live#action"
-            data-live-action-param="save"
-            class="btn btn-primary btn-full"
-            {{ form.vars.valid ? '' : 'disabled' }}
-        >
-            {{ ux_icon('lucide:plus') }}
+        <button type="submit" data-action="live#action" data-live-action-param="createGame"
+                class="btn btn-primary btn-full"
+                {{ (not form.vars.valid and form.vars.submitted) ? 'disabled' : '' }}>
+            {{ ux_icon('lucide:plus-circle') }}
             Create Game
         </button>
 
-        <button
-            type="button"
-            data-action="live#action"
-            data-live-action-param="cancel"
-            class="btn btn-outline btn-full"
-            style="margin-top: 12px;"
-        >
-            {{ ux_icon('lucide:x') }}
+        <button type="button" data-action="live#action" data-live-action-param="cancel"
+                class="btn btn-outline btn-full"
+                style="margin-top: 12px;">
+            {{ ux_icon('lucide:x-circle') }}
             Cancel
         </button>
 
-        {{ form_end(form) }}
+        {{ form_end(form, {'render_rest': false}) }}
     </div>
 </div>

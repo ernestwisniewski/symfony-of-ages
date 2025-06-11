@@ -255,6 +255,18 @@
   color: var(--color-error);
 }
 
+.flash-message.warning {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: var(--color-warning);
+}
+
+.flash-message.info {
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.3);
+  color: #3498db;
+}
+
 @keyframes slideInRight {
   from {
     transform: translateX(100%);

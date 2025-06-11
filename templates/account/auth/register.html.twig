@@ -20,19 +20,7 @@
                         <p>Begin your epic journey through 6000 years of technological and cultural evolution</p>
                     </div>
 
-                    {% for flash_error in app.flashes('verify_email_error') %}
-                        <div class="auth-error">
-                            {{ ux_icon('lucide:alert-circle') }}
-                            {{ flash_error }}
-                        </div>
-                    {% endfor %}
 
-                    {% for flash_success in app.flashes('success') %}
-                        <div class="auth-success">
-                            {{ ux_icon('lucide:check-circle') }}
-                            {{ flash_success }}
-                        </div>
-                    {% endfor %}
 
                     {{ form_start(registrationForm, {'attr': {'class': 'auth-form'}}) }}
                         {% if form_errors(registrationForm) %}
