@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(
             uriTemplate: '/games/{gameId}/map',
             normalizationContext: ['groups' => ['map:read']],
+            security: "is_granted('ROLE_USER')",
             provider: MapStateProvider::class,
         )
     ],

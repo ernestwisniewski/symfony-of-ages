@@ -19,11 +19,19 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(
             uriTemplate: '/games/{gameId}',
             normalizationContext: ['groups' => ['game:read']],
+            security: "is_granted('ROLE_USER')",
             provider: GameStateProvider::class,
         ),
         new GetCollection(
             uriTemplate: '/games',
             normalizationContext: ['groups' => ['game:read']],
+            security: "is_granted('ROLE_USER')",
+            provider: GameStateProvider::class,
+        ),
+        new GetCollection(
+            uriTemplate: '/my-games',
+            normalizationContext: ['groups' => ['game:read']],
+            security: "is_granted('ROLE_USER')",
             provider: GameStateProvider::class,
         ),
         new Post(
@@ -31,6 +39,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             status: 202,
             normalizationContext: ['groups' => ['game:read']],
             denormalizationContext: ['groups' => ['game:create']],
+            security: "is_granted('ROLE_USER')",
             validationContext: ['groups' => ['game:create']],
             output: false,
             processor: GameStateProcessor::class
@@ -40,6 +49,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             status: 202,
             normalizationContext: ['groups' => ['game:read']],
             denormalizationContext: ['groups' => ['game:start']],
+            security: "is_granted('ROLE_USER')",
             output: false,
             processor: GameStateProcessor::class
         ),
@@ -48,6 +58,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             status: 202,
             normalizationContext: ['groups' => ['game:read']],
             denormalizationContext: ['groups' => ['game:join']],
+            security: "is_granted('ROLE_USER')",
             validationContext: ['groups' => ['game:join']],
             output: false,
             processor: GameStateProcessor::class,

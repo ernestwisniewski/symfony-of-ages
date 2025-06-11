@@ -20,6 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(
             uriTemplate: '/cities/{cityId}',
             normalizationContext: ['groups' => ['city:read']],
+            security: "is_granted('ROLE_USER')",
             provider: CityStateProvider::class,
         ),
         new GetCollection(
@@ -28,6 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'gameId' => new Link(fromClass: GameResource::class)
             ],
             normalizationContext: ['groups' => ['city:read']],
+            security: "is_granted('ROLE_USER')",
             provider: CityStateProvider::class
         ),
         new Post(
@@ -39,6 +41,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             normalizationContext: ['groups' => ['city:read']],
             denormalizationContext: ['groups' => ['city:create']],
             validationContext: ['groups' => ['city:create']],
+            security: "is_granted('ROLE_USER')",
             output: false,
             processor: CityStateProcessor::class
         ),

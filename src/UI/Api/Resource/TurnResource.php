@@ -18,6 +18,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(
             uriTemplate: '/games/{gameId}/current-turn',
             normalizationContext: ['groups' => ['turn:read']],
+            security: "is_granted('ROLE_USER')",
             provider: TurnStateProcessor::class,
         ),
         new Post(
@@ -27,6 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             normalizationContext: ['groups' => ['turn:read']],
             denormalizationContext: ['groups' => ['turn:end']],
+            security: "is_granted('ROLE_USER')",
             validationContext: ['groups' => ['turn:end']],
             processor: TurnStateProvider::class,
         )

@@ -4,6 +4,7 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Application\Game\Query\GetAllGamesQuery;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Application\Game\Query\GetUserGamesQuery;
 use App\Domain\Game\ValueObject\GameId;
@@ -19,21 +20,24 @@ final readonly class GameStateProvider implements ProviderInterface
     public function __construct(
         private QueryBus              $queryBus,
         private ObjectMapperInterface $objectMapper,
-        private Security              $security
+        private Security              $security,
     )
     {
     }
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
-        if (isset($uriVariables['gameId'])) {
-            return $this->provideGame($uriVariables['gameId']);
-        }
+        $uriTemplate = $operation->getUriTemplate();
 
-        return $this->provideGames();
+        return match ($uriTemplate) {
+            '/games/{gameId}' => $this->getGame($uriVariables['gameId']),
+            '/games' => $this->getAllGames(),
+            '/my-games' => $this->getUserGames(),
+            default => null,
+        };
     }
 
-    private function provideGame(string $gameId): ?GameResource
+    private function getGame(string $gameId): ?GameResource
     {
         /** @var GameView $gameView */
         $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($gameId)));
@@ -41,12 +45,21 @@ final readonly class GameStateProvider implements ProviderInterface
         return $this->objectMapper->map($gameView, GameResource::class);
     }
 
-    private function provideGames(): array
+    private function getAllGames(): array
     {
         /** @var GameView[] $gameViews */
-        $gameViews = $this->queryBus->send(
-            new GetUserGamesQuery(new UserId($this->security->getUser()->getId()))
+        $gameViews = $this->queryBus->send(new GetAllGamesQuery());
+
+        return array_map(
+            fn(GameView $gameView): GameResource => $this->objectMapper->map($gameView, GameResource::class),
+            $gameViews
         );
+    }
+
+    private function getUserGames(): array
+    {
+        /** @var GameView[] $gameViews */
+        $gameViews = $this->queryBus->send(new GetUserGamesQuery(new UserId($this->security->getUser()->getId())));
 
         return array_map(
             fn(GameView $gameView): GameResource => $this->objectMapper->map($gameView, GameResource::class),

@@ -21,6 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(
             uriTemplate: '/units/{unitId}',
             normalizationContext: ['groups' => ['unit:read']],
+            security: "is_granted('ROLE_USER')",
             provider: UnitStateProvider::class,
         ),
         new GetCollection(
@@ -29,6 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'gameId' => new Link(fromClass: GameResource::class)
             ],
             normalizationContext: ['groups' => ['unit:read']],
+            security: "is_granted('ROLE_USER')",
             provider: UnitStateProvider::class,
         ),
         new Post(
@@ -39,6 +41,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             status: 202,
             normalizationContext: ['groups' => ['unit:read']],
             denormalizationContext: ['groups' => ['unit:create']],
+            security: "is_granted('ROLE_USER')",
             validationContext: ['groups' => ['unit:create']],
             output: false,
             processor: UnitStateProcessor::class,
@@ -48,6 +51,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             status: 202,
             normalizationContext: ['groups' => ['unit:read']],
             denormalizationContext: ['groups' => ['unit:move']],
+            security: "is_granted('ROLE_USER')",
             validationContext: ['groups' => ['unit:move']],
             output: false,
             processor: UnitStateProcessor::class,
@@ -57,6 +61,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             status: 202,
             normalizationContext: ['groups' => ['unit:read']],
             denormalizationContext: ['groups' => ['unit:attack']],
+            security: "is_granted('ROLE_USER')",
             validationContext: ['groups' => ['unit:attack']],
             output: false,
             processor: UnitStateProcessor::class,

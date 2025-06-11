@@ -15,7 +15,7 @@
         <div class="page-header-content">
             {% block header_content %}
                 <h1 class="page-title">{% block page_title %}Page{% endblock %}</h1>
-                {% if block('page_subtitle') is defined %}
+                {% if block('page_subtitle')|trim %}
                     <p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p>
                 {% endif %}
             {% endblock %}
