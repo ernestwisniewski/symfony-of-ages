@@ -2,7 +2,7 @@
 
 {% block body %}
     <!-- Page Header Section -->
-    <div class="page-header">
+    <div class="page-header bg-primary-gradient">
         <!-- Background layers -->
         <div class="page-header-background">
             <div class="page-header-gradient"></div>
@@ -18,12 +18,17 @@
                 {% if block('page_subtitle')|trim %}
                     <p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p>
                 {% endif %}
+                {% if block('page_actions')|trim %}
+                    <div class="page-actions">
+                        {% block page_actions %}{% endblock %}
+                    </div>
+                {% endif %}
             {% endblock %}
         </div>
     </div>
 
     <!-- Page Content Section -->
-    <div class="page-content">
+    <div class="page-content{% if page_content_class is defined %} {{ page_content_class }}{% endif %}">
         <div class="page-content-container">
             {% block content %}
                 <div class="empty-state">

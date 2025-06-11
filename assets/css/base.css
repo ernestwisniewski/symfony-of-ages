@@ -91,6 +91,23 @@ a:hover {
   color: var(--color-text-primary);
 }
 
+/* ===== UNIVERSAL BACKGROUNDS ===== */
+.bg-primary-gradient {
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 50%, var(--color-bg-tertiary) 100%);
+}
+
+.bg-footer-gradient {
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-tertiary) 100%);
+}
+
+.bg-card-gradient {
+  background: linear-gradient(145deg, var(--color-bg-tertiary), var(--color-bg-primary));
+}
+
+.bg-preview-gradient {
+  background: linear-gradient(145deg, var(--color-bg-primary), var(--color-bg-secondary));
+}
+
 /* ===== UTILITY CLASSES ===== */
 .container {
   max-width: 1200px;
@@ -272,7 +289,6 @@ a:hover {
 
 /* ===== FOOTER ===== */
 .footer {
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-tertiary) 100%);
   color: white;
   padding: 60px 0 30px;
   border-top: 1px solid rgba(107, 45, 107, 0.3);
@@ -553,7 +569,6 @@ a:hover {
 }
 
 .game-card-preview {
-    background: linear-gradient(145deg, var(--color-bg-primary), var(--color-bg-secondary));
     padding: 16px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);

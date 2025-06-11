@@ -4,7 +4,6 @@
 .auth-page-wrapper {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 50%, var(--color-bg-tertiary) 100%);
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
@@ -161,48 +160,11 @@
   line-height: 1.6;
 }
 
-/* Form styles */
+/* Auth specific form styles */
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-}
-
-.form-group {
-  position: relative;
-}
-
-.form-group label {
-  display: block;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  margin-bottom: var(--spacing-xs);
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(107, 45, 107, 0.3);
-  border-radius: var(--radius-md);
-  color: white;
-  font-size: 16px;
-  transition: all var(--transition-normal);
-  backdrop-filter: blur(10px);
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: var(--color-primary-light);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 3px rgba(107, 45, 107, 0.2);
-}
-
-.form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
 }
 
 /* Checkbox group */
@@ -227,7 +189,7 @@
   letter-spacing: normal;
 }
 
-/* Messages */
+/* Auth messages - extend base form messages */
 .auth-error {
   display: flex;
   align-items: center;
@@ -241,12 +203,6 @@
   margin-bottom: var(--spacing-lg);
 }
 
-.auth-error svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
 .auth-success {
   display: flex;
   align-items: center;
@@ -258,12 +214,6 @@
   color: var(--color-success);
   font-size: 14px;
   margin-bottom: var(--spacing-lg);
-}
-
-.auth-success svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
 }
 
 .auth-success a {
@@ -411,20 +361,7 @@
   50% { transform: translateY(-20px); }
 }
 
-@keyframes starsPulse1 {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-@keyframes starsPulse2 {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.9; }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
-}
+/* Using global pulse animation from base.css */
 
 @keyframes gridPulse {
   0%, 100% { opacity: 0.3; }

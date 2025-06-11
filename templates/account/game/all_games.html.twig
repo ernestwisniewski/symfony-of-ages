@@ -15,7 +15,7 @@
     {% if games is not empty %}
         <div class="content-grid three-columns">
             {% for game in games %}
-                <div class="content-card">
+                <div class="content-card bg-card-gradient">
                     <h3>{{ game.name }}</h3>
                     <p><strong>Status:</strong> {{ game.status }}</p>
                     <p><strong>Created:</strong> {{ game.createdAt|date('d.m.Y H:i') }}</p>

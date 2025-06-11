@@ -4,7 +4,6 @@
 .page-header {
   position: relative;
   min-height: 40vh;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 50%, var(--color-bg-tertiary) 100%);
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
@@ -132,7 +131,6 @@
 }
 
 .content-card {
-  background: linear-gradient(145deg, var(--color-bg-tertiary), var(--color-bg-primary));
   padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
@@ -224,4 +222,61 @@
   .page-subtitle {
     font-size: 1rem;
   }
+}
+
+/* ===== FLASH MESSAGES ===== */
+.flash-messages {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1050;
+  max-width: 400px;
+}
+
+.flash-message {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  animation: slideInRight 0.3s ease-out;
+}
+
+.flash-message.success {
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  color: var(--color-success);
+}
+
+.flash-message.error {
+  background: rgba(220, 20, 60, 0.1);
+  border: 1px solid rgba(220, 20, 60, 0.3);
+  color: var(--color-error);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ===== PAGE LAYOUT UTILITIES ===== */
+.page-content.centered {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-content.centered .page-content-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 } 
