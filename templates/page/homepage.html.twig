@@ -1,11 +1,6 @@
-{% extends 'base.html.twig' %}
+{% extends '../base.html.twig' %}
 
 {% block title %}SOA - Symfony of Ages{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
-{% endblock %}
 
 {% block body %}
 <div class="homepage">
@@ -18,7 +13,9 @@
         <nav class="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <h2>SOA</h2>
+                    <a href="/">
+                        <h2>SOA</h2>
+                    </a>
                 </div>
                 <div class="nav-menu">
                     <a href="#features" class="nav-link">Tech Tree</a>
@@ -118,6 +115,26 @@
                     <h3>Diplomacy & Trade</h3>
                     <p>Negotiate research agreements, defensive pacts, and joint wars. Establish trade routes, monitor diplomatic favor, and leverage World Congress resolutions for strategic advantage.</p>
                 </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V5H19V19M17,17V7H7V17H17M15,15H9V9H15V15Z"/>
+                        </svg>
+                    </div>
+                    <h3>City-State Management</h3>
+                    <p>Navigate complex city-state politics through envoys, quests, and specialized bonuses. Secure exclusive luxury resources, military allies, and unique district benefits through careful diplomatic investment.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12,2C13.1,2 14,2.9 14,4C14,5.1 13.1,6 12,6C10.9,6 10,5.1 10,4C10,2.9 10.9,2 12,2M21,9V7L15,1H9V3H7C5.9,3 5,3.9 5,5V6H3V8H5V19A2,2 0 0,0 7,21H10C11.1,21 12,20.1 12,19V11H18V19A2,2 0 0,0 20,21H21C22.1,21 23,20.1 23,19V9H21Z"/>
+                        </svg>
+                    </div>
+                    <h3>Great People & Wonders</h3>
+                    <p>Compete for legendary Great People across multiple categories. Construct iconic World Wonders with unique civilization bonuses, era-specific benefits, and powerful empire-wide effects that shape history.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -159,40 +176,5 @@
             </div>
         </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <h3>SOA</h3>
-                    <p>Symfony of Ages - Where empires rise and fall through the ages</p>
-                </div>
-                <div class="footer-links">
-                    <div class="link-group">
-                        <h4>Strategy</h4>
-                        <a href="/civilopedia">Civilopedia</a>
-                        <a href="/tech-tree">Tech Tree</a>
-                        <a href="/unit-guide">Unit Guide</a>
-                    </div>
-                    <div class="link-group">
-                        <h4>Community</h4>
-                        <a href="/strategy-forum">Strategy Forum</a>
-                        <a href="/discord">Discord</a>
-                        <a href="/hall-of-fame">Hall of Fame</a>
-                    </div>
-                    <div class="link-group">
-                        <h4>Resources</h4>
-                        <a href="/game-manual">Game Manual</a>
-                        <a href="/api">API</a>
-                        <a href="/patch-notes">Patch Notes</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                    <p>&copy; {{ "now"|date("Y") }} Symfony of Ages. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
 </div>
 {% endblock %}

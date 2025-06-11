@@ -8,7 +8,7 @@
         <div class="auth-gradient"></div>
         <div class="auth-particles"></div>
     </div>
-    
+
     <div class="auth-container">
         <div class="auth-header">
             <a href="/" class="auth-logo">
@@ -19,13 +19,14 @@
                  <a href="{{ path('app_register') }}" class="auth-link">Choose Civilization</a>
              </div>
         </div>
-        
-        <div class="auth-form-container">
+
+        <div class="auth-content">
+            <div class="auth-form-container">
                          <div class="auth-form-header">
                  <h1>Resume Your Campaign</h1>
                  <p>Continue your journey from Ancient Era to Information Age</p>
              </div>
-            
+
             {% if error %}
                 <div class="auth-error">
                     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -40,7 +41,7 @@
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
                     </svg>
-                                         Civilization leader {{ app.user.userIdentifier }} is online. 
+                                         Civilization leader {{ app.user.userIdentifier }} is online.
                      <a href="{{ path('app_logout') }}">End turn</a>
                 </div>
             {% endif %}
@@ -48,16 +49,16 @@
             <form method="post" class="auth-form">
                                  <div class="form-group">
                      <label for="username">Leader Credentials</label>
-                     <input type="email" value="{{ last_username }}" name="_username" id="username" 
+                     <input type="email" value="{{ last_username }}" name="_username" id="username"
                             autocomplete="email" required autofocus>
                  </div>
-                 
+
                  <div class="form-group">
                      <label for="password">Civilization Code</label>
-                     <input type="password" name="_password" id="password" 
+                     <input type="password" name="_password" id="password"
                             autocomplete="current-password" required>
                  </div>
-                
+
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
                 <button class="btn btn-primary btn-full" type="submit">
@@ -67,24 +68,25 @@
                                          Continue Campaign
                 </button>
             </form>
-            
+
                          <div class="auth-footer">
                  <p>New to 4X strategy? <a href="{{ path('app_register') }}">Found your civilization</a></p>
              </div>
-        </div>
-        
-        <div class="auth-visual">
-            <div class="command-preview">
-                <div class="command-screen">
+            </div>
+
+            <div class="auth-visual">
+                <div class="command-preview">
+                    <div class="command-screen">
                                          <div class="command-header">
                          <div class="status-indicator active"></div>
                          <span>CIVILIZATION STATUS</span>
                      </div>
-                    <div class="command-map">
-                        <div class="sector secured" style="top: 20%; left: 25%;"></div>
-                        <div class="sector contested" style="top: 35%; left: 60%;"></div>
-                        <div class="sector neutral" style="top: 55%; left: 40%;"></div>
-                        <div class="command-grid"></div>
+                        <div class="command-map">
+                            <div class="sector secured" style="top: 20%; left: 25%;"></div>
+                            <div class="sector contested" style="top: 35%; left: 60%;"></div>
+                            <div class="sector neutral" style="top: 55%; left: 40%;"></div>
+                            <div class="command-grid"></div>
+                        </div>
                     </div>
                 </div>
             </div>
