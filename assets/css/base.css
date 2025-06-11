@@ -203,6 +203,17 @@ a:hover {
   50% { opacity: 0.7; }
 }
 
+/* Stars animations - used across multiple pages */
+@keyframes starsPulse1 {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes starsPulse2 {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.9; }
+}
+
 /* ===== RESPONSIVE UTILITIES ===== */
 @media (max-width: 768px) {
   .container {

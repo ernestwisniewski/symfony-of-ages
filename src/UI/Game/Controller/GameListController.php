@@ -33,6 +33,6 @@ class GameListController extends AbstractController
                 new UserId($this->security->getUser()->getId()))
         );
 
-        return $this->render('game/index.html.twig', ['games' => $games]);
+        return $this->render('account/game/all_games.html.twig', ['games' => $games]);
     }
 }

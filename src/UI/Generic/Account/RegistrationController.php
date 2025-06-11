@@ -45,7 +45,7 @@ class RegistrationController extends AbstractController
                     ->from(new Address('mailer@your-domain.com', 'SOA'))
                     ->to((string) $user->getEmail())
                     ->subject('Please Confirm your Email')
-                    ->htmlTemplate('account/confirmation_email.html.twig')
+                    ->htmlTemplate('account/auth/confirmation_email.html.twig')
             );
 
             // do anything else you need here, like send an email
@@ -53,7 +53,7 @@ class RegistrationController extends AbstractController
             return $security->login($user, 'form_login', 'main');
         }
 
-        return $this->render('account/register.html.twig', [
+        return $this->render('account/auth/register.html.twig', [
             'registrationForm' => $form,
         ]);
     }

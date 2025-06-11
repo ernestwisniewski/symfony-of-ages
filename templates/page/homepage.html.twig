@@ -3,178 +3,181 @@
 {% block title %}{% endblock %}
 
 {% block body %}
-<div class="homepage">
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-background">
-            <div class="hero-gradient"></div>
-        </div>
-
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="nav-logo">
-                    <a href="/">
-                        <h2>SOA</h2>
-                    </a>
-                </div>
-                <div class="nav-menu">
-                    <a href="#features" class="nav-link">Tech Tree</a>
-                    <a href="#about" class="nav-link">Civilizations</a>
-                    <a href="#contact" class="nav-link">Multiplayer</a>
-                    <a href="/login" class="nav-cta">Play Now</a>
-                </div>
+    <div class="homepage">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-background">
+                <div class="hero-gradient"></div>
             </div>
-        </nav>
 
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1 class="hero-title">
-                    <span class="title-main">Symfony of Ages</span>
-                    <span class="title-sub">Build empires that span centuries</span>
-                </h1>
-                <p class="hero-description">
-                    Experience deep 4X gameplay with tech trees, diplomatic intrigue, and strategic resource management.
-                    From Ancient Era to Information Age - expand your civilization, exploit natural resources,
-                    exterminate rivals, and explore uncharted territories in persistent multiplayer campaigns.
-                </p>
-                <div class="hero-actions">
-                    <a href="/register" class="btn btn-primary">Found Your Civilization</a>
-                    <a href="#features" class="btn btn-secondary">Study the Mechanics</a>
+            {{ include('partials/navbar.html.twig') }}
+
+            <div class="hero-main">
+                <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="title-main">Symfony of Ages</span>
+                        <span class="title-sub">Build empires that span centuries</span>
+                    </h1>
+                    <p class="hero-description">
+                        Experience deep 4X gameplay with tech trees, diplomatic intrigue, and strategic resource
+                        management.
+                        From Ancient Era to Information Age - expand your civilization, exploit natural resources,
+                        exterminate rivals, and explore uncharted territories in persistent multiplayer campaigns.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="/register" class="btn btn-primary">Found Your Civilization</a>
+                        <a href="#features" class="btn btn-secondary">Study the Mechanics</a>
+                    </div>
                 </div>
-            </div>
-            <div class="hero-visual">
-                <div class="game-preview">
-                    <div class="preview-screen">
-                        <div class="world-map-preview">
-                            <div class="continent europe"></div>
-                            <div class="continent asia"></div>
-                            <div class="continent africa"></div>
-                            <div class="continent americas"></div>
-                            <div class="territory-marker controlled" style="top: 25%; left: 30%;"></div>
-                            <div class="territory-marker enemy" style="top: 45%; left: 60%;"></div>
-                            <div class="territory-marker neutral" style="top: 35%; left: 20%;"></div>
-                            <div class="territory-marker contested" style="top: 55%; left: 45%;"></div>
-                            <div class="battle-indicator" style="top: 50%; left: 50%;"></div>
-                            <div class="coordinate-grid"></div>
+                <div class="hero-visual">
+                    <div class="game-preview">
+                        <div class="preview-screen">
+                            <div class="world-map-preview">
+                                <div class="continent europe"></div>
+                                <div class="continent asia"></div>
+                                <div class="continent africa"></div>
+                                <div class="continent americas"></div>
+                                <div class="territory-marker controlled" style="top: 25%; left: 30%;"></div>
+                                <div class="territory-marker enemy" style="top: 45%; left: 60%;"></div>
+                                <div class="territory-marker neutral" style="top: 35%; left: 20%;"></div>
+                                <div class="territory-marker contested" style="top: 55%; left: 45%;"></div>
+                                <div class="battle-indicator" style="top: 50%; left: 50%;"></div>
+                                <div class="coordinate-grid"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Advanced Strategy Mechanics</h2>
-                <p>Deep systems for players who demand tactical complexity and strategic depth</p>
             </div>
+        </section>
 
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
-                            <path d="M2 17L12 22L22 17"/>
-                            <path d="M2 12L12 17L22 12"/>
-                        </svg>
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Advanced Strategy Mechanics</h2>
+                    <p>Deep systems for players who demand tactical complexity and strategic depth</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                                <path d="M2 17L12 22L22 17"/>
+                                <path d="M2 12L12 17L22 12"/>
+                            </svg>
+                        </div>
+                        <h3>Tech Tree Progression</h3>
+                        <p>Research from Bronze Working to Nuclear Fission. Unlock unique units, buildings, and
+                            government civics. Beeline critical technologies or pursue balanced development across
+                            multiple tech branches.</p>
                     </div>
-                    <h3>Tech Tree Progression</h3>
-                    <p>Research from Bronze Working to Nuclear Fission. Unlock unique units, buildings, and government civics. Beeline critical technologies or pursue balanced development across multiple tech branches.</p>
-                </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
-                            <path d="M2 17L12 22L22 17"/>
-                            <path d="M2 12L12 17L22 12"/>
-                        </svg>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                                <path d="M2 17L12 22L22 17"/>
+                                <path d="M2 12L12 17L22 12"/>
+                            </svg>
+                        </div>
+                        <h3>Hexagonal Movement</h3>
+                        <p>Master zone of control, stacking limits, and flanking maneuvers. Plan multi-turn campaigns
+                            with supply lines, siege warfare, and combined arms tactics on authentic hex grids.</p>
                     </div>
-                    <h3>Hexagonal Movement</h3>
-                    <p>Master zone of control, stacking limits, and flanking maneuvers. Plan multi-turn campaigns with supply lines, siege warfare, and combined arms tactics on authentic hex grids.</p>
-                </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20.38,8.57L12,1L3.62,8.57L12,16.14L20.38,8.57M12,18.42L1,7.57L12,22L23,7.57L12,18.42Z"/>
-                        </svg>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M20.38,8.57L12,1L3.62,8.57L12,16.14L20.38,8.57M12,18.42L1,7.57L12,22L23,7.57L12,18.42Z"/>
+                            </svg>
+                        </div>
+                        <h3>Victory Conditions</h3>
+                        <p>Pursue Domination, Science, Culture, Religious, or Diplomatic victories. Each path demands
+                            different city specializations, wonder priorities, and great person strategies.</p>
                     </div>
-                    <h3>Victory Conditions</h3>
-                    <p>Pursue Domination, Science, Culture, Religious, or Diplomatic victories. Each path demands different city specializations, wonder priorities, and great person strategies.</p>
-                </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
-                        </svg>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                            </svg>
+                        </div>
+                        <h3>Diplomacy & Trade</h3>
+                        <p>Negotiate research agreements, defensive pacts, and joint wars. Establish trade routes,
+                            monitor diplomatic favor, and leverage World Congress resolutions for strategic
+                            advantage.</p>
                     </div>
-                    <h3>Diplomacy & Trade</h3>
-                    <p>Negotiate research agreements, defensive pacts, and joint wars. Establish trade routes, monitor diplomatic favor, and leverage World Congress resolutions for strategic advantage.</p>
-                </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V5H19V19M17,17V7H7V17H17M15,15H9V9H15V15Z"/>
-                        </svg>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V5H19V19M17,17V7H7V17H17M15,15H9V9H15V15Z"/>
+                            </svg>
+                        </div>
+                        <h3>City-State Management</h3>
+                        <p>Navigate complex city-state politics through envoys, quests, and specialized bonuses. Secure
+                            exclusive luxury resources, military allies, and unique district benefits through careful
+                            diplomatic investment.</p>
                     </div>
-                    <h3>City-State Management</h3>
-                    <p>Navigate complex city-state politics through envoys, quests, and specialized bonuses. Secure exclusive luxury resources, military allies, and unique district benefits through careful diplomatic investment.</p>
-                </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12,2C13.1,2 14,2.9 14,4C14,5.1 13.1,6 12,6C10.9,6 10,5.1 10,4C10,2.9 10.9,2 12,2M21,9V7L15,1H9V3H7C5.9,3 5,3.9 5,5V6H3V8H5V19A2,2 0 0,0 7,21H10C11.1,21 12,20.1 12,19V11H18V19A2,2 0 0,0 20,21H21C22.1,21 23,20.1 23,19V9H21Z"/>
-                        </svg>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12,2C13.1,2 14,2.9 14,4C14,5.1 13.1,6 12,6C10.9,6 10,5.1 10,4C10,2.9 10.9,2 12,2M21,9V7L15,1H9V3H7C5.9,3 5,3.9 5,5V6H3V8H5V19A2,2 0 0,0 7,21H10C11.1,21 12,20.1 12,19V11H18V19A2,2 0 0,0 20,21H21C22.1,21 23,20.1 23,19V9H21Z"/>
+                            </svg>
+                        </div>
+                        <h3>Great People & Wonders</h3>
+                        <p>Compete for legendary Great People across multiple categories. Construct iconic World Wonders
+                            with unique civilization bonuses, era-specific benefits, and powerful empire-wide effects
+                            that shape history.</p>
                     </div>
-                    <h3>Great People & Wonders</h3>
-                    <p>Compete for legendary Great People across multiple categories. Construct iconic World Wonders with unique civilization bonuses, era-specific benefits, and powerful empire-wide effects that shape history.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">500+</div>
-                    <div class="stat-label">Technologies</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">28</div>
-                    <div class="stat-label">Unique Civilizations</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">18</div>
-                    <div class="stat-label">Victory Paths</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">6000</div>
-                    <div class="stat-label">Years of History</div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Ready for the Ultimate Challenge?</h2>
-                <p>Join veteran strategists who demand complexity, depth, and authentic 4X mechanics</p>
-                <div class="cta-actions">
-                    <a href="/register" class="btn btn-primary btn-large">Choose Your Civ</a>
-                    <a href="/login" class="btn btn-outline btn-large">Resume Campaign</a>
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Technologies</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">28</div>
+                        <div class="stat-label">Unique Civilizations</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">18</div>
+                        <div class="stat-label">Victory Paths</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">6000</div>
+                        <div class="stat-label">Years of History</div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-</div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2>Ready for the Ultimate Challenge?</h2>
+                    <p>Join veteran strategists who demand complexity, depth, and authentic 4X mechanics</p>
+                    <div class="cta-actions">
+                        <a href="/register" class="btn btn-primary btn-large">Choose Your Civ</a>
+                        <a href="/login" class="btn btn-outline btn-large">Resume Campaign</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
 {% endblock %}
