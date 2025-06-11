@@ -17,7 +17,17 @@
             {% for game in games %}
                 <div class="content-card bg-card-gradient">
                     <h3>{{ game.name }}</h3>
-                    <p><strong>Status:</strong> {{ game.status }}</p>
+                    
+                    <div class="game-meta">
+                        <span class="status-badge {{ game.status|lower|replace({' ': '-', '_': '-'}) }}">
+                            {{ game.status }}
+                        </span>
+                        <span class="player-count">
+                            {{ ux_icon('lucide:users') }}
+                            {{ game.players|length }}/4 Players
+                        </span>
+                    </div>
+
                     <p><strong>Created:</strong> {{ game.createdAt|date('d.m.Y H:i') }}</p>
                     {% if game.startedAt %}
                         <p><strong>Started:</strong> {{ game.startedAt|date('d.m.Y H:i') }}</p>
