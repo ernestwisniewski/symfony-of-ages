@@ -11,6 +11,7 @@ use App\UI\Api\Resource\CityResource;
 use App\UI\City\ViewModel\CityView;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final readonly class CityStateProvider implements ProviderInterface
 {
@@ -31,11 +32,14 @@ final readonly class CityStateProvider implements ProviderInterface
         return $this->provideCitiesForGame($uriVariables['gameId']);
     }
 
-    private function provideCity(string $cityId): ?CityResource
+    private function provideCity(string $cityId): CityResource
     {
-        /** @var CityView $cityView */
-        $cityView = $this->queryBus->send(new GetCityViewQuery(new CityId($cityId)));
-
+        try {
+            /** @var CityView $cityView */
+            $cityView = $this->queryBus->send(new GetCityViewQuery(new CityId($cityId)));
+        } catch (\RuntimeException $e) {
+            throw new NotFoundHttpException("City with ID $cityId not found");
+        }
         return $this->objectMapper->map($cityView, CityResource::class);
     }
 

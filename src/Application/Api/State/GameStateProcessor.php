@@ -18,7 +18,9 @@ use Ecotone\Modelling\CommandBus;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Uid\Uuid;
+use Ecotone\Modelling\AggregateNotFoundException;
 
 final readonly class GameStateProcessor implements ProcessorInterface
 {
@@ -54,19 +56,27 @@ final readonly class GameStateProcessor implements ProcessorInterface
 
     private function startGame(string $gameId): void
     {
-        $this->commandBus->send(new StartGameCommand(
-            gameId: new GameId($gameId),
-            startedAt: Timestamp::now()
-        ));
+        try {
+            $this->commandBus->send(new StartGameCommand(
+                gameId: new GameId($gameId),
+                startedAt: Timestamp::now()
+            ));
+        } catch (AggregateNotFoundException $e) {
+            throw new NotFoundHttpException("Game with ID $gameId not found");
+        }
     }
 
     private function joinGame(string $gameId, GameResource $data, UserId $userId): void
     {
-        $this->commandBus->send(new JoinGameCommand(
-            gameId: new GameId($gameId),
-            playerId: new PlayerId($data->playerId),
-            userId: $userId,
-            joinedAt: Timestamp::now()
-        ));
+        try {
+            $this->commandBus->send(new JoinGameCommand(
+                gameId: new GameId($gameId),
+                playerId: new PlayerId($data->playerId),
+                userId: $userId,
+                joinedAt: Timestamp::now()
+            ));
+        } catch (AggregateNotFoundException $e) {
+            throw new NotFoundHttpException("Game with ID $gameId not found");
+        }
     }
 }

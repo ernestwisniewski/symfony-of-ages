@@ -13,6 +13,7 @@ use App\UI\Api\Resource\GameResource;
 use App\UI\Game\ViewModel\GameView;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class GameStateProvider implements ProviderInterface
@@ -39,8 +40,12 @@ final readonly class GameStateProvider implements ProviderInterface
 
     private function getGame(string $gameId): ?GameResource
     {
-        /** @var GameView $gameView */
-        $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($gameId)));
+        try {
+            /** @var GameView $gameView */
+            $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($gameId)));
+        } catch (\RuntimeException $e) {
+            throw new NotFoundHttpException("Game with ID $gameId not found");
+        }
 
         return $this->objectMapper->map($gameView, GameResource::class);
     }

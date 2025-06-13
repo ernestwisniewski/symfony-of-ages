@@ -11,6 +11,7 @@ use App\UI\Api\Resource\UnitResource;
 use App\UI\Unit\ViewModel\UnitView;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final readonly class UnitStateProvider implements ProviderInterface
 {
@@ -38,9 +39,12 @@ final readonly class UnitStateProvider implements ProviderInterface
 
     private function getUnit(string $unitId): ?UnitResource
     {
-        /** @var UnitView $unitView */
-        $unitView = $this->queryBus->send(new GetUnitViewQuery(new UnitId($unitId)));
-
+        try {
+            /** @var UnitView $unitView */
+            $unitView = $this->queryBus->send(new GetUnitViewQuery(new UnitId($unitId)));
+        } catch (\RuntimeException $e) {
+            throw new NotFoundHttpException("Unit with ID $unitId not found");
+        }
         return $this->objectMapper->map($unitView, UnitResource::class);
     }
 

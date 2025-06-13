@@ -20,6 +20,7 @@ use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use RuntimeException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Projection("game_view", Game::class)]
@@ -36,8 +37,12 @@ readonly class GameViewProjection
     #[QueryHandler]
     public function getGameView(GetGameViewQuery $query): GameView
     {
-        $gameView = $this->find($query->gameId);
-
+        try {
+            /** @var GameView $gameView */
+            $gameView = $this->find($query->gameId);
+        } catch (\RuntimeException $e) {
+            throw new NotFoundHttpException("Game with ID $query->gameId not found");
+        }
         return $this->objectMapper->map($gameView, GameView::class);
     }
 
@@ -134,13 +139,7 @@ readonly class GameViewProjection
 
     private function find(string $gameId): GameViewEntity
     {
-        $gameView = $this->gameViewRepository->find($gameId);
-
-        if (!$gameView) {
-            throw new RuntimeException("GameViewEntity for ID $gameId not found");
-        }
-
-        return $gameView;
+        return $this->gameViewRepository->find($gameId);
     }
 
     private function save(GameViewEntity $gameView): void
