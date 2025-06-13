@@ -381,7 +381,7 @@ class GameApiTest extends ApiTestCase
         $client->request('GET', '/api/games/' . $nonExistentGameId);
 
         // Then
-        $this->assertResponseStatusCodeSame(500);
+        $this->assertResponseStatusCodeSame(404);
     }
 
     public function testStartNonExistentGame(): void

@@ -37,12 +37,7 @@ readonly class GameViewProjection
     #[QueryHandler]
     public function getGameView(GetGameViewQuery $query): GameView
     {
-        try {
-            /** @var GameView $gameView */
-            $gameView = $this->find($query->gameId);
-        } catch (\RuntimeException $e) {
-            throw new NotFoundHttpException("Game with ID $query->gameId not found");
-        }
+        $gameView = $this->find($query->gameId);
         return $this->objectMapper->map($gameView, GameView::class);
     }
 
@@ -139,7 +134,13 @@ readonly class GameViewProjection
 
     private function find(string $gameId): GameViewEntity
     {
-        return $this->gameViewRepository->find($gameId);
+        $gameView = $this->gameViewRepository->find($gameId);
+
+        if (!$gameView) {
+            throw new RuntimeException("GameViewEntity for ID $gameId not found");
+        }
+
+        return $gameView;
     }
 
     private function save(GameViewEntity $gameView): void
