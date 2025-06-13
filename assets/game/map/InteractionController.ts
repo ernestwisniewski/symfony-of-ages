@@ -1,6 +1,6 @@
 import { Application, FederatedPointerEvent } from 'pixi.js';
-import { CameraController } from './CameraController.ts';
-import type { Position } from './types.ts';
+import { CameraController } from './CameraController';
+import type { Position } from './types';
 
 /**
  * InteractionController handles all user interactions
@@ -120,4 +120,4 @@ export class InteractionController {
   getScrollSpeed(): number {
     return this.scrollSpeed;
   }
-} 
+}

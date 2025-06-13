@@ -17,7 +17,7 @@
             {% for game in games %}
                 <div class="content-card bg-card-gradient">
                     <h3>{{ game.name }}</h3>
-                    
+
                     <div class="game-meta">
                         <span class="status-badge {{ game.status|lower|replace({' ': '-', '_': '-'}) }}">
                             {{ game.status }}
@@ -34,7 +34,7 @@
                     {% endif %}
 
                     <div class="card-actions">
-                        <a href="#" class="btn btn-primary btn-sm">
+                        <a href="{{ path('app_game_map', {gameId: game.id}) }}" class="btn btn-primary btn-sm">
                             {{ ux_icon('lucide:play') }}
                             Play
                         </a>

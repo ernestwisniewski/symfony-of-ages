@@ -1,6 +1,6 @@
 import { Graphics, Container } from 'pixi.js';
-import { HexGeometry } from '../map/HexGeometry.ts';
-import type { PlayerData } from './types.ts';
+import { HexGeometry } from '../map/HexGeometry';
+import type { PlayerData } from './types';
 
 /**
  * Player class for rendering and managing a player as a simple circle on the hex map
@@ -20,11 +20,11 @@ export class Player {
     private static readonly CROSS_COLOR = 0xFF0000;
     private static readonly CROSS_WIDTH = 2;
     private static readonly CROSS_ALPHA = 0.7;
-    
+
     // Animation constants
     private static readonly BOUNCE_HEIGHT = 8;
     private static readonly ANIMATION_DURATION = 200;
-    
+
     private data: PlayerData;
     private hexSize: number;
     private hexGeometry: HexGeometry;
@@ -36,11 +36,11 @@ export class Player {
         this.data = playerData;
         this.hexSize = hexSize;
         this.hexGeometry = new HexGeometry(hexSize);
-        
+
         this.sprite = new Container();
         this.circle = new Graphics();
         this.shadow = new Graphics();
-        
+
         this.createSprite();
         this.updatePosition(playerData.position);
     }
@@ -79,11 +79,11 @@ export class Player {
         // Main player circle - made bigger for better visibility
         this.circle.circle(0, 0, this.hexSize * Player.PLAYER_CIRCLE_RADIUS_RATIO);
         this.circle.fill({ color: color });
-        
+
         // Add white border for visibility
         this.circle.circle(0, 0, this.hexSize * Player.PLAYER_CIRCLE_RADIUS_RATIO);
         this.circle.stroke({ color: Player.BORDER_COLOR, width: Player.BORDER_WIDTH });
-        
+
         // Add inner circle for better definition
         this.circle.circle(0, 0, this.hexSize * Player.PLAYER_INNER_RADIUS_RATIO);
         this.circle.fill({ color: color, alpha: Player.INNER_CIRCLE_ALPHA });
@@ -108,17 +108,17 @@ export class Player {
     private setupSpriteInteractivity(): void {
         this.sprite.eventMode = 'static';
         this.sprite.cursor = 'pointer';
-        
+
         // Add click event
         this.sprite.on('click', () => {
             this.sprite.emit('playerclick', { playerData: this.data });
         });
-        
+
         // Add hover events for visual feedback
         this.sprite.on('pointerover', () => {
             this.sprite.scale.set(1.1);
         });
-        
+
         this.sprite.on('pointerout', () => {
             this.sprite.scale.set(1.0);
         });
@@ -129,9 +129,9 @@ export class Player {
      */
     updatePosition(position: { row: number; col: number }): void {
         this.data.position = position;
-        
+
         const worldPos = this.hexGeometry.calculatePosition(position.row, position.col);
-        
+
         // Validate the calculated position
         if (this.isValidWorldPosition(worldPos)) {
             this.setSpritePosition(worldPos);
@@ -166,11 +166,11 @@ export class Player {
         const originalY = this.sprite.y;
         const duration = Player.ANIMATION_DURATION;
         const startTime = Date.now();
-        
+
         const animate = (): void => {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             if (progress < 0.5) {
                 // Up phase
                 const bounceProgress = progress * 2;
@@ -180,14 +180,14 @@ export class Player {
                 const bounceProgress = (progress - 0.5) * 2;
                 this.sprite.y = originalY - Player.BOUNCE_HEIGHT + (Player.BOUNCE_HEIGHT * bounceProgress);
             }
-            
+
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
                 this.sprite.y = originalY;
             }
         };
-        
+
         animate();
     }
 
@@ -197,12 +197,12 @@ export class Player {
     updateData(newData: Partial<PlayerData>): void {
         // Update stored data
         this.data = { ...this.data, ...newData };
-        
+
         // Update position if provided
         if (newData.position) {
             this.updatePosition(newData.position);
         }
-        
+
         // Update color if provided
         if (newData.color !== undefined) {
             this.updateColor(newData.color);
@@ -244,4 +244,4 @@ export class Player {
     destroy(): void {
         this.sprite.destroy();
     }
-} 
+}

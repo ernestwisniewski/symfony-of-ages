@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Unit\ReadModel;
 
 use App\Application\Unit\Query\GetUnitViewQuery;
+use App\Application\Unit\Query\GetUnitsByGameQuery;
 use App\Domain\Unit\Event\UnitWasAttacked;
 use App\Domain\Unit\Event\UnitWasCreated;
 use App\Domain\Unit\Event\UnitWasDestroyed;
@@ -40,6 +41,17 @@ readonly class UnitViewProjection
         }
 
         return $this->mapper->map($entity, UnitView::class);
+    }
+
+    #[QueryHandler]
+    public function getUnitsByGame(GetUnitsByGameQuery $query): array
+    {
+        $entities = $this->repository->findByGameId((string)$query->gameId);
+
+        return array_map(
+            fn(UnitViewEntity $entity) => $this->mapper->map($entity, UnitView::class),
+            $entities
+        );
     }
 
     #[EventHandler]

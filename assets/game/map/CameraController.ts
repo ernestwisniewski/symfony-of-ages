@@ -1,7 +1,6 @@
 import { Application, Container } from 'pixi.js';
-import { HexGrid } from './HexGrid.ts';
-import { HexPopup } from './HexPopup.ts';
-import type { MapConfig } from './types.ts';
+import { HexGrid } from './HexGrid';
+import type { MapConfig } from './types';
 
 /**
  * CameraController handles all camera-related operations
@@ -24,17 +23,15 @@ export class CameraController {
   private app: Application;
   private worldContainer: Container;
   private hexGrid: HexGrid;
-  private popup: HexPopup;
   private config: MapConfig;
   private minScale: number = 0;
   private maxScale: number = 0;
   private isCenteringOnPlayer: boolean = false;
 
-  constructor(app: Application, worldContainer: Container, hexGrid: HexGrid, popup: HexPopup, config: MapConfig) {
+  constructor(app: Application, worldContainer: Container, hexGrid: HexGrid, config: MapConfig) {
     this.app = app;
     this.worldContainer = worldContainer;
     this.hexGrid = hexGrid;
-    this.popup = popup;
     this.config = config;
     this.adjustScaleToFitViewport();
   }
@@ -48,7 +45,7 @@ export class CameraController {
     const initialScale = targetHexScreenWidth / hexWidth;
 
     const clampedInitialScale = Math.max(this.minScale, Math.min(this.maxScale, initialScale));
-    
+
     this.worldContainer.scale.x = clampedInitialScale;
     this.worldContainer.scale.y = clampedInitialScale * CameraController.ISOMETRIC_Y_SCALE;
   }
@@ -86,14 +83,14 @@ export class CameraController {
     if (this.isCenteringOnPlayer) {
       return;
     }
-    
+
     const constraintData = this.calculateConstraintData();
-    
+
     if (this.shouldCenterMapOnScreen(constraintData)) {
       this.centerMap();
       return;
     }
-    
+
     const newPosition = this.calculateConstrainedPosition(constraintData);
     this.applyPositionChanges(constraintData.currentPosition, newPosition);
   }
@@ -105,10 +102,10 @@ export class CameraController {
     this.isCenteringOnPlayer = true;
 
     const cameraPosition = this.calculateCameraCenterPosition(playerWorldPosition);
-    
+
     this.worldContainer.position.x = cameraPosition.x;
     this.worldContainer.position.y = cameraPosition.y;
-    
+
     this.isCenteringOnPlayer = false;
   }
 
@@ -119,7 +116,7 @@ export class CameraController {
     const playerWorldSize = this.config.size * CameraController.PLAYER_RADIUS_RATIO;
     const optimalScale = CameraController.TARGET_PLAYER_SCREEN_SIZE / playerWorldSize;
     const clampedScale = Math.max(this.minScale, Math.min(this.maxScale, optimalScale));
-    
+
     this.worldContainer.scale.x = clampedScale;
     this.worldContainer.scale.y = clampedScale * CameraController.ISOMETRIC_Y_SCALE;
   }
@@ -164,9 +161,6 @@ export class CameraController {
   onResize(): void {
     this.adjustScaleToFitViewport();
     this.centerMap();
-    if (this.popup && this.popup.visible) {
-      this.popup.updatePosition();
-    }
   }
 
   // Private helper methods
@@ -174,7 +168,7 @@ export class CameraController {
   private calculateConstraintData() {
     const scale = this.worldContainer.scale.x;
     const adaptiveMargin = Math.max(CameraController.BASE_CAMERA_MARGIN, CameraController.BASE_CAMERA_MARGIN * (CameraController.MARGIN_SCALE_FACTOR / scale));
-    
+
     const bounds = this.hexGrid.getBounds();
     const scaleY = this.worldContainer.scale.y;
 
@@ -182,12 +176,12 @@ export class CameraController {
     const mapScreenHeight = bounds.height * scaleY;
     const screenWidth = this.app.screen.width;
     const screenHeight = this.app.screen.height;
-    
+
     const currentPosition = {
       x: this.worldContainer.position.x,
       y: this.worldContainer.position.y
     };
-    
+
     return {
       scale,
       adaptiveMargin,
@@ -200,31 +194,31 @@ export class CameraController {
   }
 
   private shouldCenterMapOnScreen(constraintData: any): boolean {
-    return constraintData.mapScreenWidth <= constraintData.screenWidth && 
+    return constraintData.mapScreenWidth <= constraintData.screenWidth &&
            constraintData.mapScreenHeight <= constraintData.screenHeight;
   }
 
   private calculateConstrainedPosition(constraintData: any) {
     const { adaptiveMargin, mapScreenWidth, mapScreenHeight, screenWidth, screenHeight, currentPosition } = constraintData;
-    
+
     const bounds = {
       minX: adaptiveMargin - (mapScreenWidth / 2),
       maxX: screenWidth - adaptiveMargin + (mapScreenWidth / 2),
       minY: adaptiveMargin - (mapScreenHeight / 2),
       maxY: screenHeight - adaptiveMargin + (mapScreenHeight / 2)
     };
-    
+
     let newX = currentPosition.x;
     let newY = currentPosition.y;
-    
+
     if (mapScreenWidth > screenWidth) {
       newX = this.constrainAxisPosition(currentPosition.x, bounds.minX, bounds.maxX, 'X');
     }
-    
+
     if (mapScreenHeight > screenHeight) {
       newY = this.constrainAxisPosition(currentPosition.y, bounds.minY, bounds.maxY, 'Y');
     }
-    
+
     return { x: newX, y: newY };
   }
 
@@ -249,10 +243,10 @@ export class CameraController {
   private calculateCameraCenterPosition(playerWorldPosition: { x: number, y: number }) {
     const worldScale = this.worldContainer.scale.x;
     const worldScaleY = this.worldContainer.scale.y;
-    
+
     const centerX = this.app.screen.width / 2;
     const centerY = this.app.screen.height / 2;
-    
+
     return {
       x: centerX - playerWorldPosition.x * worldScale,
       y: centerY - playerWorldPosition.y * worldScaleY,
@@ -260,4 +254,4 @@ export class CameraController {
       centerY
     };
   }
-} 
+}

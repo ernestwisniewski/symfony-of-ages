@@ -1,0 +1,29 @@
+{% extends 'layouts/page_with_header.html.twig' %}
+
+{% block title %}{{ game.name }} - Game Map{% endblock %}
+
+{% block content %}
+    <div class="game-map-wrapper">
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button class="btn" onclick="console.log('End Turn clicked')">
+                {{ ux_icon('lucide:skip-forward') }}
+                End Turn
+            </button>
+        </div>
+
+        <!-- Game Map Canvas -->
+        <div class="game-map-container">
+            <div
+                data-controller="game"
+                data-game-game-id-value="{{ game.id }}"
+                data-game-map-data-value="{{ map|json_encode|e('html_attr') }}"
+                data-game-game-data-value="{{ game|json_encode|e('html_attr') }}"
+                data-game-units-data-value="{{ units|json_encode|e('html_attr') }}"
+                data-game-cities-data-value="{{ cities|json_encode|e('html_attr') }}"
+                style="width: 100%; height: 100%;"
+            ></div>
+        </div>
+        {{ component('SelectionPanel') }}
+    </div>
+{% endblock %}

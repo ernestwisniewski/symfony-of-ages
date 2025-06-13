@@ -1,7 +1,6 @@
 import { SelectionManager } from './SelectionManager';
 import { SelectableHex } from './SelectableHex';
 import { SelectablePlayer } from './SelectablePlayer';
-import { SelectionPanel } from '../ui/SelectionPanel';
 import type { PlayerData } from '../player/types';
 
 /**
@@ -10,27 +9,9 @@ import type { PlayerData } from '../player/types';
  */
 export class SelectionSystem {
   private selectionManager: SelectionManager;
-  private selectionPanel: SelectionPanel;
 
   constructor() {
     this.selectionManager = new SelectionManager();
-    this.selectionPanel = new SelectionPanel();
-    this.setupConnections();
-  }
-
-  /**
-   * Setup connections between manager and panel
-   */
-  private setupConnections(): void {
-    // Connect selection manager to selection panel
-    this.selectionManager.onSelectionChange((data) => {
-      this.selectionPanel.onSelectionChange(data);
-    });
-    
-    // Handle clear selection events from panel
-    this.selectionPanel.getElement().addEventListener('clearSelection', () => {
-      this.selectionManager.clearSelection();
-    });
   }
 
   /**
@@ -64,17 +45,9 @@ export class SelectionSystem {
   }
 
   /**
-   * Get selection panel for advanced use
-   */
-  getPanel(): SelectionPanel {
-    return this.selectionPanel;
-  }
-
-  /**
    * Cleanup resources
    */
   destroy(): void {
-    this.selectionPanel.destroy();
     this.selectionManager.clearSelection();
   }
 } 

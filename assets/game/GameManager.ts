@@ -1,78 +1,189 @@
 import { GameMap } from './map/GameMap';
 import { SelectionSystem } from './selection/SelectionSystem';
-import type { PlayerData } from './player/types';
+import type { GameData, UnitData, CityData, MapData } from './core';
 import type { MapConfig } from './map/types';
 
 /**
- * GameManager coordinates between all game systems
- * Separates concerns from GameMap and manages high-level game logic
+ * GameManager handles map rendering and game interactions
+ * Uses data passed from the controller instead of API calls
  */
 export class GameManager {
   private gameMap: GameMap;
   private selectionSystem: SelectionSystem;
+  private currentGame: GameData | null = null;
+  private currentUnits: UnitData[] = [];
+  private currentCities: CityData[] = [];
 
-  constructor(element: HTMLElement, config: MapConfig) {
+  constructor(element: HTMLElement, config: MapConfig, gameData?: GameData, units?: UnitData[], cities?: CityData[]) {
     this.gameMap = new GameMap(element, config);
     this.selectionSystem = new SelectionSystem();
     
+    // Use data passed from controller
+    this.currentGame = gameData || null;
+    this.currentUnits = units || [];
+    this.currentCities = cities || [];
+    
     this.setupEventHandlers();
+    this.updateGameMap();
   }
 
   /**
-   * Initialize all game systems
+   * Initialize the game map
    */
   async init(): Promise<void> {
     await this.gameMap.init();
   }
 
   /**
-   * Setup event handlers between game systems
+   * Setup event handlers for map interactions
    */
   private setupEventHandlers(): void {
-    // Handle hex clicks for selection
+    // Handle hex clicks for selection and interaction
     this.gameMap.onHexClick = (row: number, col: number, terrainData: any) => {
       this.selectionSystem.selectHex(terrainData, { row, col });
+      
+      // Emit custom event for external handling
+      this.gameMap.getElement().dispatchEvent(new CustomEvent('hexclick', {
+        detail: { row, col, terrainData }
+      }));
     };
 
-    // Handle player clicks for selection
-    this.gameMap.onPlayerClick = (playerData: PlayerData) => {
+    // Handle unit clicks for selection
+    this.gameMap.onPlayerClick = (playerData: any) => {
       this.selectionSystem.selectPlayer(playerData);
+      
+      // Emit custom event for external handling
+      this.gameMap.getElement().dispatchEvent(new CustomEvent('unitclick', {
+        detail: { playerData }
+      }));
     };
   }
 
   /**
-   * Add player to the game
+   * Update game map with current data
    */
-  addPlayer(playerData: PlayerData): void {
+  private updateGameMap(): void {
+    // Update units on map
+    this.currentUnits.forEach(unit => {
+      this.addUnit(unit);
+    });
+
+    // Update cities on map
+    this.currentCities.forEach(city => {
+      this.addCity(city);
+    });
+  }
+
+  /**
+   * Add unit to the map
+   */
+  addUnit(unitData: UnitData): void {
+    // Convert UnitData to PlayerData for compatibility with existing GameMap
+    const playerData = {
+      id: unitData.unitId,
+      name: `${unitData.type} (${unitData.ownerId})`,
+      position: {
+        row: unitData.position.y,
+        col: unitData.position.x
+      },
+      movementPoints: unitData.movementRange,
+      maxMovementPoints: unitData.movementRange,
+      color: this.getColorForOwner(unitData.ownerId)
+    };
+
     this.gameMap.addPlayer(playerData);
   }
 
   /**
-   * Update player position
+   * Get color for owner ID (simple hash-based color generation)
    */
-  updatePlayerPosition(playerData: PlayerData): void {
-    this.gameMap.updatePlayerPosition(playerData);
+  private getColorForOwner(ownerId: string): number {
+    let hash = 0;
+    for (let i = 0; i < ownerId.length; i++) {
+      const char = ownerId.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    // Generate a color from the hash
+    const hue = Math.abs(hash) % 360;
+    return this.hsvToRgb(hue, 0.8, 0.9);
   }
 
   /**
-   * Remove player from the game
+   * Convert HSV to RGB color
    */
-  removePlayer(): void {
-    this.gameMap.removePlayer();
+  private hsvToRgb(h: number, s: number, v: number): number {
+    const c = v * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = v - c;
+    
+    let r = 0, g = 0, b = 0;
+    
+    if (h >= 0 && h < 60) {
+      r = c; g = x; b = 0;
+    } else if (h >= 60 && h < 120) {
+      r = x; g = c; b = 0;
+    } else if (h >= 120 && h < 180) {
+      r = 0; g = c; b = x;
+    } else if (h >= 180 && h < 240) {
+      r = 0; g = x; b = c;
+    } else if (h >= 240 && h < 300) {
+      r = x; g = 0; b = c;
+    } else if (h >= 300 && h < 360) {
+      r = c; g = 0; b = x;
+    }
+    
+    const red = Math.round((r + m) * 255);
+    const green = Math.round((g + m) * 255);
+    const blue = Math.round((b + m) * 255);
+    
+    return (red << 16) | (green << 8) | blue;
   }
 
   /**
-   * Get current player
+   * Add city to the map
    */
-  getPlayer(): any {
-    return this.gameMap.getPlayer();
+  addCity(cityData: CityData): void {
+    // TODO: Implement city rendering
+    console.log('Adding city:', cityData);
   }
 
   /**
-   * Check if currently dragging
+   * Get current game data
    */
-  get isDragging(): boolean {
-    return this.gameMap.isDragging;
+  getCurrentGame(): GameData | null {
+    return this.currentGame;
+  }
+
+  /**
+   * Get current units
+   */
+  getCurrentUnits(): UnitData[] {
+    return this.currentUnits;
+  }
+
+  /**
+   * Get current cities
+   */
+  getCurrentCities(): CityData[] {
+    return this.currentCities;
+  }
+
+  /**
+   * Get selected hex data
+   */
+  getSelectedHex(): any {
+    const selected = this.selectionSystem.getManager().getSelected();
+    return selected && selected.type === 'hex' ? selected : null;
+  }
+
+  /**
+   * Get selected unit data
+   */
+  getSelectedUnit(): any {
+    const selected = this.selectionSystem.getManager().getSelected();
+    return selected && selected.type === 'player' ? selected : null;
   }
 
   /**

@@ -33,7 +33,7 @@ class GameListController extends AbstractController
         /** @var GameView[] $games */
         $games = $this->queryBus->send(new GetAllGamesQuery());
 
-        return $this->render('account/game/all_games.html.twig', ['games' => $games]);
+        return $this->render('game/all_games.html.twig', ['games' => $games]);
     }
 
     #[isGranted('ROLE_USER')]
@@ -45,7 +45,7 @@ class GameListController extends AbstractController
                 new UserId($this->security->getUser()->getId()))
         );
 
-        return $this->render('account/game/all_games.html.twig', ['games' => $games]);
+        return $this->render('game/all_games.html.twig', ['games' => $games]);
     }
 
 }

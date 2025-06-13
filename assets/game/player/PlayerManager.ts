@@ -1,9 +1,9 @@
 import { Container } from 'pixi.js';
-import { Player } from './Player.ts';
-import { HexGrid } from '../map/HexGrid.ts';
-import { CameraController } from '../map/CameraController.ts';
-import type { PlayerData } from './types.ts';
-import type { MapConfig } from '../map/types.ts';
+import { Player } from './Player';
+import { HexGrid } from '../map/HexGrid';
+import { CameraController } from '../map/CameraController';
+import type { PlayerData } from './types';
+import type { MapConfig } from '../map/types';
 
 /**
  * PlayerManager handles all player-related operations
@@ -49,7 +49,7 @@ export class PlayerManager {
   updatePlayerPosition(playerData: PlayerData): void {
     if (this.player) {
       this.player.updateData(playerData);
-      
+
       // Always center camera on player after movement
       this.centerCameraOnPlayer();
     }
@@ -92,11 +92,11 @@ export class PlayerManager {
     const playerSprite = this.player.sprite;
     const hexGridWorldX = this.hexGrid.x;
     const hexGridWorldY = this.hexGrid.y;
-    
+
     // Player is now inside hexGrid, so we need to account for hexGrid's transform
     const playerWorldX = hexGridWorldX + (playerSprite.x - this.hexGrid.pivot.x) * this.hexGrid.scale.x;
     const playerWorldY = hexGridWorldY + (playerSprite.y - this.hexGrid.pivot.y) * this.hexGrid.scale.y;
-    
+
     return { x: playerWorldX, y: playerWorldY };
   }
 
@@ -107,4 +107,4 @@ export class PlayerManager {
     if (!this.player) return;
     this.centerCameraOnPlayer();
   }
-} 
+}

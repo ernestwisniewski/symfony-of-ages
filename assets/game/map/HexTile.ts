@@ -1,6 +1,6 @@
 import {Graphics, Texture, Assets} from 'pixi.js';
 import {Color} from 'pixi.js';
-import {getTerrainTexture} from './TerrainTextures.ts';
+import {getTerrainTexture} from './TerrainTextures';
 
 /**
  * Interface for hex tile configuration
@@ -43,7 +43,7 @@ export class HexTile extends Graphics {
   private static readonly HEX_ANGLE_STEP = 60;
   private static readonly HEX_VERTEX_COUNT = 6;
   private static readonly DEFAULT_TERRAIN_COLOR = 0xF8F8F8;
-  
+
   private size: number;
   private hoverEffect: any[];
   private terrainData: any;

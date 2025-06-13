@@ -1,8 +1,7 @@
 import {Container} from 'pixi.js';
-import {HexTile} from './HexTile.ts';
-import {HexGeometry} from './HexGeometry.ts';
-import {HexPopup} from './HexPopup.ts';
-import {HexRenderer} from './HexRenderer.ts';
+import {HexTile} from './HexTile';
+import {HexGeometry} from './HexGeometry';
+import {HexRenderer} from './HexRenderer';
 
 /**
  * Interface for hex grid configuration
@@ -21,9 +20,8 @@ interface HexGridConfig {
  */
 export class HexGrid extends Container {
   private static readonly ISOMETRIC_Y_SCALE = 0.8;
-  
+
   private config: HexGridConfig;
-  public popup: HexPopup | null = null; // Will be set by GameMap
   private geometry: HexGeometry;
   private readonly hoverEffect: any[];
 
@@ -72,7 +70,7 @@ export class HexGrid extends Container {
     }
 
     this.addChild(...hexes);
-    
+
     // Force bounds recalculation after adding children
     this.getBounds();
   }
@@ -86,30 +84,23 @@ export class HexGrid extends Container {
   private setupHexInteraction(hex: HexTile): void {
     hex.on('hexhover', (event: any) => {
       const gameMap = this.parent?.parent as any;
-      if (gameMap && !gameMap.isDragging && this.popup) {
-        this.popup.show(event.data);
+      if (gameMap && !gameMap.isDragging) {
+        // this.popup.show(event.data);
       }
     });
 
     hex.on('hexhoverend', () => {
-      if (this.popup) {
-        this.popup.hide();
-      }
+      // this.popup.hide();
     });
 
     hex.on('hexclick', (event: any) => {
       const gameMap = this.parent?.parent as any;
-      
+
       if (gameMap && !gameMap.isDragging) {
-        // Show popup if available
-        if (this.popup) {
-          this.popup.show(event.data);
-        }
-        
         // Extract coordinates and emit event for GameMap to handle
         if (event.data) {
           const { row, col } = this.getHexCoordinates(event);
-          
+
           // Emit event that GameMap can listen to
           this.emit('hexclick', { row, col, terrainData: event.data });
         }
@@ -132,12 +123,12 @@ export class HexGrid extends Container {
         col: terrainData.coordinates.col
       };
     }
-    
+
     // Fallback: calculate from position (less reliable)
     const position = eventData.position || { x: 0, y: 0 };
     const col = Math.round(position.x / (this.config.size * Math.sqrt(3)));
     const row = Math.round(position.y / (this.config.size * 1.5));
-    
+
     return { row, col };
   }
 
@@ -147,10 +138,10 @@ export class HexGrid extends Container {
    */
   private setupPosition(): void {
     const bounds = this.getBounds();
-    
+
     const centerPosition = this.calculateGridCenter(bounds);
     this.pivot.set(centerPosition.x, centerPosition.y);
-    
+
     // Apply isometric scaling for visual perspective
     this.scale.y = HexGrid.ISOMETRIC_Y_SCALE;
   }
@@ -179,10 +170,10 @@ export class HexGrid extends Container {
   private calculateCenterManually(): { x: number, y: number } {
     const cornerPositions = this.getCornerPositions();
     const actualBounds = this.calculateActualBounds(cornerPositions);
-    
+
     const centerX = (actualBounds.minX + actualBounds.maxX) / 2;
     const centerY = (actualBounds.minY + actualBounds.maxY) / 2;
-    
+
     return { x: centerX, y: centerY };
   }
 
@@ -192,7 +183,7 @@ export class HexGrid extends Container {
   private getCornerPositions() {
     const lastRowIndex = this.config.rows - 1;
     const lastColIndex = this.config.cols - 1;
-    
+
     return {
       topLeft: this.geometry.calculatePosition(0, 0),
       topRight: this.geometry.calculatePosition(0, lastColIndex),
@@ -206,15 +197,15 @@ export class HexGrid extends Container {
    */
   private calculateActualBounds(cornerPositions: any) {
     const { topLeft, topRight, bottomLeft, bottomRight } = cornerPositions;
-    
+
     const minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
     const maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
     const minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
     const maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-    
+
     // Add hex size to account for hex dimensions (not just center points)
     const hexRadius = this.config.size;
-    
+
     return {
       minX: minX - hexRadius,
       maxX: maxX + hexRadius,

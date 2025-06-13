@@ -1,6 +1,5 @@
 import {Application, Container} from 'pixi.js';
 import {HexGrid} from './HexGrid';
-import {HexPopup} from './HexPopup';
 import {preloadTerrainTextures} from './TerrainTextures';
 import {CameraController} from './CameraController';
 import {InteractionController} from './InteractionController';
@@ -24,8 +23,7 @@ export class GameMap {
   private worldContainer!: Container;
   private uiContainer!: Container;
   private hexGrid!: HexGrid;
-  private popup!: HexPopup;
-  
+
   // Specialized controllers
   private cameraController!: CameraController;
   private interactionController!: InteractionController;
@@ -117,14 +115,6 @@ export class GameMap {
     // Create hex grid in world container
     this.hexGrid = new HexGrid(this.config);
     this.worldContainer.addChild(this.hexGrid);
-
-    // Create popup in UI container (always on top, fixed to viewport)
-    this.popup = new HexPopup();
-    this.popup.setApp(this.app);
-    this.uiContainer.addChild(this.popup);
-
-    // Pass popup reference to hex grid for interactions
-    this.hexGrid.popup = this.popup;
   }
 
   /**
@@ -136,7 +126,6 @@ export class GameMap {
       this.app,
       this.worldContainer,
       this.hexGrid,
-      this.popup,
       this.config
     );
 
@@ -158,20 +147,20 @@ export class GameMap {
       this.worldContainer,
       this.config
     );
-    
+
     // Setup player click handling
     this.hexGrid.on('playerclick', (event: any) => {
       if (this.onPlayerClick) {
         this.onPlayerClick(event.playerData);
       }
     });
-    
+
     // Setup hex click handling
     this.hexGrid.on('hexclick', (event: any) => {
       if (this.onHexClick) {
         this.onHexClick(event.row, event.col, event.terrainData);
       }
-      
+
       // Emit custom event for game controller to handle player movement
       this.element.dispatchEvent(new CustomEvent('hexclick', {
         detail: { row: event.row, col: event.col }
@@ -184,7 +173,7 @@ export class GameMap {
    */
   private setInitialView(): void {
     this.cameraController.setInitialView();
-    
+
     // Only center the map if no player is present
     if (!this.playerManager.getPlayer()) {
       this.cameraController.centerMap();
@@ -208,7 +197,7 @@ export class GameMap {
    */
   addPlayer(playerData: PlayerData): void {
     this.playerManager.addPlayer(playerData);
-    
+
     // Add debug markers when player is added
     this.debugRenderer.addDebugMarkers();
   }
@@ -233,12 +222,19 @@ export class GameMap {
    */
   getPlayer() {
     return this.playerManager.getPlayer();
-  } 
+  }
 
   /**
    * Gets the current dragging state from interaction controller
    */
   get isDragging(): boolean {
     return this.interactionController.getIsDragging();
+  }
+
+  /**
+   * Get the DOM element for external event dispatching
+   */
+  getElement(): HTMLElement {
+    return this.element;
   }
 }

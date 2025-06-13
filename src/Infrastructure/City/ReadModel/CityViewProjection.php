@@ -3,6 +3,7 @@
 namespace App\Infrastructure\City\ReadModel;
 
 use App\Application\City\Query\GetCityViewQuery;
+use App\Application\City\Query\GetCitiesByGameQuery;
 use App\Domain\City\City;
 use App\Domain\City\Event\CityWasFounded;
 use App\Infrastructure\City\ReadModel\Doctrine\CityViewEntity;
@@ -36,6 +37,17 @@ readonly class CityViewProjection
         }
 
         return $this->mapper->map($entity, CityView::class);
+    }
+
+    #[QueryHandler]
+    public function getCitiesByGame(GetCitiesByGameQuery $query): array
+    {
+        $entities = $this->repository->findByGameId((string)$query->gameId);
+
+        return array_map(
+            fn(CityViewEntity $entity) => $this->mapper->map($entity, CityView::class),
+            $entities
+        );
     }
 
     #[EventHandler]
