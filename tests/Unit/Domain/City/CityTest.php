@@ -37,7 +37,6 @@ final class CityTest extends TestCase
             new GameId($gameId),
             $cityName,
             $position,
-            $terrain,
             $foundedAt,
             $existingCityPositions
         );

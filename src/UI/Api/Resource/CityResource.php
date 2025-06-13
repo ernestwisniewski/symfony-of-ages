@@ -40,8 +40,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             status: 201,
             normalizationContext: ['groups' => ['city:read']],
             denormalizationContext: ['groups' => ['city:create']],
-            validationContext: ['groups' => ['city:create']],
             security: "is_granted('ROLE_USER')",
+            validationContext: ['groups' => ['city:create']],
             output: false,
             processor: CityStateProcessor::class
         ),

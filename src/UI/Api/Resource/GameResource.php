@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             provider: GameStateProvider::class,
         ),
         new GetCollection(
-            uriTemplate: '/my-games',
+            uriTemplate: '/user/games',
             normalizationContext: ['groups' => ['game:read']],
             security: "is_granted('ROLE_USER')",
             provider: GameStateProvider::class,

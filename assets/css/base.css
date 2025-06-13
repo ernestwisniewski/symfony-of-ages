@@ -225,10 +225,10 @@ a:hover {
   height: 20px;
 }
 
-.form-error ux-icon,
-.form-success ux-icon,
-.auth-error ux-icon,
-.auth-success ux-icon {
+.form-error svg,
+.form-success svg,
+.auth-error svg,
+.auth-success svg {
   width: 20px;
   height: 20px;
   flex-shrink: 0;

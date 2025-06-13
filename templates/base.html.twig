@@ -14,27 +14,7 @@
         {% endblock %}
     </head>
     <body>
-        <!-- Flash Messages -->
-        {% if app.flashes %}
-            <div class="flash-messages">
-                {% for type, messages in app.flashes %}
-                    {% for message in messages %}
-                        <div class="flash-message {{ type }}">
-                            {% if type == 'success' %}
-                                {{ ux_icon('lucide:check-circle') }}
-                            {% elseif type == 'error' %}
-                                {{ ux_icon('lucide:alert-circle') }}
-                            {% elseif type == 'warning' %}
-                                {{ ux_icon('lucide:alert-triangle') }}
-                            {% else %}
-                                {{ ux_icon('lucide:info') }}
-                            {% endif %}
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endfor %}
-            </div>
-        {% endif %}
+        {{ include('partials/flash.html.twig') }}
 
         {% block body %}{% endblock %}
         {{ include('partials/footer.html.twig') }}

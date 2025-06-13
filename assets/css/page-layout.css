@@ -193,17 +193,17 @@
   .page-header {
     min-height: 30vh;
   }
-  
+
   .page-title {
     font-size: 2.5rem;
   }
-  
+
   .content-grid.two-columns,
   .content-grid.three-columns,
   .content-grid.four-columns {
     grid-template-columns: 1fr;
   }
-  
+
   .page-actions {
     flex-direction: column;
     align-items: center;
@@ -214,11 +214,11 @@
   .page-header {
     min-height: 25vh;
   }
-  
+
   .page-title {
     font-size: 2rem;
   }
-  
+
   .page-subtitle {
     font-size: 1rem;
   }
@@ -291,4 +291,4 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-} 
+}
