@@ -8,7 +8,7 @@ FROM dunglas/frankenphp:1-php8.4 AS frankenphp_upstream
 # https://docs.docker.com/compose/compose-file/#target
 
 
-# Base FrankenPHP image
+# Base FrankenPHP images
 FROM frankenphp_upstream AS frankenphp_base
 
 WORKDIR /app
@@ -56,7 +56,7 @@ ENTRYPOINT ["docker-entrypoint"]
 HEALTHCHECK --start-period=60s CMD curl -f http://localhost:2019/metrics || exit 1
 CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile" ]
 
-# Dev FrankenPHP image
+# Dev FrankenPHP images
 FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev
@@ -74,7 +74,7 @@ COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 
 CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--watch" ]
 
-# Prod FrankenPHP image
+# Prod FrankenPHP images
 FROM frankenphp_base AS frankenphp_prod
 
 ENV APP_ENV=prod

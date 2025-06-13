@@ -2,7 +2,7 @@
 
 **Symfony of Ages** is a turn-based browser game inspired by *Civilization*. Players expand their influence, explore a hex-based map, and engage in strategic gameplay to dominate the neighborhood.
 
-This is an experimental setup for learning, so expect the code to change frequently. But if you’re also exploring Ecotone or curious how event sourcing might work in a Symfony project, feel free to check it out, leave feedback, or just follow along.
+This is an experimental setup for learning, so expect the code to change frequently. But if you're also exploring Ecotone or curious how event sourcing might work in a Symfony project, feel free to check it out, leave feedback, or just follow along.Add commentMore actions
 
 ## Project Goals
 
@@ -35,3 +35,5 @@ This is an experimental setup for learning, so expect the code to change frequen
 5. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
 6. Open `https://localhost/api` (API documentation)
 7. Run `docker compose down --remove-orphans` to stop the Docker containers.
+
+![Symfony of Ages Promo](docs/images/promo.jpg)
