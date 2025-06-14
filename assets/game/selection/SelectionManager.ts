@@ -1,24 +1,4 @@
-/**
- * Interface for objects that can be selected
- */
-export interface SelectableObject {
-  readonly id: string;
-  readonly type: string;
-  readonly position: { row: number; col: number };
-  readonly displayName: string;
-  getSelectionInfo(): Record<string, any>;
-}
-
-/**
- * Interface for selection data
- */
-export interface SelectionData {
-  id: string;
-  type: string;
-  position: { row: number; col: number };
-  displayName: string;
-  info: Record<string, any>;
-}
+import type { SelectableObject, SelectionData, GridPosition } from '../core/types';
 
 /**
  * SelectionManager handles object selection state

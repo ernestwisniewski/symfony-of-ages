@@ -2,6 +2,7 @@ import {Container} from 'pixi.js';
 import {HexTile} from './HexTile';
 import {HexGeometry} from './HexGeometry';
 import {HexRenderer} from './HexRenderer';
+import type { TerrainTile } from '../core/types';
 
 /**
  * Interface for hex grid configuration
@@ -10,7 +11,7 @@ interface HexGridConfig {
   size: number;
   rows: number;
   cols: number;
-  mapData: any[][];
+  mapData: TerrainTile[][];
 }
 
 /**
@@ -52,7 +53,7 @@ export class HexGrid extends Container {
         const terrainData = this.config.mapData[r][c];
 
         // Add coordinates to terrain data for easier access
-        const terrainDataWithCoords = {
+        const terrainDataWithCoords: TerrainTile = {
           ...terrainData,
           coordinates: { row: r, col: c }
         };
@@ -149,7 +150,7 @@ export class HexGrid extends Container {
   /**
    * Calculates the center position for the grid
    */
-  private calculateGridCenter(bounds: any): { x: number, y: number } {
+  private calculateGridCenter(bounds: any): { x: number; y: number } {
     if (this.areBoundsEmpty(bounds)) {
       return this.calculateCenterManually();
     } else {
@@ -167,7 +168,7 @@ export class HexGrid extends Container {
   /**
    * Calculates center manually when bounds are empty
    */
-  private calculateCenterManually(): { x: number, y: number } {
+  private calculateCenterManually(): { x: number; y: number } {
     const cornerPositions = this.getCornerPositions();
     const actualBounds = this.calculateActualBounds(cornerPositions);
 
@@ -217,7 +218,7 @@ export class HexGrid extends Container {
   /**
    * Calculates center from existing bounds
    */
-  private calculateCenterFromBounds(bounds: any): { x: number, y: number } {
+  private calculateCenterFromBounds(bounds: any): { x: number; y: number } {
     const centerX = bounds.x + (bounds.width / 2);
     const centerY = bounds.y + (bounds.height / 2);
     return { x: centerX, y: centerY };

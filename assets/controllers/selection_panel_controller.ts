@@ -1,6 +1,7 @@
 import {Controller} from '@hotwired/stimulus'
 import {Component, getComponent} from '@symfony/ux-live-component';
 import {GameManager} from '../game/GameManager'
+import type { TerrainTile, UnitData, CityData } from '../game/core'
 
 export default class extends Controller<HTMLElement> {
     private gameManager: GameManager | null = null
@@ -32,18 +33,20 @@ export default class extends Controller<HTMLElement> {
         })
     }
 
-    private handleHexSelection(_hexData: any): void {
-        this.component.emit('open', {'type': 'hex', 'payload': _hexData});
+    private handleHexSelection(hexData: { row: number; col: number; terrainData: TerrainTile }): void {
+        this.component.emit('open', {'type': 'hex', 'payload': hexData});
     }
 
-    private handleUnitSelection(_unitData: any): void {
-        this.component.emit('open', {'type': 'unit', 'payload': _unitData});
+    private handleUnitSelection(unitData: { playerData: UnitData }): void {
+        this.component.emit('open', {'type': 'unit', 'payload': unitData});
     }
 
-    private handleCitySelection(_cityData: any): void {
+    private handleCitySelection(cityData: { cityData: CityData }): void {
+        this.component.emit('open', {'type': 'city', 'payload': cityData});
     }
 
     private dispatchToSelectionPanel(action: string, args: any[] = []): void {
+        // Implementation for dispatching to selection panel
     }
 
     disconnect(): void {

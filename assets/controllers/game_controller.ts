@@ -1,13 +1,6 @@
 import {Controller} from '@hotwired/stimulus'
 import {GameManager} from '../game/GameManager'
-import type {CityData, GameData, MapData, UnitData} from '../game/core'
-
-interface MapConfig {
-    cols: number
-    rows: number
-    size: number
-    mapData: any[][]
-}
+import type {CityData, GameData, MapData, UnitData, MapConfig} from '../game/core'
 
 export default class extends Controller<HTMLElement> {
     static values = {

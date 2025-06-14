@@ -1,4 +1,4 @@
-import type { SelectableObject } from './SelectionManager';
+import type { SelectableObject, TerrainTile, GridPosition } from '../core/types';
 
 /**
  * SelectableHex represents a hex tile that can be selected
@@ -7,13 +7,13 @@ import type { SelectableObject } from './SelectionManager';
 export class SelectableHex implements SelectableObject {
     readonly type = 'hex';
     readonly id: string;
-    readonly position: { row: number; col: number };
+    readonly position: GridPosition;
     readonly displayName: string;
     
     constructor(
         public readonly row: number,
         public readonly col: number,
-        public readonly terrainData: any
+        public readonly terrainData: TerrainTile
     ) {
         this.position = { row, col };
         this.id = `hex_${row}_${col}`;
@@ -36,7 +36,7 @@ export class SelectableHex implements SelectableObject {
     /**
      * Get position as object
      */
-    getPosition(): { row: number; col: number } {
+    getPosition(): GridPosition {
         return { row: this.row, col: this.col };
     }
 
@@ -57,7 +57,7 @@ export class SelectableHex implements SelectableObject {
     /**
      * Get all terrain data
      */
-    getTerrainData(): any {
+    getTerrainData(): TerrainTile {
         return this.terrainData;
     }
 
@@ -68,11 +68,7 @@ export class SelectableHex implements SelectableObject {
         return {
             type: this.type,
             position: this.getPosition(),
-            terrain: {
-                type: this.getTerrainType(),
-                name: this.getTerrainName(),
-                ...this.terrainData
-            }
+            terrain: this.terrainData
         };
     }
 } 

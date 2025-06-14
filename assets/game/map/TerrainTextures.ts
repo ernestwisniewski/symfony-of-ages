@@ -1,4 +1,5 @@
 import {Assets} from 'pixi.js';
+import { TerrainType } from '../core/types';
 
 // Terrain texture imports for Vite asset handling
 import plainsImg from '../../images/terrain/plains.png';
@@ -27,12 +28,12 @@ interface TerrainTextureConfig {
  * Vite automatically handles asset versioning and optimization
  */
 const TERRAIN_TEXTURES: TerrainTextureConfig = {
-  plains: plainsImg,
-  forest: forestImg,
-  mountain: mountainImg,
-  water: waterImg,
-  desert: desertImg,
-  swamp: swampImg
+  [TerrainType.PLAINS]: plainsImg,
+  [TerrainType.FOREST]: forestImg,
+  [TerrainType.MOUNTAIN]: mountainImg,
+  [TerrainType.WATER]: waterImg,
+  [TerrainType.DESERT]: desertImg,
+  [TerrainType.SWAMP]: swampImg
 };
 
 /**
@@ -61,6 +62,6 @@ export async function preloadTerrainTextures(): Promise<void> {
  * @param terrainType - The terrain type name (e.g., 'plains', 'forest')
  * @returns The texture URL or null if not found
  */
-export function getTerrainTexture(terrainType: string): string | null {
+export function getTerrainTexture(terrainType: TerrainType): string | null {
   return TERRAIN_TEXTURES[terrainType] || null;
 }

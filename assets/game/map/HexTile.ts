@@ -1,6 +1,7 @@
 import {Graphics, Texture, Assets} from 'pixi.js';
 import {Color} from 'pixi.js';
 import {getTerrainTexture} from './TerrainTextures';
+import type { TerrainTile } from '../core/types';
 
 /**
  * Interface for hex tile configuration
@@ -9,7 +10,7 @@ interface HexTileConfig {
   size: number;
   position: { x: number; y: number };
   hoverEffect: any[];
-  terrainData: any;
+  terrainData: TerrainTile;
 }
 
 /**
@@ -46,7 +47,7 @@ export class HexTile extends Graphics {
 
   private size: number;
   private hoverEffect: any[];
-  private terrainData: any;
+  private terrainData: TerrainTile;
   private terrainTexture: Texture | null = null;
   private defaultState: DefaultState;
 
