@@ -1,5 +1,4 @@
-import type { PlayerData } from '../player/types';
-import type { SelectableObject } from './SelectionManager';
+import type { PlayerData, SelectableObject } from '../core/types';
 
 /**
  * SelectablePlayer represents a player that can be selected

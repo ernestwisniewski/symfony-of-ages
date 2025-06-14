@@ -13,31 +13,35 @@
         <div class="unit-info">
             <div class="info-row">
                 <span class="info-label">Type:</span>
-                <span class="info-value">{{ payload.type ?? 'Unknown' }}</span>
+                <span class="info-value">{{ this.getPayloadValue('type', 'Unknown') }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Owner:</span>
-                <span class="info-value">{{ payload.ownerId ?? 'Unknown' }}</span>
+                <span class="info-value">{{ this.getPayloadValue('ownerId', 'Unknown') }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Position:</span>
-                <span class="info-value">({{ payload.position.x ?? 0 }}, {{ payload.position.y ?? 0 }})</span>
+                <span class="info-value">({{ this.getPayloadValue('position.x', 0) }}, {{ this.getPayloadValue('position.y', 0) }})</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Movement Points:</span>
-                <span class="info-value">{{ payload.movementRange ?? 0 }}</span>
+                <span class="info-value">{{ this.getPayloadValue('movementRange', 0) }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Health:</span>
-                <span class="info-value">{{ payload.health ?? 100 }}%</span>
+                <span class="info-value">{{ this.getPayloadValue('health', 100) }}%</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Attack:</span>
-                <span class="info-value">{{ payload.attack ?? 0 }}</span>
+                <span class="info-value">{{ this.getPayloadValue('attack', 0) }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Defense:</span>
-                <span class="info-value">{{ payload.defense ?? 0 }}</span>
+                <span class="info-value">{{ this.getPayloadValue('defense', 0) }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="info-value">{{ this.getPayloadValue('isDead', false) ? 'Dead' : 'Alive' }}</span>
             </div>
         </div>
         

@@ -13,31 +13,31 @@
         <div class="city-info">
             <div class="info-row">
                 <span class="info-label">Name:</span>
-                <span class="info-value">{{ payload.name ?? 'Unknown City' }}</span>
+                <span class="info-value">{{ this.getPayloadValue('name', 'Unknown City') }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Owner:</span>
-                <span class="info-value">{{ payload.ownerId ?? 'Unknown' }}</span>
+                <span class="info-value">{{ this.getPayloadValue('ownerId', 'Unknown') }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Position:</span>
-                <span class="info-value">({{ payload.position.x ?? 0 }}, {{ payload.position.y ?? 0 }})</span>
+                <span class="info-value">({{ this.getPayloadValue('position.x', 0) }}, {{ this.getPayloadValue('position.y', 0) }})</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Population:</span>
-                <span class="info-value">{{ payload.population ?? 0 }}</span>
+                <span class="info-value">{{ this.getPayloadValue('population', 0) }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Production:</span>
-                <span class="info-value">{{ payload.production ?? 0 }}</span>
+                <span class="info-value">{{ this.getPayloadValue('production', 0) }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Food:</span>
-                <span class="info-value">{{ payload.food ?? 0 }}</span>
+                <span class="info-value">{{ this.getPayloadValue('food', 0) }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Gold:</span>
-                <span class="info-value">{{ payload.gold ?? 0 }}</span>
+                <span class="info-value">{{ this.getPayloadValue('gold', 0) }}</span>
             </div>
         </div>
         

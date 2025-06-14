@@ -63,5 +63,6 @@ export async function preloadTerrainTextures(): Promise<void> {
  * @returns The texture URL or null if not found
  */
 export function getTerrainTexture(terrainType: TerrainType): string | null {
-  return TERRAIN_TEXTURES[terrainType] || null;
+  const texture = TERRAIN_TEXTURES[terrainType] || null;
+  return texture;
 }

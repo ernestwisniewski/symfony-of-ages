@@ -23,10 +23,14 @@ final class SelectionPanelComponent
     #[LiveProp(writable: true)]
     public ?string $template = null;
 
+    #[LiveProp(writable: true)]
+    public ?array $payload = null;
+
     #[LiveListener('open')]
     public function open(#[LiveArg] string $type, #[LiveArg] array $payload): void
     {
         $this->template = $type;
+        $this->payload = $payload;
         $this->isVisible = true;
     }
 
@@ -36,6 +40,7 @@ final class SelectionPanelComponent
         $this->isVisible = false;
         $this->template = null;
         $this->selectedHex = null;
+        $this->payload = null;
     }
 
     public function getPartialTemplate(): string
@@ -46,5 +51,21 @@ final class SelectionPanelComponent
             'hex', 'tile' => 'game/partials/_hex_panel.html.twig',
             default => 'game/partials/_default_panel.html.twig',
         };
+    }
+
+    /**
+     * Get formatted payload data for templates
+     */
+    public function getPayload(): array
+    {
+        return $this->payload ?? [];
+    }
+
+    /**
+     * Get specific payload value with fallback
+     */
+    public function getPayloadValue(string $key, mixed $default = null): mixed
+    {
+        return $this->payload[$key] ?? $default;
     }
 }

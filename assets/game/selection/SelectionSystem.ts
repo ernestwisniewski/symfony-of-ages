@@ -1,7 +1,7 @@
 import { SelectionManager } from './SelectionManager';
 import { SelectableHex } from './SelectableHex';
 import { SelectablePlayer } from './SelectablePlayer';
-import type { PlayerData } from '../player/types';
+import type { PlayerData, TerrainTile, GridPosition } from '../core/types';
 
 /**
  * SelectionSystem coordinates all selection-related functionality
@@ -17,7 +17,7 @@ export class SelectionSystem {
   /**
    * Select a hex tile
    */
-  selectHex(terrainData: any, position: { row: number; col: number }): void {
+  selectHex(terrainData: TerrainTile, position: GridPosition): void {
     const selectableHex = new SelectableHex(position.row, position.col, terrainData);
     this.selectionManager.select(selectableHex);
   }

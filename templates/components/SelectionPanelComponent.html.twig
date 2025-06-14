@@ -3,9 +3,7 @@
     {{ attributes }}>
     {% if isVisible %}
         <div class="selection-content">
-            {% if template is same as 'hex' %}
-                {% include 'game/partials/_hex_panel.html.twig' %}
-            {% endif %}
+            {% include this.getPartialTemplate() %}
         </div>
     {% endif %}
 </div>

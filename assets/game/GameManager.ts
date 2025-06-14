@@ -1,6 +1,6 @@
 import { GameMap } from './map/GameMap';
 import { SelectionSystem } from './selection/SelectionSystem';
-import type { GameData, UnitData, CityData, MapData } from './core';
+import type { GameData, UnitData, CityData, MapData, TerrainTile } from './core';
 import type { MapConfig } from './map/types';
 
 /**
@@ -39,7 +39,7 @@ export class GameManager {
    */
   private setupEventHandlers(): void {
     // Handle hex clicks for selection and interaction
-    this.gameMap.onHexClick = (row: number, col: number, terrainData: any) => {
+    this.gameMap.onHexClick = (row: number, col: number, terrainData: TerrainTile) => {
       this.selectionSystem.selectHex(terrainData, { row, col });
 
       // Emit custom event for external handling
@@ -50,13 +50,46 @@ export class GameManager {
 
     // Handle unit clicks for selection
     this.gameMap.onPlayerClick = (playerData: any) => {
-      this.selectionSystem.selectPlayer(playerData);
+      // Convert to UnitData if it's a unit, or use as PlayerData if it's already in the right format
+      const unitData = this.convertToUnitData(playerData);
+      if (unitData) {
+        // Convert UnitData to PlayerData format for selection system
+        const playerDataForSelection = {
+          id: unitData.unitId,
+          name: `${unitData.type} (${unitData.ownerId})`,
+          position: {
+            row: unitData.position.y,
+            col: unitData.position.x
+          },
+          movementPoints: unitData.movementRange,
+          maxMovementPoints: unitData.movementRange,
+          color: this.getColorForOwner(unitData.ownerId)
+        };
+        this.selectionSystem.selectPlayer(playerDataForSelection);
+      }
 
       // Emit custom event for external handling
       this.gameMap.getElement().dispatchEvent(new CustomEvent('unitclick', {
-        detail: { playerData }
+        detail: { playerData: unitData || playerData }
       }));
     };
+  }
+
+  /**
+   * Convert player data to UnitData format
+   */
+  private convertToUnitData(playerData: any): UnitData | null {
+    // If it's already UnitData, return as is
+    if (playerData && playerData.unitId && playerData.type) {
+      return playerData as UnitData;
+    }
+
+    // If it's PlayerData format, try to find corresponding UnitData
+    if (playerData && playerData.id) {
+      return this.currentUnits.find(unit => unit.unitId === playerData.id) || null;
+    }
+
+    return null;
   }
 
   /**
