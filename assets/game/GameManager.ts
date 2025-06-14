@@ -17,12 +17,12 @@ export class GameManager {
   constructor(element: HTMLElement, config: MapConfig, gameData?: GameData, units?: UnitData[], cities?: CityData[]) {
     this.gameMap = new GameMap(element, config);
     this.selectionSystem = new SelectionSystem();
-    
+
     // Use data passed from controller
     this.currentGame = gameData || null;
     this.currentUnits = units || [];
     this.currentCities = cities || [];
-    
+
     this.setupEventHandlers();
     this.updateGameMap();
   }
@@ -41,7 +41,7 @@ export class GameManager {
     // Handle hex clicks for selection and interaction
     this.gameMap.onHexClick = (row: number, col: number, terrainData: any) => {
       this.selectionSystem.selectHex(terrainData, { row, col });
-      
+
       // Emit custom event for external handling
       this.gameMap.getElement().dispatchEvent(new CustomEvent('hexclick', {
         detail: { row, col, terrainData }
@@ -51,7 +51,7 @@ export class GameManager {
     // Handle unit clicks for selection
     this.gameMap.onPlayerClick = (playerData: any) => {
       this.selectionSystem.selectPlayer(playerData);
-      
+
       // Emit custom event for external handling
       this.gameMap.getElement().dispatchEvent(new CustomEvent('unitclick', {
         detail: { playerData }
@@ -104,7 +104,7 @@ export class GameManager {
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    
+
     // Generate a color from the hash
     const hue = Math.abs(hash) % 360;
     return this.hsvToRgb(hue, 0.8, 0.9);
@@ -117,9 +117,9 @@ export class GameManager {
     const c = v * s;
     const x = c * (1 - Math.abs((h / 60) % 2 - 1));
     const m = v - c;
-    
+
     let r = 0, g = 0, b = 0;
-    
+
     if (h >= 0 && h < 60) {
       r = c; g = x; b = 0;
     } else if (h >= 60 && h < 120) {
@@ -133,11 +133,11 @@ export class GameManager {
     } else if (h >= 300 && h < 360) {
       r = c; g = 0; b = x;
     }
-    
+
     const red = Math.round((r + m) * 255);
     const green = Math.round((g + m) * 255);
     const blue = Math.round((b + m) * 255);
-    
+
     return (red << 16) | (green << 8) | blue;
   }
 
@@ -146,7 +146,6 @@ export class GameManager {
    */
   addCity(cityData: CityData): void {
     // TODO: Implement city rendering
-    console.log('Adding city:', cityData);
   }
 
   /**
@@ -202,4 +201,4 @@ export class GameManager {
       this.gameMap.app.destroy(true);
     }
   }
-} 
+}

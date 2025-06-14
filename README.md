@@ -36,4 +36,6 @@ This is an experimental setup for learning, so expect the code to change frequen
 6. Open `https://localhost/api` (API documentation)
 7. Run `docker compose down --remove-orphans` to stop the Docker containers.
 
+---
+
 ![Symfony of Ages Promo](docs/images/promo.jpg)

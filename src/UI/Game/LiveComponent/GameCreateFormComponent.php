@@ -23,8 +23,8 @@ use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
-#[AsLiveComponent('GameCreateForm')]
-final class GameCreateForm extends AbstractController
+#[AsLiveComponent('GameCreateFormComponent')]
+final class GameCreateFormComponent extends AbstractController
 {
     use DefaultActionTrait;
     use ComponentWithFormTrait;
@@ -48,7 +48,7 @@ final class GameCreateForm extends AbstractController
         $form = $this->getForm();
 
         if (!$form->isValid()) {
-            return $this->render('components/GameCreateForm.html.twig');
+            return $this->render('GameCreateFormComponent.html.twig');
         }
 
         /** @var GameCreateFormDTO $gameData */
@@ -79,7 +79,7 @@ final class GameCreateForm extends AbstractController
         } catch (\Exception $e) {
             $this->addFlash('error', 'Failed to create game: ' . $e->getMessage());
 
-            return $this->render('components/GameCreateForm.html.twig');
+            return $this->render('GameCreateFormComponent.html.twig');
         }
     }
 

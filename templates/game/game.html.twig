@@ -23,7 +23,7 @@
                 data-game-cities-data-value="{{ cities|json_encode|e('html_attr') }}"
                 style="width: 100%; height: 100%;"
             ></div>
+            {{ component('SelectionPanelComponent') }}
         </div>
-        {{ component('SelectionPanel') }}
     </div>
 {% endblock %}

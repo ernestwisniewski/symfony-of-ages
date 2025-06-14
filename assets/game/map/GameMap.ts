@@ -162,9 +162,15 @@ export class GameMap {
       }
 
       // Emit custom event for game controller to handle player movement
-      this.element.dispatchEvent(new CustomEvent('hexclick', {
-        detail: { row: event.row, col: event.col }
-      }));
+      const customEvent = new CustomEvent('hexclick', {
+        detail: {
+          row: event.row,
+          col: event.col,
+          terrainData: event.terrainData
+        }
+      });
+
+      document.dispatchEvent(customEvent);
     });
   }
 

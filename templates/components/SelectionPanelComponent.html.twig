@@ -1,0 +1,11 @@
+<div class="selection-panel {{ isVisible ? 'visible' : 'hidden' }}"
+     data-controller="selection-panel live"
+    {{ attributes }}>
+    {% if isVisible %}
+        <div class="selection-content">
+            {% if template is same as 'hex' %}
+                {% include 'game/partials/_hex_panel.html.twig' %}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

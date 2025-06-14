@@ -1,52 +1,53 @@
-import { Controller } from '@hotwired/stimulus'
+import {Controller} from '@hotwired/stimulus'
+import {Component, getComponent} from '@symfony/ux-live-component';
+import {GameManager} from '../game/GameManager'
 
-export default class extends Controller {
-  connect(): void {
-    console.log('SelectionPanel controller connected')
-    
-    // Listen for Live Component events on document
-    document.addEventListener('hexSelected', (event: any) => {
-      console.log('Hex selected event received:', event.detail)
-      this.handleHexSelection(event.detail)
-    })
-    
-    document.addEventListener('unitSelected', (event: any) => {
-      console.log('Unit selected event received:', event.detail)
-      this.handleUnitSelection(event.detail)
-    })
-  }
+export default class extends Controller<HTMLElement> {
+    private gameManager: GameManager | null = null
+    private component: Component;
 
-  /**
-   * Handle hex selection from Live Component event
-   */
-  private handleHexSelection(hexData: any): void {
-    console.log('Handling hex selection in Stimulus controller:', hexData)
-    
-    // Use Live Component action system
-    const actionEvent = new CustomEvent('live#action', {
-      detail: {
-        action: 'selectHex',
-        args: [hexData]
-      }
-    })
-    
-    this.element.dispatchEvent(actionEvent)
-  }
+    connect(): void {
+        this.setupInteractionHandlers()
+    }
 
-  /**
-   * Handle unit selection from Live Component event
-   */
-  private handleUnitSelection(unitData: any): void {
-    console.log('Handling unit selection in Stimulus controller:', unitData)
-    
-    // Use Live Component action system
-    const actionEvent = new CustomEvent('live#action', {
-      detail: {
-        action: 'selectUnit',
-        args: [unitData]
-      }
-    })
-    
-    this.element.dispatchEvent(actionEvent)
-  }
-} 
+    async initialize() {
+        this.component = await getComponent(this.element);
+    }
+
+    setupInteractionHandlers(): void {
+        document.addEventListener('hexclick', (event: any) => {
+            this.handleHexSelection(event.detail)
+        })
+        document.addEventListener('unitclick', (event: any) => {
+            this.handleUnitSelection(event.detail)
+        })
+        document.addEventListener('cityclick', (event: any) => {
+            this.handleCitySelection(event.detail)
+        })
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                this.dispatchToSelectionPanel('close')
+            }
+        })
+    }
+
+    private handleHexSelection(_hexData: any): void {
+        this.component.emit('open', {'type': 'hex', 'payload': _hexData});
+    }
+
+    private handleUnitSelection(_unitData: any): void {
+        this.component.emit('open', {'type': 'unit', 'payload': _unitData});
+    }
+
+    private handleCitySelection(_cityData: any): void {
+    }
+
+    private dispatchToSelectionPanel(action: string, args: any[] = []): void {
+    }
+
+    disconnect(): void {
+        this.gameManager?.destroy()
+        this.gameManager = null
+    }
+}

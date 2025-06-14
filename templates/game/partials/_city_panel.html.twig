@@ -1,0 +1,56 @@
+<div class="city-panel">
+    <div class="panel-header">
+        <h3>City Information</h3>
+        <button class="panel-close" 
+                type="button"
+                data-action="live#action"
+                data-live-action-param="close">
+            &times;
+        </button>
+    </div>
+    
+    <div class="panel-content">
+        <div class="city-info">
+            <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span class="info-value">{{ payload.name ?? 'Unknown City' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Owner:</span>
+                <span class="info-value">{{ payload.ownerId ?? 'Unknown' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Position:</span>
+                <span class="info-value">({{ payload.position.x ?? 0 }}, {{ payload.position.y ?? 0 }})</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Population:</span>
+                <span class="info-value">{{ payload.population ?? 0 }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Production:</span>
+                <span class="info-value">{{ payload.production ?? 0 }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Food:</span>
+                <span class="info-value">{{ payload.food ?? 0 }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Gold:</span>
+                <span class="info-value">{{ payload.gold ?? 0 }}</span>
+            </div>
+        </div>
+        
+        <div class="city-actions">
+            <button class="btn btn-primary" onclick="console.log('Build unit in city')">
+                Build Unit
+            </button>
+            <button class="btn btn-secondary" onclick="console.log('Build building in city')">
+                Build Building
+            </button>
+            <button class="btn btn-warning" onclick="console.log('Manage city')">
+                Manage City
+            </button>
+        </div>
+    </div>
+</div> 

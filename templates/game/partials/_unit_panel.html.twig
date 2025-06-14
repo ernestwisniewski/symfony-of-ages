@@ -1,0 +1,56 @@
+<div class="unit-panel">
+    <div class="panel-header">
+        <h3>Unit Information</h3>
+        <button class="panel-close" 
+                type="button"
+                data-action="live#action"
+                data-live-action-param="close">
+            &times;
+        </button>
+    </div>
+    
+    <div class="panel-content">
+        <div class="unit-info">
+            <div class="info-row">
+                <span class="info-label">Type:</span>
+                <span class="info-value">{{ payload.type ?? 'Unknown' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Owner:</span>
+                <span class="info-value">{{ payload.ownerId ?? 'Unknown' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Position:</span>
+                <span class="info-value">({{ payload.position.x ?? 0 }}, {{ payload.position.y ?? 0 }})</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Movement Points:</span>
+                <span class="info-value">{{ payload.movementRange ?? 0 }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Health:</span>
+                <span class="info-value">{{ payload.health ?? 100 }}%</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Attack:</span>
+                <span class="info-value">{{ payload.attack ?? 0 }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Defense:</span>
+                <span class="info-value">{{ payload.defense ?? 0 }}</span>
+            </div>
+        </div>
+        
+        <div class="unit-actions">
+            <button class="btn btn-primary" onclick="console.log('Move unit')">
+                Move Unit
+            </button>
+            <button class="btn btn-secondary" onclick="console.log('Attack with unit')">
+                Attack
+            </button>
+            <button class="btn btn-warning" onclick="console.log('Fortify unit')">
+                Fortify
+            </button>
+        </div>
+    </div>
+</div> 
