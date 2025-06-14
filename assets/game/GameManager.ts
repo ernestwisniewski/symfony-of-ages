@@ -1,7 +1,7 @@
 import { GameMap } from './map/GameMap';
 import { SelectionSystem } from './selection/SelectionSystem';
-import type { GameData, UnitData, CityData, MapData, TerrainTile } from './core';
-import type { MapConfig } from './map/types';
+import type { GameResource, UnitResource, CityResource, MapResource } from '../api';
+import type { TerrainTile, MapConfig, GameData, UnitData, CityData, MapData } from './core';
 
 /**
  * GameManager handles map rendering and game interactions
@@ -14,17 +14,67 @@ export class GameManager {
   private currentUnits: UnitData[] = [];
   private currentCities: CityData[] = [];
 
-  constructor(element: HTMLElement, config: MapConfig, gameData?: GameData, units?: UnitData[], cities?: CityData[]) {
+  constructor(element: HTMLElement, config: MapConfig, gameData?: GameResource, units?: UnitResource[], cities?: CityResource[]) {
     this.gameMap = new GameMap(element, config);
     this.selectionSystem = new SelectionSystem();
 
-    // Use data passed from controller
-    this.currentGame = gameData || null;
-    this.currentUnits = units || [];
-    this.currentCities = cities || [];
+    // Convert API resources to internal game data
+    this.currentGame = gameData ? this.convertGameResource(gameData) : null;
+    this.currentUnits = units ? units.map(unit => this.convertUnitResource(unit)) : [];
+    this.currentCities = cities ? cities.map(city => this.convertCityResource(city)) : [];
 
     this.setupEventHandlers();
     this.updateGameMap();
+  }
+
+  /**
+   * Convert GameResource to internal GameData
+   */
+  private convertGameResource(gameResource: GameResource): GameData {
+    return {
+      id: gameResource.gameId || '',
+      name: gameResource.name || '',
+      status: gameResource.status || '',
+      activePlayer: gameResource.activePlayer || '',
+      currentTurn: gameResource.currentTurn || 0,
+      createdAt: gameResource.createdAt || '',
+      players: gameResource.players || [],
+      userId: 0, // Not available in API resource
+      startedAt: gameResource.startedAt || null,
+      currentTurnAt: null // Not available in API resource
+    };
+  }
+
+  /**
+   * Convert UnitResource to internal UnitData
+   */
+  private convertUnitResource(unitResource: UnitResource): UnitData {
+    return {
+      id: unitResource.unitId || '',
+      ownerId: unitResource.ownerId || '',
+      gameId: unitResource.gameId || '',
+      type: unitResource.type || '',
+      position: unitResource.position || { x: 0, y: 0 },
+      currentHealth: unitResource.currentHealth || 0,
+      maxHealth: unitResource.maxHealth || 0,
+      isDead: unitResource.isDead || false,
+      attackPower: unitResource.attackPower || 0,
+      defensePower: unitResource.defensePower || 0,
+      movementRange: unitResource.movementRange || 0
+    };
+  }
+
+  /**
+   * Convert CityResource to internal CityData
+   */
+  private convertCityResource(cityResource: CityResource): CityData {
+    return {
+      id: cityResource.cityId || '',
+      ownerId: cityResource.ownerId || '',
+      gameId: cityResource.gameId || '',
+      name: cityResource.name || '',
+      position: cityResource.position || { x: 0, y: 0 }
+    };
   }
 
   /**

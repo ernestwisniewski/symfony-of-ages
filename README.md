@@ -39,3 +39,7 @@ This is an experimental setup for learning, so expect the code to change frequen
 ---
 
 ![Symfony of Ages Promo](docs/images/promo.jpg)
+
+---
+
+![Symfony of Ages Promo](docs/images/promo2.jpg)

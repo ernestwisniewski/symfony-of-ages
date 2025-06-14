@@ -1,6 +1,8 @@
 import {Controller} from '@hotwired/stimulus'
 import {Component, getComponent} from '@symfony/ux-live-component';
-import type { TerrainTile, UnitData, CityData, GridPosition } from '../game/core'
+import type { UnitResource, CityResource } from '../api'
+import { TerrainType } from '../api'
+import type { GridPosition } from '../game/core'
 
 /**
  * Selection Panel Controller
@@ -52,7 +54,7 @@ export default class extends Controller<HTMLElement> {
     /**
      * Handle hex tile selection
      */
-    private handleHexSelection(hexData: { row: number; col: number; terrainData: TerrainTile }): void {
+    private handleHexSelection(hexData: { row: number; col: number; terrainData: any }): void {
         if (!this.component) return;
 
         const payload = this.formatHexPayload(hexData);
@@ -62,7 +64,7 @@ export default class extends Controller<HTMLElement> {
     /**
      * Handle unit selection
      */
-    private handleUnitSelection(unitData: { playerData: UnitData }): void {
+    private handleUnitSelection(unitData: { playerData: UnitResource }): void {
         if (!this.component) return;
 
         const payload = this.formatUnitPayload(unitData.playerData);
@@ -72,7 +74,7 @@ export default class extends Controller<HTMLElement> {
     /**
      * Handle city selection
      */
-    private handleCitySelection(cityData: { cityData: CityData }): void {
+    private handleCitySelection(cityData: { cityData: CityResource }): void {
         if (!this.component) return;
 
         const payload = this.formatCityPayload(cityData.cityData);
@@ -81,70 +83,103 @@ export default class extends Controller<HTMLElement> {
 
     /**
      * Format hex data for the Live Component payload
+     * Returns proper API types for consistency with backend
      */
-    private formatHexPayload(hexData: { row: number; col: number; terrainData: TerrainTile }): Record<string, any> {
+    private formatHexPayload(hexData: { row: number; col: number; terrainData: any }): {
+        terrainName: string;
+        terrainType: TerrainType;
+        position: GridPosition;
+        movementCost: number;
+        defense: number;
+        resources: number;
+        properties: Record<string, any>;
+        coordinates: string;
+    } {
         const { row, col, terrainData } = hexData;
         
-        // Ensure we have a valid terrain type
-        const terrainType = terrainData.type || this.detectTerrainType(terrainData);
+        // Ensure we have a valid terrain type using TerrainType enum
+        const terrainType = this.getValidTerrainType(terrainData);
         const terrainName = this.getTerrainDisplayName(terrainData);
+        const properties = terrainData.properties || {};
         
         return {
             terrainName: terrainName,
             terrainType: terrainType,
-            position: { row, col },
-            movementCost: terrainData.properties?.movementCost ?? 1,
-            defense: terrainData.properties?.defenseBonus ?? 0,
-            resources: this.calculateResources(terrainData.properties),
-            properties: terrainData.properties,
+            position: { row, col } as GridPosition,
+            movementCost: properties.movementCost ?? 1,
+            defense: properties.defenseBonus ?? 0,
+            resources: this.calculateResources(properties),
+            properties: properties,
             coordinates: `(${row}, ${col})`
         };
     }
 
     /**
+     * Get valid terrain type from terrain data, ensuring it matches TerrainType enum
+     */
+    private getValidTerrainType(terrainData: any): TerrainType {
+        // If terrain has a valid type, use it
+        if (terrainData.type && Object.values(TerrainType).includes(terrainData.type)) {
+            return terrainData.type;
+        }
+
+        // Try to detect from properties
+        const detectedType = this.detectTerrainType(terrainData);
+        
+        // Ensure the detected type is valid
+        if (Object.values(TerrainType).includes(detectedType as TerrainType)) {
+            return detectedType as TerrainType;
+        }
+
+        // Default to plains if we can't determine
+        return TerrainType.PLAINS;
+    }
+
+    /**
      * Detect terrain type from terrain data if not explicitly set
      */
-    private detectTerrainType(terrainData: TerrainTile): string {
-        // Try to detect from properties or other fields
-        if (terrainData.properties) {
+    private detectTerrainType(terrainData: any): string {
+        const properties = terrainData.properties;
+        
+        if (properties) {
             // Check if it's water (impassable)
-            if (terrainData.properties.impassable) {
-                return 'water';
+            if (properties.impassable) {
+                return TerrainType.WATER;
             }
             
             // Check movement cost to guess terrain type
-            if (terrainData.properties.movementCost === 2) {
-                return 'forest';
+            if (properties.movementCost === 2) {
+                return TerrainType.FOREST;
             }
-            if (terrainData.properties.movementCost === 3) {
-                return 'mountain';
+            if (properties.movementCost === 3) {
+                return TerrainType.MOUNTAIN;
             }
         }
         
         // Default to plains if we can't determine
-        return 'plains';
+        return TerrainType.PLAINS;
     }
 
     /**
      * Get display name for terrain type
      */
-    private getTerrainDisplayName(terrainData: TerrainTile): string {
+    private getTerrainDisplayName(terrainData: any): string {
         // If terrain has a name, use it
         if (terrainData.name && terrainData.name !== 'Unknown') {
             return terrainData.name;
         }
 
         // Get terrain type (either from data or detected)
-        const terrainType = terrainData.type || this.detectTerrainType(terrainData);
+        const terrainType = this.getValidTerrainType(terrainData);
 
         // Generate name from type
-        const typeNames: Record<string, string> = {
-            'plains': 'Plains',
-            'forest': 'Forest',
-            'mountain': 'Mountain',
-            'water': 'Water',
-            'desert': 'Desert',
-            'swamp': 'Swamp'
+        const typeNames: Record<TerrainType, string> = {
+            [TerrainType.PLAINS]: 'Plains',
+            [TerrainType.FOREST]: 'Forest',
+            [TerrainType.MOUNTAIN]: 'Mountain',
+            [TerrainType.WATER]: 'Water',
+            [TerrainType.DESERT]: 'Desert',
+            [TerrainType.SWAMP]: 'Swamp'
         };
 
         return typeNames[terrainType] || 'Unknown Terrain';
@@ -152,32 +187,57 @@ export default class extends Controller<HTMLElement> {
 
     /**
      * Format unit data for the Live Component payload
+     * Returns proper UnitResource structure for consistency with backend
      */
-    private formatUnitPayload(unitData: UnitData): Record<string, any> {
+    private formatUnitPayload(unitData: UnitResource): {
+        type: string | null;
+        ownerId: string | null;
+        position: { x: number; y: number } | null;
+        movementRange: number | null;
+        currentHealth: number | null;
+        maxHealth: number | null;
+        health: number;
+        attack: number | null;
+        defense: number | null;
+        isDead: boolean | null;
+        unitId: string | null;
+    } {
         return {
-            type: unitData.type,
-            ownerId: unitData.ownerId,
-            position: unitData.position,
-            movementRange: unitData.movementRange,
-            currentHealth: unitData.currentHealth,
-            maxHealth: unitData.maxHealth,
-            health: Math.round((unitData.currentHealth / unitData.maxHealth) * 100),
-            attack: unitData.attackPower,
-            defense: unitData.defensePower,
-            isDead: unitData.isDead,
-            unitId: unitData.id
+            type: unitData.type ?? null,
+            ownerId: unitData.ownerId ?? null,
+            position: unitData.position ?? null,
+            movementRange: unitData.movementRange ?? null,
+            currentHealth: unitData.currentHealth ?? null,
+            maxHealth: unitData.maxHealth ?? null,
+            health: unitData.currentHealth && unitData.maxHealth 
+                ? Math.round((unitData.currentHealth / unitData.maxHealth) * 100)
+                : 0,
+            attack: unitData.attackPower ?? null,
+            defense: unitData.defensePower ?? null,
+            isDead: unitData.isDead ?? null,
+            unitId: unitData.unitId ?? null
         };
     }
 
     /**
      * Format city data for the Live Component payload
+     * Returns proper CityResource structure for consistency with backend
      */
-    private formatCityPayload(cityData: CityData): Record<string, any> {
+    private formatCityPayload(cityData: CityResource): {
+        name: string | null;
+        ownerId: string | null;
+        position: { x: number; y: number } | null;
+        cityId: string | null;
+        population: number;
+        production: number;
+        food: number;
+        gold: number;
+    } {
         return {
-            name: cityData.name,
-            ownerId: cityData.ownerId,
-            position: cityData.position,
-            cityId: cityData.id,
+            name: cityData.name ?? null,
+            ownerId: cityData.ownerId ?? null,
+            position: cityData.position ?? null,
+            cityId: cityData.cityId ?? null,
             // Default values for city properties (can be extended later)
             population: 1000,
             production: 10,
@@ -190,9 +250,8 @@ export default class extends Controller<HTMLElement> {
      * Calculate resources from terrain properties
      */
     private calculateResources(properties: any): number {
-        if (!properties) return 0;
-        
         let resources = 0;
+        
         if (properties.foodBonus) resources += properties.foodBonus;
         if (properties.goldBonus) resources += properties.goldBonus;
         if (properties.productionBonus) resources += properties.productionBonus;

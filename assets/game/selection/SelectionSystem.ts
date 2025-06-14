@@ -1,7 +1,7 @@
 import { SelectionManager } from './SelectionManager';
 import { SelectableHex } from './SelectableHex';
 import { SelectablePlayer } from './SelectablePlayer';
-import type { PlayerData, TerrainTile, GridPosition } from '../core/types';
+import type { PlayerData, GridPosition, TerrainTile } from '../core';
 
 /**
  * SelectionSystem coordinates all selection-related functionality

@@ -1,4 +1,4 @@
-import type { SelectableObject, TerrainTile, GridPosition } from '../core/types';
+import type { SelectableObject, GridPosition, TerrainTile } from '../core';
 
 /**
  * SelectableHex represents a hex tile that can be selected

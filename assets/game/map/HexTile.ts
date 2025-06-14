@@ -1,7 +1,7 @@
 import {Graphics, Texture, Assets} from 'pixi.js';
 import {Color} from 'pixi.js';
 import {getTerrainTexture} from './TerrainTextures';
-import type { TerrainTile } from '../core/types';
+import type { TerrainTile } from '../core';
 
 /**
  * Interface for hex tile configuration

@@ -1,8 +1,8 @@
 /**
- * Core API Types and Interfaces
+ * Core Game Types and Interfaces
  * 
- * This file contains all TypeScript interfaces that correspond to Symfony ViewModel classes.
- * These interfaces ensure type safety and consistency across the entire application.
+ * This file contains TypeScript interfaces for internal game logic and rendering.
+ * These types are used for game state management and UI interactions.
  */
 
 // ============================================================================
@@ -25,33 +25,14 @@ export interface GridPosition {
   col: number;
 }
 
-/**
- * Common properties for all API resources
- */
-export interface BaseApiResource {
-  id?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
 // ============================================================================
-// GAME TYPES (corresponds to GameView.php)
+// GAME TYPES
 // ============================================================================
 
 /**
- * Game status enumeration
+ * Game data for internal use
  */
-export enum GameStatus {
-  WAITING = 'waiting',
-  ACTIVE = 'active',
-  FINISHED = 'finished',
-  CANCELLED = 'cancelled'
-}
-
-/**
- * Game data from API (corresponds to GameView.php)
- */
-export interface GameData extends BaseApiResource {
+export interface GameData {
   id: string;
   name: string;
   status: string;
@@ -64,44 +45,14 @@ export interface GameData extends BaseApiResource {
   currentTurnAt?: string | null;
 }
 
-/**
- * Create game request
- */
-export interface CreateGameRequest {
-  name: string;
-}
-
-/**
- * Join game request
- */
-export interface JoinGameRequest {
-  playerId: string;
-}
-
-/**
- * Start game request
- */
-export interface StartGameRequest {
-  // No additional fields needed for starting a game
-}
-
 // ============================================================================
-// UNIT TYPES (corresponds to UnitView.php)
+// UNIT TYPES
 // ============================================================================
 
 /**
- * Unit type enumeration
+ * Unit data for internal use
  */
-export enum UnitType {
-  WARRIOR = 'warrior',
-  ARCHER = 'archer',
-  CAVALRY = 'cavalry'
-}
-
-/**
- * Unit data from API (corresponds to UnitView.php)
- */
-export interface UnitData extends BaseApiResource {
+export interface UnitData {
   id: string;
   ownerId: string;
   gameId: string;
@@ -115,39 +66,14 @@ export interface UnitData extends BaseApiResource {
   movementRange: number;
 }
 
-/**
- * Create unit request
- */
-export interface CreateUnitRequest {
-  playerId: string;
-  unitType: UnitType;
-  x: number;
-  y: number;
-}
-
-/**
- * Move unit request
- */
-export interface MoveUnitRequest {
-  toX: number;
-  toY: number;
-}
-
-/**
- * Attack unit request
- */
-export interface AttackUnitRequest {
-  targetUnitId: string;
-}
-
 // ============================================================================
-// CITY TYPES (corresponds to CityView.php)
+// CITY TYPES
 // ============================================================================
 
 /**
- * City data from API (corresponds to CityView.php)
+ * City data for internal use
  */
-export interface CityData extends BaseApiResource {
+export interface CityData {
   id: string;
   ownerId: string;
   gameId: string;
@@ -155,18 +81,8 @@ export interface CityData extends BaseApiResource {
   position: Position;
 }
 
-/**
- * Create city request
- */
-export interface CreateCityRequest {
-  playerId: string;
-  name: string;
-  x: number;
-  y: number;
-}
-
 // ============================================================================
-// MAP TYPES (corresponds to MapView.php and MapTileView.php)
+// MAP TYPES
 // ============================================================================
 
 /**
@@ -195,14 +111,14 @@ export interface TerrainProperties {
 }
 
 /**
- * Terrain tile data (corresponds to MapTileView.php)
+ * Terrain tile data for internal use
  */
 export interface TerrainTile {
   type: TerrainType;
   name: string;
   properties: TerrainProperties;
   coordinates?: GridPosition;
-  // Additional fields from MapTileView
+  // Additional fields for rendering
   x?: number;
   y?: number;
   terrain?: string;
@@ -210,9 +126,9 @@ export interface TerrainTile {
 }
 
 /**
- * Map data from API (corresponds to MapView.php)
+ * Map data for internal use
  */
-export interface MapData extends BaseApiResource {
+export interface MapData {
   gameId: string;
   width: number;
   height: number;
@@ -231,32 +147,25 @@ export interface MapConfig {
 }
 
 // ============================================================================
-// TURN TYPES (corresponds to TurnView.php)
+// TURN TYPES
 // ============================================================================
 
 /**
- * Turn data from API (corresponds to TurnView.php)
+ * Turn data for internal use
  */
-export interface TurnData extends BaseApiResource {
+export interface TurnData {
   gameId: string;
   activePlayer: string;
   currentTurn: number;
   turnEndedAt: string;
 }
 
-/**
- * End turn request
- */
-export interface EndTurnRequest {
-  playerId: string;
-}
-
 // ============================================================================
-// PLAYER TYPES (corresponds to Player domain entity)
+// PLAYER TYPES
 // ============================================================================
 
 /**
- * Player data for game rendering (derived from Player domain entity)
+ * Player data for game rendering
  */
 export interface PlayerData {
   id: string;
@@ -269,27 +178,6 @@ export interface PlayerData {
   playerId?: string;
   gameId?: string;
   userId?: number;
-}
-
-/**
- * Player animation configuration
- */
-export interface PlayerAnimationConfig {
-  bounceHeight: number;
-  animationDuration: number;
-}
-
-/**
- * Player visual configuration
- */
-export interface PlayerVisualConfig {
-  circleRadiusRatio: number;
-  innerRadiusRatio: number;
-  borderColor: number;
-  borderWidth: number;
-  shadowOffsetX: number;
-  shadowOffsetY: number;
-  shadowAlpha: number;
 }
 
 // ============================================================================
@@ -316,33 +204,6 @@ export interface SelectionData {
   position: GridPosition;
   displayName: string;
   info: Record<string, any>;
-}
-
-// ============================================================================
-// API RESPONSE TYPES
-// ============================================================================
-
-/**
- * Hydra collection response wrapper
- */
-export interface HydraCollection<T> {
-  'hydra:member': T[];
-  'hydra:totalItems': number;
-  'hydra:view'?: {
-    'hydra:first'?: string;
-    'hydra:last'?: string;
-    'hydra:next'?: string;
-    'hydra:previous'?: string;
-  };
-}
-
-/**
- * API error response
- */
-export interface ApiError {
-  message: string;
-  code?: string;
-  details?: Record<string, any>;
 }
 
 // ============================================================================

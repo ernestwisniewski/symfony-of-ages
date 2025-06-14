@@ -2,7 +2,7 @@ import {Container} from 'pixi.js';
 import {HexTile} from './HexTile';
 import {HexGeometry} from './HexGeometry';
 import {HexRenderer} from './HexRenderer';
-import type { TerrainTile } from '../core/types';
+import type { TerrainTile } from '../core';
 
 /**
  * Interface for hex grid configuration
