@@ -165,7 +165,7 @@ export default class extends Controller<HTMLElement> {
             attack: unitData.attackPower,
             defense: unitData.defensePower,
             isDead: unitData.isDead,
-            unitId: unitData.unitId
+            unitId: unitData.id
         };
     }
 
@@ -177,7 +177,7 @@ export default class extends Controller<HTMLElement> {
             name: cityData.name,
             ownerId: cityData.ownerId,
             position: cityData.position,
-            cityId: cityData.cityId,
+            cityId: cityData.id,
             // Default values for city properties (can be extended later)
             population: 1000,
             production: 10,

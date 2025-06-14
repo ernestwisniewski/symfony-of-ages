@@ -1,7 +1,7 @@
 /**
  * Core API Types and Interfaces
  * 
- * This file contains all TypeScript interfaces that correspond to Symfony API Platform resources.
+ * This file contains all TypeScript interfaces that correspond to Symfony ViewModel classes.
  * These interfaces ensure type safety and consistency across the entire application.
  */
 
@@ -35,7 +35,7 @@ export interface BaseApiResource {
 }
 
 // ============================================================================
-// GAME TYPES
+// GAME TYPES (corresponds to GameView.php)
 // ============================================================================
 
 /**
@@ -49,17 +49,19 @@ export enum GameStatus {
 }
 
 /**
- * Game data from API
+ * Game data from API (corresponds to GameView.php)
  */
 export interface GameData extends BaseApiResource {
-  gameId: string;
+  id: string;
   name: string;
-  status: GameStatus;
-  players: string[];
-  currentTurn: number;
+  status: string;
   activePlayer: string;
+  currentTurn: number;
   createdAt: string;
-  startedAt?: string;
+  players: string[];
+  userId: number;
+  startedAt?: string | null;
+  currentTurnAt?: string | null;
 }
 
 /**
@@ -84,7 +86,7 @@ export interface StartGameRequest {
 }
 
 // ============================================================================
-// UNIT TYPES
+// UNIT TYPES (corresponds to UnitView.php)
 // ============================================================================
 
 /**
@@ -97,13 +99,13 @@ export enum UnitType {
 }
 
 /**
- * Unit data from API
+ * Unit data from API (corresponds to UnitView.php)
  */
 export interface UnitData extends BaseApiResource {
-  unitId: string;
+  id: string;
   ownerId: string;
   gameId: string;
-  type: UnitType;
+  type: string;
   position: Position;
   currentHealth: number;
   maxHealth: number;
@@ -139,14 +141,14 @@ export interface AttackUnitRequest {
 }
 
 // ============================================================================
-// CITY TYPES
+// CITY TYPES (corresponds to CityView.php)
 // ============================================================================
 
 /**
- * City data from API
+ * City data from API (corresponds to CityView.php)
  */
 export interface CityData extends BaseApiResource {
-  cityId: string;
+  id: string;
   ownerId: string;
   gameId: string;
   name: string;
@@ -164,7 +166,7 @@ export interface CreateCityRequest {
 }
 
 // ============================================================================
-// MAP TYPES
+// MAP TYPES (corresponds to MapView.php and MapTileView.php)
 // ============================================================================
 
 /**
@@ -193,17 +195,22 @@ export interface TerrainProperties {
 }
 
 /**
- * Terrain tile data
+ * Terrain tile data (corresponds to MapTileView.php)
  */
 export interface TerrainTile {
   type: TerrainType;
   name: string;
   properties: TerrainProperties;
   coordinates?: GridPosition;
+  // Additional fields from MapTileView
+  x?: number;
+  y?: number;
+  terrain?: string;
+  isOccupied?: boolean;
 }
 
 /**
- * Map data from API
+ * Map data from API (corresponds to MapView.php)
  */
 export interface MapData extends BaseApiResource {
   gameId: string;
@@ -224,17 +231,17 @@ export interface MapConfig {
 }
 
 // ============================================================================
-// TURN TYPES
+// TURN TYPES (corresponds to TurnView.php)
 // ============================================================================
 
 /**
- * Turn data from API
+ * Turn data from API (corresponds to TurnView.php)
  */
 export interface TurnData extends BaseApiResource {
   gameId: string;
   activePlayer: string;
   currentTurn: number;
-  turnEndedAt?: string;
+  turnEndedAt: string;
 }
 
 /**
@@ -245,11 +252,11 @@ export interface EndTurnRequest {
 }
 
 // ============================================================================
-// PLAYER TYPES
+// PLAYER TYPES (corresponds to Player domain entity)
 // ============================================================================
 
 /**
- * Player data for game rendering
+ * Player data for game rendering (derived from Player domain entity)
  */
 export interface PlayerData {
   id: string;
@@ -258,6 +265,10 @@ export interface PlayerData {
   movementPoints: number;
   maxMovementPoints: number;
   color: number;
+  // Additional fields from Player domain
+  playerId?: string;
+  gameId?: string;
+  userId?: number;
 }
 
 /**

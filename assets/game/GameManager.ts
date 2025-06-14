@@ -55,7 +55,7 @@ export class GameManager {
       if (unitData) {
         // Convert UnitData to PlayerData format for selection system
         const playerDataForSelection = {
-          id: unitData.unitId,
+          id: unitData.id,
           name: `${unitData.type} (${unitData.ownerId})`,
           position: {
             row: unitData.position.y,
@@ -80,13 +80,13 @@ export class GameManager {
    */
   private convertToUnitData(playerData: any): UnitData | null {
     // If it's already UnitData, return as is
-    if (playerData && playerData.unitId && playerData.type) {
+    if (playerData && playerData.id && playerData.type) {
       return playerData as UnitData;
     }
 
     // If it's PlayerData format, try to find corresponding UnitData
     if (playerData && playerData.id) {
-      return this.currentUnits.find(unit => unit.unitId === playerData.id) || null;
+      return this.currentUnits.find(unit => unit.id === playerData.id) || null;
     }
 
     return null;
@@ -113,7 +113,7 @@ export class GameManager {
   addUnit(unitData: UnitData): void {
     // Convert UnitData to PlayerData for compatibility with existing GameMap
     const playerData = {
-      id: unitData.unitId,
+      id: unitData.id,
       name: `${unitData.type} (${unitData.ownerId})`,
       position: {
         row: unitData.position.y,
