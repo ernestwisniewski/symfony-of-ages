@@ -1,19 +1,23 @@
 import { Container } from 'pixi.js';
-import { Player } from './Player';
+import { City } from './City';
+import { Unit } from './Unit';
 import { HexGrid } from '../map/HexGrid';
+import { HexGeometry } from '../map/HexGeometry';
 import { CameraController } from '../map/CameraController';
-import type { PlayerData } from './types';
+import type { CityData, UnitData } from '../core/types';
 import type { MapConfig } from '../map/types';
 
 /**
  * PlayerManager handles all player-related operations
- * Manages player lifecycle, positioning, and camera integration
+ * Manages cities and units as pulsating dots on the map
+ * Player no longer has direct representation on the map
  */
 export class PlayerManager {
   private hexGrid: HexGrid;
   private cameraController: CameraController;
   private config: MapConfig;
-  private player: Player | null = null;
+  private cities: Map<string, City> = new Map();
+  private units: Map<string, Unit> = new Map();
 
   constructor(hexGrid: HexGrid, cameraController: CameraController, config: MapConfig) {
     this.hexGrid = hexGrid;
@@ -22,89 +26,232 @@ export class PlayerManager {
   }
 
   /**
-   * Adds a player to the map
-   * @param playerData - Player data from backend
+   * Adds a city to the map
+   * @param cityData - City data from backend
    */
-  addPlayer(playerData: PlayerData): void {
-    // Remove existing player if any
-    this.removePlayer();
+  addCity(cityData: CityData): void {
+    // Remove existing city if any
+    this.removeCity(cityData.id);
 
-    // Create new player sprite
-    this.player = new Player(playerData, this.config.size);
-    this.hexGrid.addChild(this.player.sprite);
+    // Create new city sprite
+    const city = new City(cityData, this.config.size);
+    this.cities.set(cityData.id, city);
+    this.hexGrid.addChild(city.sprite);
 
-    // Setup player click handling
-    this.player.sprite.on('playerclick', (event: any) => {
-      this.hexGrid.emit('playerclick', event);
+    // Setup city click handling
+    city.sprite.on('cityclick', (event: any) => {
+      this.hexGrid.emit('cityclick', event);
     });
-
-    // Set optimal zoom for player visibility and center camera
-    this.cameraController.setOptimalPlayerZoom();
-    this.centerCameraOnPlayer();
   }
 
   /**
-   * Updates player position
+   * Updates city position and data
    */
-  updatePlayerPosition(playerData: PlayerData): void {
-    if (this.player) {
-      this.player.updateData(playerData);
-
-      // Always center camera on player after movement
-      this.centerCameraOnPlayer();
+  updateCity(cityData: CityData): void {
+    const city = this.cities.get(cityData.id);
+    if (city) {
+      city.updateData(cityData);
+    } else {
+      // If city doesn't exist, add it
+      this.addCity(cityData);
     }
   }
 
   /**
-   * Removes player from the map
+   * Removes city from the map
    */
-  removePlayer(): void {
-    if (this.player) {
-      this.hexGrid.removeChild(this.player.sprite);
-      this.player.destroy();
-      this.player = null;
+  removeCity(cityId: string): void {
+    const city = this.cities.get(cityId);
+    if (city) {
+      this.hexGrid.removeChild(city.sprite);
+      city.destroy();
+      this.cities.delete(cityId);
     }
   }
 
   /**
-   * Gets the current player
+   * Adds a unit to the map
+   * @param unitData - Unit data from backend
    */
-  getPlayer(): Player | null {
-    return this.player;
+  addUnit(unitData: UnitData): void {
+    // Remove existing unit if any
+    this.removeUnit(unitData.id);
+
+    // Create new unit sprite
+    const unit = new Unit(unitData, this.config.size);
+    this.units.set(unitData.id, unit);
+    this.hexGrid.addChild(unit.sprite);
+
+    // Setup unit click handling
+    unit.sprite.on('unitclick', (event: any) => {
+      this.hexGrid.emit('unitclick', event);
+    });
   }
 
   /**
-   * Centers camera on player position
+   * Updates unit position and data
    */
-  private centerCameraOnPlayer(): void {
-    if (!this.player) return;
-
-    const playerWorldPosition = this.calculatePlayerWorldPosition();
-    this.cameraController.centerCameraOnPlayer(playerWorldPosition);
+  updateUnit(unitData: UnitData): void {
+    const unit = this.units.get(unitData.id);
+    if (unit) {
+      unit.updateData(unitData);
+    } else {
+      // If unit doesn't exist, add it
+      this.addUnit(unitData);
+    }
   }
 
   /**
-   * Calculates the player's world position considering hexGrid transforms
+   * Removes unit from the map
    */
-  private calculatePlayerWorldPosition(): { x: number, y: number } {
-    if (!this.player) return { x: 0, y: 0 };
+  removeUnit(unitId: string): void {
+    const unit = this.units.get(unitId);
+    if (unit) {
+      this.hexGrid.removeChild(unit.sprite);
+      unit.destroy();
+      this.units.delete(unitId);
+    }
+  }
 
-    const playerSprite = this.player.sprite;
+  /**
+   * Updates all cities with new data
+   */
+  updateCities(citiesData: CityData[]): void {
+    // Remove cities that no longer exist
+    const currentCityIds = new Set(this.cities.keys());
+    const newCityIds = new Set(citiesData.map(city => city.id));
+    
+    // Remove cities that are no longer in the data
+    for (const cityId of currentCityIds) {
+      if (!newCityIds.has(cityId)) {
+        this.removeCity(cityId);
+      }
+    }
+
+    // Add or update cities
+    citiesData.forEach(cityData => {
+      this.updateCity(cityData);
+    });
+  }
+
+  /**
+   * Updates all units with new data
+   */
+  updateUnits(unitsData: UnitData[]): void {
+    // Remove units that no longer exist
+    const currentUnitIds = new Set(this.units.keys());
+    const newUnitIds = new Set(unitsData.map(unit => unit.id));
+    
+    // Remove units that are no longer in the data
+    for (const unitId of currentUnitIds) {
+      if (!newUnitIds.has(unitId)) {
+        this.removeUnit(unitId);
+      }
+    }
+
+    // Add or update units
+    unitsData.forEach(unitData => {
+      this.updateUnit(unitData);
+    });
+  }
+
+  /**
+   * Gets all cities
+   */
+  getCities(): Map<string, City> {
+    return this.cities;
+  }
+
+  /**
+   * Gets all units
+   */
+  getUnits(): Map<string, Unit> {
+    return this.units;
+  }
+
+  /**
+   * Gets a specific city by ID
+   */
+  getCity(cityId: string): City | undefined {
+    return this.cities.get(cityId);
+  }
+
+  /**
+   * Gets a specific unit by ID
+   */
+  getUnit(unitId: string): Unit | undefined {
+    return this.units.get(unitId);
+  }
+
+  /**
+   * Gets city at specific position
+   */
+  getCityAtPosition(x: number, y: number): City | undefined {
+    for (const city of this.cities.values()) {
+      if (city.isAtPosition(x, y)) {
+        return city;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Gets unit at specific position
+   */
+  getUnitAtPosition(x: number, y: number): Unit | undefined {
+    for (const unit of this.units.values()) {
+      if (unit.isAtPosition(x, y)) {
+        return unit;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Centers camera on a specific position (for cities/units)
+   */
+  centerCameraOnPosition(x: number, y: number): void {
+    const worldPos = this.calculateWorldPosition(x, y);
+    this.cameraController.centerCameraOnPlayer(worldPos);
+  }
+
+  /**
+   * Calculates world position from grid coordinates
+   */
+  private calculateWorldPosition(x: number, y: number): { x: number, y: number } {
+    // Convert grid coordinates to world coordinates
+    const hexGeometry = new HexGeometry(this.config.size);
+    const worldPos = hexGeometry.calculatePosition(y, x);
+    
+    // Account for hexGrid transforms
     const hexGridWorldX = this.hexGrid.x;
     const hexGridWorldY = this.hexGrid.y;
+    
+    const worldX = hexGridWorldX + (worldPos.x - this.hexGrid.pivot.x) * this.hexGrid.scale.x;
+    const worldY = hexGridWorldY + (worldPos.y - this.hexGrid.pivot.y) * this.hexGrid.scale.y;
 
-    // Player is now inside hexGrid, so we need to account for hexGrid's transform
-    const playerWorldX = hexGridWorldX + (playerSprite.x - this.hexGrid.pivot.x) * this.hexGrid.scale.x;
-    const playerWorldY = hexGridWorldY + (playerSprite.y - this.hexGrid.pivot.y) * this.hexGrid.scale.y;
-
-    return { x: playerWorldX, y: playerWorldY };
+    return { x: worldX, y: worldY };
   }
 
   /**
-   * Keeps the player centered on camera
+   * Removes all cities and units from the map
    */
-  keepPlayerInView(): void {
-    if (!this.player) return;
-    this.centerCameraOnPlayer();
+  clearAll(): void {
+    // Remove all cities
+    for (const cityId of this.cities.keys()) {
+      this.removeCity(cityId);
+    }
+
+    // Remove all units
+    for (const unitId of this.units.keys()) {
+      this.removeUnit(unitId);
+    }
+  }
+
+  /**
+   * Cleanup all resources
+   */
+  destroy(): void {
+    this.clearAll();
   }
 }

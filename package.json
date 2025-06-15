@@ -15,6 +15,7 @@
     "vite-plugin-symfony": "^8.1"
   },
   "dependencies": {
+    "@hotwired/turbo": "^8.0.13",
     "@pixi/filter-drop-shadow": "^5.2.0",
     "pixi.js": "^8.9.2"
   }

@@ -1,12 +1,14 @@
 import {Application, Container} from 'pixi.js';
 import {HexGrid} from './HexGrid';
-import {preloadTerrainTextures} from './TerrainTextures';
 import {CameraController} from './CameraController';
 import {InteractionController} from './InteractionController';
 import {PlayerManager} from '../player/PlayerManager';
 import {DebugRenderer} from './DebugRenderer';
+import {preloadTerrainTextures} from './TerrainTextures';
 import type {MapConfig} from './types';
-import type {PlayerData} from '../player/types';
+import type {CityData, UnitData} from '../core/types';
+import {City} from '../player/City';
+import {Unit} from '../player/Unit';
 
 /**
  * GameMap class manages the main game map with hexagonal tiles
@@ -32,7 +34,7 @@ export class GameMap {
 
   // Callback functions for external handling
   public onHexClick?: (row: number, col: number, terrainData: any) => void;
-  public onPlayerClick?: (playerData: PlayerData) => void;
+  public onPlayerClick?: (data: CityData | UnitData) => void;
 
   /**
    * Creates a new GameMap instance
@@ -148,10 +150,17 @@ export class GameMap {
       this.config
     );
 
-    // Setup player click handling
-    this.hexGrid.on('playerclick', (event: any) => {
+    // Setup city click handling
+    this.hexGrid.on('cityclick', (event: any) => {
       if (this.onPlayerClick) {
-        this.onPlayerClick(event.playerData);
+        this.onPlayerClick(event.cityData);
+      }
+    });
+
+    // Setup unit click handling
+    this.hexGrid.on('unitclick', (event: any) => {
+      if (this.onPlayerClick) {
+        this.onPlayerClick(event.unitData);
       }
     });
 
@@ -180,10 +189,8 @@ export class GameMap {
   private setInitialView(): void {
     this.cameraController.setInitialView();
 
-    // Only center the map if no player is present
-    if (!this.playerManager.getPlayer()) {
-      this.cameraController.centerMap();
-    }
+    // Center the map since we no longer have a single player
+    this.cameraController.centerMap();
   }
 
   /**
@@ -198,36 +205,70 @@ export class GameMap {
   }
 
   /**
-   * Adds a player to the game map
-   * @param playerData - Player data from backend
+   * Adds cities to the game map
+   * @param citiesData - Array of city data from backend
    */
-  addPlayer(playerData: PlayerData): void {
-    // this.playerManager.addPlayer(playerData);
-
-    // Add debug markers when player is added
-    // this.debugRenderer.addDebugMarkers();
+  addCities(citiesData: CityData[]): void {
+    this.playerManager.updateCities(citiesData);
   }
 
   /**
-   * Updates player position
-   * @param playerData - Updated player data
+   * Adds units to the game map
+   * @param unitsData - Array of unit data from backend
    */
-  updatePlayerPosition(playerData: PlayerData): void {
-    this.playerManager.updatePlayerPosition(playerData);
+  addUnits(unitsData: UnitData[]): void {
+    this.playerManager.updateUnits(unitsData);
   }
 
   /**
-   * Removes player from the map
+   * Updates cities on the map
+   * @param citiesData - Updated cities data
    */
-  removePlayer(): void {
-    this.playerManager.removePlayer();
+  updateCities(citiesData: CityData[]): void {
+    this.playerManager.updateCities(citiesData);
   }
 
   /**
-   * Gets the current player
+   * Updates units on the map
+   * @param unitsData - Updated units data
    */
-  getPlayer() {
-    return this.playerManager.getPlayer();
+  updateUnits(unitsData: UnitData[]): void {
+    this.playerManager.updateUnits(unitsData);
+  }
+
+  /**
+   * Gets all cities
+   */
+  getCities(): Map<string, City> {
+    return this.playerManager.getCities();
+  }
+
+  /**
+   * Gets all units
+   */
+  getUnits(): Map<string, Unit> {
+    return this.playerManager.getUnits();
+  }
+
+  /**
+   * Gets city at specific position
+   */
+  getCityAtPosition(x: number, y: number): City | undefined {
+    return this.playerManager.getCityAtPosition(x, y);
+  }
+
+  /**
+   * Gets unit at specific position
+   */
+  getUnitAtPosition(x: number, y: number): Unit | undefined {
+    return this.playerManager.getUnitAtPosition(x, y);
+  }
+
+  /**
+   * Centers camera on specific position
+   */
+  centerCameraOnPosition(x: number, y: number): void {
+    this.playerManager.centerCameraOnPosition(x, y);
   }
 
   /**
@@ -242,5 +283,12 @@ export class GameMap {
    */
   getElement(): HTMLElement {
     return this.element;
+  }
+
+  /**
+   * Get map configuration
+   */
+  getMapConfig(): MapConfig {
+    return this.config;
   }
 }
