@@ -2,7 +2,7 @@
 
 **Symfony of Ages** is a turn-based browser game inspired by *Civilization*. Players expand their influence, explore a hex-based map, and engage in strategic gameplay to dominate the neighborhood.
 
-This is an experimental setup for learning, so expect the code to change frequently. But if you're also exploring Ecotone or curious how event sourcing might work in a Symfony project, feel free to check it out, leave feedback, or just follow along.Add commentMore actions
+This is an experimental setup for learning, so expect the code to change frequently. But if you're also exploring Ecotone or curious how event sourcing might work in a Symfony project, feel free to check it out, leave feedback, or just follow along.
 
 ## Project Goals
 
