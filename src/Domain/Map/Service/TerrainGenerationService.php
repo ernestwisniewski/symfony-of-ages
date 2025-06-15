@@ -4,7 +4,7 @@ namespace App\Domain\Map\Service;
 
 use App\Domain\Map\ValueObject\TerrainType;
 
-class TerrainGenerationDomainService
+class TerrainGenerationService
 {
     private const array TERRAIN_WEIGHTS = [
         TerrainType::PLAINS->value => 35,

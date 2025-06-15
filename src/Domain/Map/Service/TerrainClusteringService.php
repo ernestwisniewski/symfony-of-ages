@@ -4,7 +4,7 @@ namespace App\Domain\Map\Service;
 
 use App\Domain\Map\ValueObject\TerrainType;
 
-class TerrainClusteringDomainService
+class TerrainClusteringService
 {
     private const array TERRAIN_CLUSTERS = [
         TerrainType::WATER->value => 0.7,

@@ -4,7 +4,7 @@ namespace App\Domain\Map\Service;
 
 use App\Domain\Map\ValueObject\TerrainType;
 
-class TerrainSmoothingDomainService
+class TerrainSmoothingService
 {
     private const array TERRAIN_COMPATIBILITY = [
         TerrainType::PLAINS->value => [
