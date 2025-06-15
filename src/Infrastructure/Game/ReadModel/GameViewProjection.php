@@ -5,6 +5,7 @@ namespace App\Infrastructure\Game\ReadModel;
 use App\Application\Game\Query\GetAllGamesQuery;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Application\Game\Query\GetUserGamesQuery;
+use App\Application\Game\Query\GetGamePlayersQuery;
 use App\Domain\Game\Event\GameWasCreated;
 use App\Domain\Game\Event\GameWasStarted;
 use App\Domain\Game\Event\PlayerEndedTurn;
@@ -65,6 +66,13 @@ readonly class GameViewProjection
             fn(GameViewEntity $entity): GameView => $this->objectMapper->map($entity, GameView::class),
             $gameViewEntities
         );
+    }
+
+    #[QueryHandler]
+    public function getGamePlayers(GetGamePlayersQuery $query): array
+    {
+        $gameView = $this->find((string)$query->gameId);
+        return $gameView->players;
     }
 
     #[EventHandler]

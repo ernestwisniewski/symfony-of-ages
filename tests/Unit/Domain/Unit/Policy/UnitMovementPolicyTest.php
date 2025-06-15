@@ -143,6 +143,7 @@ class UnitMovementPolicyTest extends TestCase
     {
         return [
             'warrior' => [UnitType::WARRIOR, 2],
+            'settler' => [UnitType::SETTLER, 2],
             'archer' => [UnitType::ARCHER, 2],
             'cavalry' => [UnitType::CAVALRY, 4],
             'scout' => [UnitType::SCOUT, 5],

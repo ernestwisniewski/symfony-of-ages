@@ -126,6 +126,11 @@ a:hover {
 .mb-4 { margin-bottom: var(--spacing-lg); }
 
 /* ===== BUTTONS ===== */
+button:disabled,
+button[disabled]{
+    opacity: .3;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

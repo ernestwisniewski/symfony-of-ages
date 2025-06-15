@@ -11,6 +11,7 @@ class UnitTypeTest extends TestCase
     public function testAllUnitTypesHaveValidValues(): void
     {
         $this->assertEquals('warrior', UnitType::WARRIOR->value);
+        $this->assertEquals('settler', UnitType::SETTLER->value);
         $this->assertEquals('archer', UnitType::ARCHER->value);
         $this->assertEquals('cavalry', UnitType::CAVALRY->value);
         $this->assertEquals('scout', UnitType::SCOUT->value);
@@ -25,6 +26,16 @@ class UnitTypeTest extends TestCase
         $this->assertEquals(12, $warrior->getDefensePower());
         $this->assertEquals(100, $warrior->getMaxHealth());
         $this->assertEquals(2, $warrior->getMovementRange());
+    }
+
+    public function testSettlerStats(): void
+    {
+        $settler = UnitType::SETTLER;
+
+        $this->assertEquals(5, $settler->getAttackPower());
+        $this->assertEquals(8, $settler->getDefensePower());
+        $this->assertEquals(80, $settler->getMaxHealth());
+        $this->assertEquals(2, $settler->getMovementRange());
     }
 
     public function testArcherStats(): void
@@ -70,6 +81,7 @@ class UnitTypeTest extends TestCase
     public function testCanCreateFromString(): void
     {
         $this->assertEquals(UnitType::WARRIOR, UnitType::from('warrior'));
+        $this->assertEquals(UnitType::SETTLER, UnitType::from('settler'));
         $this->assertEquals(UnitType::ARCHER, UnitType::from('archer'));
         $this->assertEquals(UnitType::CAVALRY, UnitType::from('cavalry'));
         $this->assertEquals(UnitType::SCOUT, UnitType::from('scout'));

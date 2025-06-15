@@ -5,6 +5,7 @@ namespace App\Domain\Unit\ValueObject;
 enum UnitType: string
 {
     case WARRIOR = 'warrior';
+    case SETTLER = 'settler';
     case ARCHER = 'archer';
     case CAVALRY = 'cavalry';
     case SCOUT = 'scout';
@@ -14,6 +15,7 @@ enum UnitType: string
     {
         return match ($this) {
             self::WARRIOR => 15,
+            self::SETTLER => 5,
             self::ARCHER => 12,
             self::CAVALRY => 18,
             self::SCOUT => 8,
@@ -25,6 +27,7 @@ enum UnitType: string
     {
         return match ($this) {
             self::WARRIOR => 12,
+            self::SETTLER => 8,
             self::ARCHER => 8,
             self::CAVALRY => 10,
             self::SCOUT => 6,
@@ -36,6 +39,7 @@ enum UnitType: string
     {
         return match ($this) {
             self::WARRIOR => 100,
+            self::SETTLER => 80,
             self::ARCHER => 80,
             self::CAVALRY => 90,
             self::SCOUT => 60,
@@ -47,6 +51,7 @@ enum UnitType: string
     {
         return match ($this) {
             self::WARRIOR => 2,
+            self::SETTLER => 2,
             self::ARCHER => 2,
             self::CAVALRY => 4,
             self::SCOUT => 5,

@@ -14,10 +14,9 @@
     <div class="card-actions">
         {% if this.getIsMyGame %}
             {% if not this.game.isStarted %}
-                <button class="btn btn-primary btn-sm {% if not this.getCanStart %}disabled{% endif %}"
+                <button class="btn btn-primary btn-sm"
                         {% if not this.getCanStart %}disabled{% endif %}
-                        data-live-action="startGame"
-                        data-live-action-param-gameId="{{ this.game.id }}">
+                    {{ live_action('startGame') }}>
                     {{ ux_icon('lucide:play') }}
                     Start Game
                 </button>
@@ -30,7 +29,8 @@
         {% else %}
             {% if not this.game.isStarted %}
                 {% if not this.getUserIsParticipant %}
-                    <button class="btn btn-primary btn-sm {% if not this.getCanJoin %}disabled{% endif %}"
+                    <button class="btn btn-primary btn-sm"
+                            {% if not this.getCanJoin %}disabled{% endif %}
                         {{ live_action('joinGame') }}>
                         {{ ux_icon('lucide:user-plus') }}
                         Join Game

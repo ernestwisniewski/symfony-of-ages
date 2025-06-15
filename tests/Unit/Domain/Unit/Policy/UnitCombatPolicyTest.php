@@ -264,6 +264,8 @@ class UnitCombatPolicyTest extends TestCase
     {
         return [
             'warrior_vs_archer' => [UnitType::WARRIOR, UnitType::ARCHER, 7], // 15 - 8 = 7
+            'settler_vs_warrior' => [UnitType::SETTLER, UnitType::WARRIOR, 1], // 5 - 12 = -7, minimum 1
+            'warrior_vs_settler' => [UnitType::WARRIOR, UnitType::SETTLER, 7], // 15 - 8 = 7
             'archer_vs_warrior' => [UnitType::ARCHER, UnitType::WARRIOR, 1], // 12 - 12 = 0, minimum 1
             'cavalry_vs_scout' => [UnitType::CAVALRY, UnitType::SCOUT, 12], // 18 - 6 = 12
             'siege_vs_cavalry' => [UnitType::SIEGE_ENGINE, UnitType::CAVALRY, 15], // 25 - 10 = 15

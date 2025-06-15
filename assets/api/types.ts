@@ -149,6 +149,7 @@ export enum TerrainType {
  */
 export enum UnitType {
   WARRIOR = 'warrior',
+  SETTLER = 'settler',
   ARCHER = 'archer',
   CAVALRY = 'cavalry',
   SCOUT = 'scout',

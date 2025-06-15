@@ -114,7 +114,7 @@ final class UnitResource
 
     #[Groups(['unit:create'])]
     #[Assert\NotBlank(message: 'Unit type is required', groups: ['unit:create'])]
-    #[Assert\Choice(choices: ['warrior', 'archer', 'cavalry'], groups: ['unit:create'])]
+    #[Assert\Choice(choices: ['warrior', 'settler', 'archer', 'cavalry'], groups: ['unit:create'])]
     public ?string $unitType = null;
 
     #[Groups(['unit:create'])]
