@@ -64,10 +64,17 @@ export default class extends Controller<HTMLElement> {
   /**
    * Handle unit selection
    */
-  private handleUnitSelection(unitData: { unitData: UnitResource }): void {
-    if (!this.component) return;
+  private handleUnitSelection(unitData: { unitData: any }): void {
+    console.log('Unit selection event received:', unitData);
+    
+    if (!this.component) {
+      console.warn('Live Component not initialized');
+      return;
+    }
 
     const payload = this.formatUnitPayload(unitData.unitData);
+    console.log('Formatted unit payload:', payload);
+    
     this.component.emit('open', {type: 'unit', payload});
   }
 
@@ -187,9 +194,9 @@ export default class extends Controller<HTMLElement> {
 
   /**
    * Format unit data for the Live Component payload
-   * Returns proper UnitResource structure for consistency with backend
+   * Converts UnitData to UnitResource format for consistency with backend
    */
-  private formatUnitPayload(unitData: UnitResource): {
+  private formatUnitPayload(unitData: any): {
     type: string | null;
     ownerId: string | null;
     position: { x: number; y: number } | null;
@@ -202,20 +209,32 @@ export default class extends Controller<HTMLElement> {
     isDead: boolean | null;
     unitId: string | null;
   } {
+    // Handle both UnitData (internal) and UnitResource (API) formats
+    const unitId = unitData.unitId || unitData.id;
+    const type = unitData.type;
+    const ownerId = unitData.ownerId;
+    const position = unitData.position;
+    const currentHealth = unitData.currentHealth;
+    const maxHealth = unitData.maxHealth;
+    const attackPower = unitData.attackPower;
+    const defensePower = unitData.defensePower;
+    const movementRange = unitData.movementRange;
+    const isDead = unitData.isDead;
+
     return {
-      type: unitData.type ?? null,
-      ownerId: unitData.ownerId ?? null,
-      position: unitData.position ?? null,
-      movementRange: unitData.movementRange ?? null,
-      currentHealth: unitData.currentHealth ?? null,
-      maxHealth: unitData.maxHealth ?? null,
-      health: unitData.currentHealth && unitData.maxHealth
-        ? Math.round((unitData.currentHealth / unitData.maxHealth) * 100)
+      type: type ?? null,
+      ownerId: ownerId ?? null,
+      position: position ?? null,
+      movementRange: movementRange ?? null,
+      currentHealth: currentHealth ?? null,
+      maxHealth: maxHealth ?? null,
+      health: currentHealth && maxHealth
+        ? Math.round((currentHealth / maxHealth) * 100)
         : 0,
-      attack: unitData.attackPower ?? null,
-      defense: unitData.defensePower ?? null,
-      isDead: unitData.isDead ?? null,
-      unitId: unitData.unitId ?? null
+      attack: attackPower ?? null,
+      defense: defensePower ?? null,
+      isDead: isDead ?? null,
+      unitId: unitId ?? null
     };
   }
 

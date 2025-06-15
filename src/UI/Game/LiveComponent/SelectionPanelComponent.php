@@ -53,9 +53,6 @@ final class SelectionPanelComponent
         };
     }
 
-    /**
-     * Get formatted payload data for templates
-     */
     public function getPayload(): array
     {
         return $this->payload ?? [];
@@ -63,9 +60,24 @@ final class SelectionPanelComponent
 
     /**
      * Get specific payload value with fallback
+     * Supports nested keys using dot notation (e.g., 'position.x')
      */
     public function getPayloadValue(string $key, mixed $default = null): mixed
     {
-        return $this->payload[$key] ?? $default;
+        if (!str_contains($key, '.')) {
+            return $this->payload[$key] ?? $default;
+        }
+
+        $keys = explode('.', $key);
+        $value = $this->payload;
+
+        foreach ($keys as $nestedKey) {
+            if (!is_array($value) || !array_key_exists($nestedKey, $value)) {
+                return $default;
+            }
+            $value = $value[$nestedKey];
+        }
+
+        return $value;
     }
 }

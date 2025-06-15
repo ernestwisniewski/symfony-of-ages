@@ -155,13 +155,28 @@ export class GameMap {
       if (this.onPlayerClick) {
         this.onPlayerClick(event.cityData);
       }
+
+      // Emit custom event for external handling
+      const customEvent = new CustomEvent('cityclick', {
+        detail: { cityData: event.cityData }
+      });
+      document.dispatchEvent(customEvent);
     });
 
     // Setup unit click handling
     this.hexGrid.on('unitclick', (event: any) => {
+      console.log('GameMap: unitclick event received:', event);
+      
       if (this.onPlayerClick) {
         this.onPlayerClick(event.unitData);
       }
+
+      // Emit custom event for external handling
+      const customEvent = new CustomEvent('unitclick', {
+        detail: { unitData: event.unitData }
+      });
+      console.log('GameMap: emitting unitclick to document:', customEvent);
+      document.dispatchEvent(customEvent);
     });
 
     // Setup hex click handling
