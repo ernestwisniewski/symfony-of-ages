@@ -13,12 +13,14 @@ use App\Infrastructure\Map\ReadModel\Doctrine\MapViewEntity;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapViewRepository;
 use App\UI\Map\ViewModel\MapTileView;
 use App\UI\Map\ViewModel\MapView;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[Projection("map_view", Game::class)]
 readonly class MapProjection
@@ -70,25 +72,48 @@ readonly class MapProjection
     #[EventHandler]
     public function onMapGenerated(MapWasGenerated $event): void
     {
-        // Create overall map view
+        $tiles = json_decode($event->tiles, true);
+
         $mapView = new MapViewEntity(
             $event->gameId,
             $event->width,
             $event->height,
-            json_decode($event->tiles, true),
+            $tiles,
             $event->generatedAt
         );
         $this->entityManager->persist($mapView);
-
-        // Create individual tile views
-        foreach (json_decode($event->tiles, true) as $tileData) {
-            $tile = new MapTileViewEntity($event->gameId, $tileData['x'], $tileData['y'], $tileData['terrain']);
-            $this->entityManager->persist($tile);
-        }
-
         $this->entityManager->flush();
+
+        $conn = $this->entityManager->getConnection();
+        $chunkSize = 10;
+        $sqlPrefix = <<<SQL
+            INSERT INTO map_tile_view (id, game_id, x, y, terrain, is_occupied)
+            VALUES
+        SQL;
+
+        $paramIndex = 0;
+
+        foreach (array_chunk($tiles, $chunkSize) as $chunk) {
+            $values = [];
+            $params = [];
+
+            foreach ($chunk as $t) {
+                $values[] = "( :u{$paramIndex}, :g{$paramIndex}, :x{$paramIndex}, :y{$paramIndex}, :tr{$paramIndex}, :o{$paramIndex} )";
+                $params["u{$paramIndex}"] = Uuid::v4()->toRfc4122();
+                $params["g{$paramIndex}"] = $event->gameId;
+                $params["x{$paramIndex}"] = $t['x'];
+                $params["y{$paramIndex}"] = $t['y'];
+                $params["tr{$paramIndex}"] = $t['terrain'];
+                $params["o{$paramIndex}"] = 'false';
+                ++$paramIndex;
+            }
+
+            $sql = $sqlPrefix . implode(',', $values);
+            $conn->executeStatement($sql, $params);
+        }
     }
 
+    /** @return MapTileViewEntity[] */
     private function find(string $gameId): array
     {
         $mapView = $this->mapTileViewRepository->findByGameId($gameId);

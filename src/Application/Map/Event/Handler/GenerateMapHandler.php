@@ -23,9 +23,9 @@ readonly class GenerateMapHandler
         $this->bus->send(
             new GenerateMapCommand(
                 gameId: new GameId($event->gameId),
-                tiles: $this->mapGeneratorService->generateTiles(10, 10),
-                width: 10,
-                height: 10,
+                tiles: $this->mapGeneratorService->generateTiles(100, 100),
+                width: 100,
+                height: 100,
                 generatedAt: Timestamp::now()
             )
         );

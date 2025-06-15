@@ -202,10 +202,10 @@ export class GameMap {
    * @param playerData - Player data from backend
    */
   addPlayer(playerData: PlayerData): void {
-    this.playerManager.addPlayer(playerData);
+    // this.playerManager.addPlayer(playerData);
 
     // Add debug markers when player is added
-    this.debugRenderer.addDebugMarkers();
+    // this.debugRenderer.addDebugMarkers();
   }
 
   /**
