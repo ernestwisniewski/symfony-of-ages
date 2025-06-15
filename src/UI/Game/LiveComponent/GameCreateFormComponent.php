@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
@@ -29,10 +30,14 @@ final class GameCreateFormComponent extends AbstractController
     use DefaultActionTrait;
     use ComponentWithFormTrait;
 
+    #[LiveProp]
+    public ?GameCreateFormDTO $initialFormData = null;
+
     public function __construct(
         private readonly CommandBus $commandBus,
-        private readonly Security $security
-    ) {
+        private readonly Security   $security
+    )
+    {
     }
 
     protected function instantiateForm(): FormInterface
@@ -45,42 +50,24 @@ final class GameCreateFormComponent extends AbstractController
     {
         $this->submitForm();
 
-        $form = $this->getForm();
-
-        if (!$form->isValid()) {
-            return $this->render('GameCreateFormComponent.html.twig');
-        }
-
         /** @var GameCreateFormDTO $gameData */
-        $gameData = $form->getData();
+        $gameData = $this->getForm()->getData();
 
-        try {
-            $user = $this->security->getUser();
+        $user = $this->security->getUser();
+        $gameId = new GameId(Uuid::v4()->toRfc4122());
+        $playerId = new PlayerId(Uuid::v4()->toRfc4122());
 
-            if (!$user) {
-                throw new \RuntimeException('User not authenticated');
-            }
+        $this->commandBus->send(new CreateGameCommand(
+            gameId: $gameId,
+            playerId: $playerId,
+            name: new GameName($gameData->name),
+            userId: new UserId($user->getId()),
+            createdAt: Timestamp::now()
+        ));
 
-            $gameId = new GameId(Uuid::v4()->toRfc4122());
-            $playerId = new PlayerId(Uuid::v4()->toRfc4122());
+        $this->addFlash('success', 'Game "' . $gameData->name . '" created successfully!');
 
-                $this->commandBus->send(new CreateGameCommand(
-                gameId: $gameId,
-                playerId: $playerId,
-                name: new GameName($gameData->name),
-                userId: new UserId($user->getId()),
-                createdAt: Timestamp::now()
-            ));
-
-            $this->addFlash('success', 'Game "' . $gameData->name . '" created successfully!');
-
-            return $this->redirectToRoute('app_games');
-
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Failed to create game: ' . $e->getMessage());
-
-            return $this->render('GameCreateFormComponent.html.twig');
-        }
+        return $this->redirectToRoute('app_games');
     }
 
     #[LiveAction]

@@ -17,7 +17,7 @@ class GameCreateController extends AbstractController
 {
     #[Route('/games/create', name: 'app_game_create', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function create(Request $request): Response
+    public function create(): Response
     {
         return $this->render('game/create.html.twig');
     }

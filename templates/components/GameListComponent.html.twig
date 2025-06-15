@@ -1,0 +1,36 @@
+<div class="game-list-container" {{ attributes }} >
+    <div class="game-list-filters">
+        <div class="filter-panel">
+            <button class="btn btn-outline filter-btn" data-action="click->game-list#toggleUserGames">
+                <i class="icon icon--lucide icon--lucide-filter"></i>
+                {% if this.showUserGames %}
+                    <span {{ live_action('toggleUserGames') }}>Show All Games</span>
+                {% else %}
+                    <span {{ live_action('toggleUserGames') }}>Show My Games</span>
+                {% endif %}
+            </button>
+        </div>
+    </div>
+
+    {% if this.games is empty %}
+        <div class="game-list-empty">
+            <div class="game-list-empty-icon">
+                <i class="icon icon--lucide icon--lucide-gamepad-2"></i>
+            </div>
+            <h3 class="game-list-empty-title">No games found</h3>
+            <p class="game-list-empty-text">
+                {% if this.showUserGames %}
+                    You haven't joined any games yet.
+                {% else %}
+                    No games are available at the moment.
+                {% endif %}
+            </p>
+        </div>
+    {% else %}
+        <div class="content-grid three-columns">
+            {% for game in games %}
+                {{ component('GameListCardComponent', {game: game}) }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

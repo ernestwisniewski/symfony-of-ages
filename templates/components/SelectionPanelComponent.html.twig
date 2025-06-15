@@ -1,5 +1,5 @@
 <div class="selection-panel {{ isVisible ? 'visible' : 'hidden' }}"
-     data-controller="selection-panel live"
+    {{ stimulus_controller('selection-panel live') }}
     {{ attributes }}>
     {% if isVisible %}
         <div class="selection-content">

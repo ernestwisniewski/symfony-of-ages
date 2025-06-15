@@ -1,0 +1,16 @@
+{% extends 'layout/page_with_header.html.twig' %}
+
+{% block title %}My Games - SOA{% endblock %}
+
+{% block page_title %}Games{% endblock %}
+
+{% block page_actions %}
+    <a href="{{ path('app_game_create') }}" class="btn btn-primary">
+        {{ ux_icon('lucide:plus') }}
+        Create New Game
+    </a>
+{% endblock %}
+
+{% block content %}
+    {{ component('GameListComponent') }}
+{% endblock %}

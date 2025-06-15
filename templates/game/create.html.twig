@@ -1,4 +1,4 @@
-{% extends 'layouts/page_with_header.html.twig' %}
+{% extends 'layout/page_with_header.html.twig' %}
 
 {% block title %}Create New Game - SOA{% endblock %}
 
@@ -16,7 +16,5 @@
 {% set page_content_class = 'centered' %}
 
 {% block content %}
-    <turbo-frame id="game-create-form" data-turbo-action="advance">
-        {{ component('GameCreateFormComponent') }}
-    </turbo-frame>
+    {{ component('GameCreateFormComponent') }}
 {% endblock %}

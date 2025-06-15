@@ -1,0 +1,54 @@
+<div class="content-card bg-card-gradient" {{ attributes }}>
+    <h3>{{ this.game.name }}</h3>
+
+    <div class="game-meta">
+        <span class="status-badge {{ this.game.status|lower|replace({' ': '-', '_': '-'}) }}">
+            {{ this.game.status }}
+        </span>
+        <span class="player-count">
+            {{ ux_icon('lucide:users') }}
+            {{ this.game.players|length }}/4 Players
+        </span>
+    </div>
+
+    <div class="card-actions">
+        {% if this.getIsMyGame %}
+            {% if not this.game.isStarted %}
+                <button class="btn btn-primary btn-sm {% if not this.getCanStart %}disabled{% endif %}"
+                        {% if not this.getCanStart %}disabled{% endif %}
+                        data-live-action="startGame"
+                        data-live-action-param-gameId="{{ this.game.id }}">
+                    {{ ux_icon('lucide:play') }}
+                    Start Game
+                </button>
+            {% else %}
+                <a href="{{ path('app_game_map', {gameId: this.game.id}) }}" class="btn btn-primary btn-sm">
+                    {{ ux_icon('lucide:play') }}
+                    Play
+                </a>
+            {% endif %}
+        {% else %}
+            {% if not this.game.isStarted %}
+                {% if not this.getUserIsParticipant %}
+                    <button class="btn btn-primary btn-sm {% if not this.getCanJoin %}disabled{% endif %}"
+                        {{ live_action('joinGame') }}>
+                        {{ ux_icon('lucide:user-plus') }}
+                        Join Game
+                    </button>
+                {% endif %}
+            {% else %}
+                {% if this.getUserIsParticipant %}
+                    <a href="{{ path('app_game_map', {gameId: this.game.id}) }}"
+                       class="btn btn-primary btn-sm">
+                        {{ ux_icon('lucide:play') }}
+                        Play
+                    </a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        <a href="#" class="btn btn-outline btn-sm">
+            {{ ux_icon('lucide:eye') }}
+            Details
+        </a>
+    </div>
+</div>
