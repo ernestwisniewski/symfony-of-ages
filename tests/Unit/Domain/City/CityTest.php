@@ -13,6 +13,7 @@ use App\Domain\Map\ValueObject\TerrainType;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Shared\ValueObject\Timestamp;
+use App\Domain\Unit\ValueObject\UnitId;
 use Ecotone\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
@@ -25,6 +26,7 @@ final class CityTest extends TestCase
         $cityId = Uuid::v4()->toRfc4122();
         $playerId = Uuid::v4()->toRfc4122();
         $gameId = Uuid::v4()->toRfc4122();
+        $unitId = Uuid::v4()->toRfc4122();
         $cityName = new CityName('Warsaw');
         $position = new Position(10, 5);
         $terrain = TerrainType::PLAINS;
@@ -35,6 +37,7 @@ final class CityTest extends TestCase
             new CityId($cityId),
             new PlayerId($playerId),
             new GameId($gameId),
+            new UnitId($unitId),
             $cityName,
             $position,
             $foundedAt,
@@ -56,6 +59,7 @@ final class CityTest extends TestCase
                 cityId: $cityId,
                 ownerId: $playerId,
                 gameId: $gameId,
+                unitId: $unitId,
                 name: (string)$cityName,
                 x: $position->x,
                 y: $position->y,

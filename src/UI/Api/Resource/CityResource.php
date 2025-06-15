@@ -85,4 +85,9 @@ final class CityResource
     #[Assert\NotNull(message: 'Y position is required', groups: ['city:create'])]
     #[Assert\GreaterThanOrEqual(0, groups: ['city:create'])]
     public ?int $y = null;
+
+    #[Groups(['city:create'])]
+    #[Assert\NotBlank(message: 'Unit ID is required', groups: ['city:create'])]
+    #[Assert\Uuid(groups: ['city:create'])]
+    public ?string $unitId = null;
 }

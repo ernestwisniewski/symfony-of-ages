@@ -18,6 +18,7 @@ use App\Domain\Shared\ValueObject\Timestamp;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\Uid\Uuid;
+use App\Domain\City\ValueObject\UnitId;
 
 final readonly class GameOrchestrationService
 {
@@ -70,6 +71,7 @@ final readonly class GameOrchestrationService
     public function foundCityAtBestPosition(
         GameId   $gameId,
         PlayerId $playerId,
+        UnitId   $unitId,
         CityName $cityName
     ): array
     {
@@ -102,6 +104,7 @@ final readonly class GameOrchestrationService
             new CityId(Uuid::v4()->toRfc4122()),
             $playerId,
             $gameId,
+            $unitId,
             $cityName,
             $chosenPosition,
             Timestamp::now(),

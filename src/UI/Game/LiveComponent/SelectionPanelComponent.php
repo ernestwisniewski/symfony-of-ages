@@ -8,12 +8,14 @@ use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 #[AsLiveComponent]
 final class SelectionPanelComponent
 {
     use DefaultActionTrait;
+    use ComponentToolsTrait;
 
     #[LiveProp(writable: true)]
     public ?array $selectedHex = null;
@@ -41,6 +43,12 @@ final class SelectionPanelComponent
         $this->template = null;
         $this->selectedHex = null;
         $this->payload = null;
+    }
+
+    #[LiveListener('found-city:success')]
+    public function onCityFounded(#[LiveArg] array $data): void
+    {
+        $this->close();
     }
 
     public function getPartialTemplate(): string

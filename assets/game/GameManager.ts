@@ -20,6 +20,7 @@ export class GameManager {
     this.selectionSystem = new SelectionSystem();
 
     // Convert API resources to internal game data
+    console.log(cities)
     this.currentGame = gameData ? this.convertGameResource(gameData) : null;
     this.currentUnits = units ? units.map(unit => this.convertUnitResource(unit)) : [];
     this.currentCities = cities ? cities.map(city => this.convertCityResource(city)) : [];
@@ -49,11 +50,8 @@ export class GameManager {
    * Convert UnitResource to internal UnitData
    */
   private convertUnitResource(unitResource: UnitResource): UnitData {
-    // Generate unique ID if unitId is missing
-    const unitId = unitResource.unitId || this.generateUniqueId();
-    
     return {
-      id: unitId,
+      id: unitResource.id,
       ownerId: unitResource.ownerId || '',
       gameId: unitResource.gameId || '',
       type: unitResource.type || '',
@@ -68,33 +66,16 @@ export class GameManager {
   }
 
   /**
-   * Generate unique ID for units without ID
-   */
-  private generateUniqueId(): string {
-    return `unit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
    * Convert CityResource to internal CityData
    */
   private convertCityResource(cityResource: CityResource): CityData {
-    // Generate unique ID if cityId is missing
-    const cityId = cityResource.cityId || this.generateUniqueCityId();
-    
     return {
-      id: cityId,
+      id: cityResource.id,
       ownerId: cityResource.ownerId || '',
       gameId: cityResource.gameId || '',
       name: cityResource.name || '',
       position: cityResource.position || { x: 0, y: 0 }
     };
-  }
-
-  /**
-   * Generate unique ID for cities without ID
-   */
-  private generateUniqueCityId(): string {
-    return `city-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
@@ -177,7 +158,7 @@ export class GameManager {
     // Center camera on first unit if available
     if (this.currentUnits.length > 0) {
       const firstUnit = this.currentUnits[0];
-      
+
       // Use setTimeout to ensure units are rendered before centering camera
       setTimeout(() => {
         this.gameMap.centerCameraOnPosition(firstUnit.position.x, firstUnit.position.y);

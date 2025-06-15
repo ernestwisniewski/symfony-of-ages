@@ -4,10 +4,8 @@ namespace App\Domain\Unit;
 
 use App\Application\Unit\Command\AttackUnitCommand;
 use App\Application\Unit\Command\CreateUnitCommand;
+use App\Application\Unit\Command\DestroyUnitCommand;
 use App\Application\Unit\Command\MoveUnitCommand;
-use App\Domain\Game\ValueObject\GameId;
-use App\Domain\Player\ValueObject\PlayerId;
-use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\Event\UnitWasAttacked;
 use App\Domain\Unit\Event\UnitWasCreated;
 use App\Domain\Unit\Event\UnitWasDestroyed;
@@ -19,6 +17,9 @@ use App\Domain\Unit\Policy\UnitMovementPolicy;
 use App\Domain\Unit\ValueObject\Health;
 use App\Domain\Unit\ValueObject\UnitId;
 use App\Domain\Unit\ValueObject\UnitType;
+use App\Domain\Game\ValueObject\GameId;
+use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\Position;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
@@ -139,6 +140,21 @@ class Unit
         }
 
         return $events;
+    }
+
+    #[CommandHandler]
+    public function destroy(DestroyUnitCommand $command): array
+    {
+        if ($this->isDead) {
+            throw UnitAlreadyDeadException::create($this->unitId);
+        }
+
+        return [
+            new UnitWasDestroyed(
+                unitId: (string)$this->unitId,
+                destroyedAt: $command->destroyedAt->format()
+            )
+        ];
     }
 
     #[EventSourcingHandler]

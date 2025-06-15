@@ -1,60 +1,66 @@
-<div class="unit-panel">
-    <div class="panel-header">
-        <h3>Unit Information</h3>
-        <button class="panel-close" 
-                type="button"
-                data-action="live#action"
-                data-live-action-param="close">
-            &times;
+<div class="panel-header">
+    <h3>Unit Information</h3>
+    <button class="panel-close"
+            type="button"
+            data-action="live#action"
+            data-live-action-param="close">
+        &times;
+    </button>
+</div>
+
+<div class="panel-content">
+    <div class="unit-info">
+        <div class="info-row">
+            <span class="info-label">Type:</span>
+            <span class="info-value">{{ this.getPayloadValue('type', 'Unknown') }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Owner:</span>
+            <span class="info-value">{{ this.getPayloadValue('ownerId', 'Unknown') }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Position:</span>
+            <span
+                class="info-value">({{ this.getPayloadValue('position.x', 0) }}, {{ this.getPayloadValue('position.y', 0) }})</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Movement Points:</span>
+            <span class="info-value">{{ this.getPayloadValue('movementRange', 0) }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Health:</span>
+            <span class="info-value">{{ this.getPayloadValue('health', 100) }}%</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Attack:</span>
+            <span class="info-value">{{ this.getPayloadValue('attack', 0) }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Defense:</span>
+            <span class="info-value">{{ this.getPayloadValue('defense', 0) }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Status:</span>
+            <span class="info-value">{{ this.getPayloadValue('isDead', false) ? 'Dead' : 'Alive' }}</span>
+        </div>
+    </div>
+
+    <div class="unit-actions">
+        {% if this.getPayloadValue('type') == 'settler' %}
+            <div class="found-city-section" style="margin-bottom: 16px;">
+                {{ component('FoundCityFormComponent', {
+                    unitData: this.payload
+                }) }}
+            </div>
+        {% endif %}
+        <button class="btn btn-primary" onclick="console.log('Move unit')">
+            Move Unit
+        </button>
+        <button class="btn btn-secondary" onclick="console.log('Attack with unit')">
+            Attack
+        </button>
+        <button class="btn btn-warning" onclick="console.log('Fortify unit')">
+            Fortify
         </button>
     </div>
-    
-    <div class="panel-content">
-        <div class="unit-info">
-            <div class="info-row">
-                <span class="info-label">Type:</span>
-                <span class="info-value">{{ this.getPayloadValue('type', 'Unknown') }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Owner:</span>
-                <span class="info-value">{{ this.getPayloadValue('ownerId', 'Unknown') }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Position:</span>
-                <span class="info-value">({{ this.getPayloadValue('position.x', 0) }}, {{ this.getPayloadValue('position.y', 0) }})</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Movement Points:</span>
-                <span class="info-value">{{ this.getPayloadValue('movementRange', 0) }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Health:</span>
-                <span class="info-value">{{ this.getPayloadValue('health', 100) }}%</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Attack:</span>
-                <span class="info-value">{{ this.getPayloadValue('attack', 0) }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Defense:</span>
-                <span class="info-value">{{ this.getPayloadValue('defense', 0) }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Status:</span>
-                <span class="info-value">{{ this.getPayloadValue('isDead', false) ? 'Dead' : 'Alive' }}</span>
-            </div>
-        </div>
-        
-        <div class="unit-actions">
-            <button class="btn btn-primary" onclick="console.log('Move unit')">
-                Move Unit
-            </button>
-            <button class="btn btn-secondary" onclick="console.log('Attack with unit')">
-                Attack
-            </button>
-            <button class="btn btn-warning" onclick="console.log('Fortify unit')">
-                Fortify
-            </button>
-        </div>
-    </div>
-</div> 
+</div>

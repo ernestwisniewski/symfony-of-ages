@@ -21,14 +21,16 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
-#[AsLiveComponent('GameCreateFormComponent')]
+#[AsLiveComponent]
 final class GameCreateFormComponent extends AbstractController
 {
     use DefaultActionTrait;
     use ComponentWithFormTrait;
+    use ComponentToolsTrait;
 
     #[LiveProp]
     public ?GameCreateFormDTO $initialFormData = null;
@@ -66,6 +68,14 @@ final class GameCreateFormComponent extends AbstractController
         ));
 
         $this->addFlash('success', 'Game "' . $gameData->name . '" created successfully!');
+
+        $this->dispatchBrowserEvent('flash:success', [
+            'message' => "Game '{$gameData->name}' founded successfully!"
+        ]);
+
+        $this->dispatchBrowserEvent('create-game', [
+            'cityName' => $gameData->name,
+        ]);
 
         return $this->redirectToRoute('app_games');
     }

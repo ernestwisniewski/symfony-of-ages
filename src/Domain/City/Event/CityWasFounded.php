@@ -8,6 +8,7 @@ final readonly class CityWasFounded
         public string $cityId,
         public string $ownerId,
         public string $gameId,
+        public string $unitId,
         public string $name,
         public int    $x,
         public int    $y,

@@ -46,6 +46,7 @@ class City
                 (string)$command->cityId,
                 (string)$command->ownerId,
                 (string)$command->gameId,
+                (string)$command->unitId,
                 (string)$command->name,
                 $command->position->x,
                 $command->position->y,

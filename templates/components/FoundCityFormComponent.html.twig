@@ -1,0 +1,37 @@
+<div {{ attributes }}>
+    <div class="found-city-section">
+        {{ form_start(form, {
+            'attr': {
+                'data-action': 'live#action:prevent',
+                'data-live-action-param': 'foundCity',
+                'class': 'form'
+            }
+        }) }}
+
+        <div class="form-group">
+            {{ form_label(form.cityName) }}
+            {{ form_widget(form.cityName) }}
+
+            {% if form.cityName.vars.help %}
+                <small class="form-help">{{ form.cityName.vars.help }}</small>
+            {% endif %}
+
+            {% if form.cityName.vars.errors|length > 0 %}
+                <div class="form-error">
+                    {% for error in form.cityName.vars.errors %}
+                        {{ error.message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit"
+                {{ live_action('foundCity') }}
+                class="btn btn-primary"
+                style="width: 100%;">
+            Found City
+        </button>
+
+        {{ form_end(form) }}
+    </div>
+</div>

@@ -165,8 +165,6 @@ export class GameMap {
 
     // Setup unit click handling
     this.hexGrid.on('unitclick', (event: any) => {
-      console.log('GameMap: unitclick event received:', event);
-      
       if (this.onPlayerClick) {
         this.onPlayerClick(event.unitData);
       }
@@ -175,7 +173,6 @@ export class GameMap {
       const customEvent = new CustomEvent('unitclick', {
         detail: { unitData: event.unitData }
       });
-      console.log('GameMap: emitting unitclick to document:', customEvent);
       document.dispatchEvent(customEvent);
     });
 

@@ -8,6 +8,7 @@ use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Shared\ValueObject\Timestamp;
+use App\Domain\Unit\ValueObject\UnitId;
 
 final readonly class FoundCityCommand
 {
@@ -15,6 +16,7 @@ final readonly class FoundCityCommand
         public CityId    $cityId,
         public PlayerId  $ownerId,
         public GameId    $gameId,
+        public UnitId    $unitId,
         public CityName  $name,
         public Position  $position,
         public Timestamp $foundedAt,

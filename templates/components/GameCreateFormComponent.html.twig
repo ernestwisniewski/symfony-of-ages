@@ -7,8 +7,7 @@
 
         {{ form_start(form, {
             'attr': {
-                'class': 'form',
-                'novalidate': true
+                'class': 'form'
             }
         }) }}
 
@@ -30,20 +29,22 @@
             {% endif %}
         </div>
 
-        <button type="submit" data-action="live#action" data-live-action-param="createGame"
+        <button type="submit"
+                {{ live_action('createGame') }}
                 class="btn btn-primary btn-full"
-                {{ (not form.vars.valid and form.vars.submitted) ? 'disabled' : '' }}>
+            {{ (not form.vars.valid and form.vars.submitted) ? 'disabled' : '' }}>
             {{ ux_icon('lucide:plus-circle') }}
             Create Game
         </button>
 
-        <button type="button" data-action="live#action" data-live-action-param="cancel"
+        <button type="button"
+            {{ live_action('cancel') }}
                 class="btn btn-outline btn-full"
                 style="margin-top: 12px;">
             {{ ux_icon('lucide:x-circle') }}
             Cancel
         </button>
 
-        {{ form_end(form, {'render_rest': false}) }}
+        {{ form_end(form) }}
     </div>
 </div>

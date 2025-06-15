@@ -1,6 +1,6 @@
 /**
  * API Types - Exact matches for Symfony API Resources
- * 
+ *
  * These types correspond directly to the App\UI\Api\Resource classes
  * and represent the data structures used in API communication.
  */
@@ -32,7 +32,7 @@ export interface GameResource {
  * UnitResource - matches App\UI\Api\Resource\UnitResource
  */
 export interface UnitResource {
-  unitId?: string | null;
+  id?: string | null;
   ownerId?: string | null;
   gameId?: string | null;
   type?: string | null;
@@ -43,17 +43,17 @@ export interface UnitResource {
   attackPower?: number | null;
   defensePower?: number | null;
   movementRange?: number | null;
-  
+
   // Create operation fields
   playerId?: string | null;
   unitType?: string | null;
   x?: number | null;
   y?: number | null;
-  
+
   // Move operation fields
   toX?: number | null;
   toY?: number | null;
-  
+
   // Attack operation fields
   targetUnitId?: string | null;
 }
@@ -66,12 +66,12 @@ export interface UnitResource {
  * CityResource - matches App\UI\Api\Resource\CityResource
  */
 export interface CityResource {
-  cityId?: string | null;
+  id?: string | null;
   ownerId?: string | null;
   gameId?: string | null;
   name?: string | null;
   position?: { x: number; y: number } | null;
-  
+
   // Create operation fields
   playerId?: string | null;
   x?: number | null;
@@ -101,7 +101,7 @@ export interface MapResource {
   height?: number | null;
   tiles?: MapTileResource[][] | null;
   generatedAt?: string | null;
-  
+
   // Generate operation fields
   mapWidth?: number | null;
   mapHeight?: number | null;
@@ -119,7 +119,7 @@ export interface TurnResource {
   activePlayer?: string | null;
   currentTurn?: number | null;
   turnEndedAt?: string | null;
-  
+
   // End turn operation fields
   playerId?: string | null;
 }
@@ -188,4 +188,4 @@ export interface ApiItemResponse<T> {
   '@id': string;
   '@type': string;
   [key: string]: any;
-} 
+}

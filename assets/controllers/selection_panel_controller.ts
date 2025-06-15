@@ -49,6 +49,17 @@ export default class extends Controller<HTMLElement> {
         this.closePanel();
       }
     });
+
+    // Listen for flash messages from Live Component
+    document.addEventListener('flash:success', (event: Event) => {
+      const customEvent = event as CustomEvent;
+      this.showFlashMessage('success', customEvent.detail.message);
+    });
+
+    document.addEventListener('flash:error', (event: Event) => {
+      const customEvent = event as CustomEvent;
+      this.showFlashMessage('error', customEvent.detail.message);
+    });
   }
 
   /**
@@ -66,7 +77,7 @@ export default class extends Controller<HTMLElement> {
    */
   private handleUnitSelection(unitData: { unitData: any }): void {
     console.log('Unit selection event received:', unitData);
-    
+
     if (!this.component) {
       console.warn('Live Component not initialized');
       return;
@@ -74,7 +85,7 @@ export default class extends Controller<HTMLElement> {
 
     const payload = this.formatUnitPayload(unitData.unitData);
     console.log('Formatted unit payload:', payload);
-    
+
     this.component.emit('open', {type: 'unit', payload});
   }
 
@@ -199,6 +210,7 @@ export default class extends Controller<HTMLElement> {
   private formatUnitPayload(unitData: any): {
     type: string | null;
     ownerId: string | null;
+    gameId: string | null;
     position: { x: number; y: number } | null;
     movementRange: number | null;
     currentHealth: number | null;
@@ -213,6 +225,7 @@ export default class extends Controller<HTMLElement> {
     const unitId = unitData.unitId || unitData.id;
     const type = unitData.type;
     const ownerId = unitData.ownerId;
+    const gameId = unitData.gameId;
     const position = unitData.position;
     const currentHealth = unitData.currentHealth;
     const maxHealth = unitData.maxHealth;
@@ -224,6 +237,7 @@ export default class extends Controller<HTMLElement> {
     return {
       type: type ?? null,
       ownerId: ownerId ?? null,
+      gameId: gameId ?? null,
       position: position ?? null,
       movementRange: movementRange ?? null,
       currentHealth: currentHealth ?? null,
@@ -285,6 +299,38 @@ export default class extends Controller<HTMLElement> {
     if (this.component) {
       this.component.emit('close', {});
     }
+  }
+
+  /**
+   * Show flash message
+   */
+  private showFlashMessage(type: 'success' | 'error', message: string): void {
+    // Create flash message element
+    const flashElement = document.createElement('div');
+    flashElement.className = `flash-message ${type}`;
+    flashElement.innerHTML = `
+      <span class="flash-icon">
+        ${type === 'success' ? '✓' : '✗'}
+      </span>
+      <span class="flash-text">${message}</span>
+    `;
+
+    // Add to flash messages container or create one
+    let flashContainer = document.querySelector('.flash-messages');
+    if (!flashContainer) {
+      flashContainer = document.createElement('div');
+      flashContainer.className = 'flash-messages';
+      document.body.appendChild(flashContainer);
+    }
+
+    flashContainer.appendChild(flashElement);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (flashElement.parentNode) {
+        flashElement.parentNode.removeChild(flashElement);
+      }
+    }, 5000);
   }
 
   disconnect(): void {

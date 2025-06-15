@@ -66,6 +66,16 @@ use Symfony\Component\Validator\Constraints as Assert;
             output: false,
             processor: UnitStateProcessor::class,
         ),
+        new Post(
+            uriTemplate: '/units/{unitId}/found-city',
+            status: 202,
+            normalizationContext: ['groups' => ['unit:read']],
+            denormalizationContext: ['groups' => ['unit:found-city']],
+            security: "is_granted('ROLE_USER')",
+            validationContext: ['groups' => ['unit:found-city']],
+            output: false,
+            processor: UnitStateProcessor::class,
+        ),
     ],
     paginationEnabled: false,
 )]
@@ -141,4 +151,9 @@ final class UnitResource
     #[Assert\NotBlank(message: 'Target unit ID is required', groups: ['unit:attack'])]
     #[Assert\Uuid(groups: ['unit:attack'])]
     public ?string $targetUnitId = null;
+
+    #[Groups(['unit:found-city'])]
+    #[Assert\NotBlank(message: 'City name is required', groups: ['unit:found-city'])]
+    #[Assert\Length(min: 2, max: 30, groups: ['unit:found-city'])]
+    public ?string $cityName = null;
 }

@@ -15,6 +15,7 @@ use App\UI\Api\Resource\CityResource;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Uid\Uuid;
+use App\Domain\City\ValueObject\UnitId;
 
 final readonly class CityStateProcessor implements ProcessorInterface
 {
@@ -36,8 +37,9 @@ final readonly class CityStateProcessor implements ProcessorInterface
     {
         $this->commandBus->send(new FoundCityCommand(
             cityId: new CityId(Uuid::v4()->toRfc4122()),
-            ownerId: new PlayerId(Uuid::v4()->toRfc4122()),
+            ownerId: new PlayerId($data->playerId ?? Uuid::v4()->toRfc4122()),
             gameId: new GameId($gameId),
+            unitId: new UnitId($data->unitId),
             name: new CityName($data->name),
             position: new Position($data->x, $data->y),
             foundedAt: Timestamp::now(),
