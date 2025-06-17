@@ -21,6 +21,7 @@ use App\Domain\Game\ValueObject\GameStatus;
 use App\Domain\Game\ValueObject\Turn;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 use App\UI\Map\ViewModel\MapTileView;
 use DomainException;
 use Ecotone\Modelling\Attribute\CommandHandler;
@@ -34,8 +35,8 @@ class Game
 {
     use WithAggregateVersioning;
 
-    const int MIN_PLAYERS = 2;
-    const int MAX_PLAYERS = 4;
+    const int MIN_PLAYERS = ValidationConstants::MIN_PLAYERS_PER_GAME;
+    const int MAX_PLAYERS = ValidationConstants::MAX_PLAYERS_PER_GAME;
 
     #[Identifier]
     private GameId $gameId;

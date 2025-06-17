@@ -11,6 +11,8 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Application\Api\State\UnitStateProcessor;
 use App\Application\Api\State\UnitStateProvider;
+use App\Domain\Shared\ValueObject\ValidationConstants;
+use App\Domain\Unit\ValueObject\UnitType;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -124,27 +126,27 @@ final class UnitResource
 
     #[Groups(['unit:create'])]
     #[Assert\NotBlank(message: 'Unit type is required', groups: ['unit:create'])]
-    #[Assert\Choice(choices: ['warrior', 'settler', 'archer', 'cavalry'], groups: ['unit:create'])]
+    #[Assert\Choice(choices: [UnitType::class, 'allValues'], groups: ['unit:create'])]
     public ?string $unitType = null;
 
     #[Groups(['unit:create'])]
     #[Assert\NotNull(message: 'X position is required', groups: ['unit:create'])]
-    #[Assert\GreaterThanOrEqual(0, groups: ['unit:create'])]
+    #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['unit:create'])]
     public ?int $x = null;
 
     #[Groups(['unit:create'])]
     #[Assert\NotNull(message: 'Y position is required', groups: ['unit:create'])]
-    #[Assert\GreaterThanOrEqual(0, groups: ['unit:create'])]
+    #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['unit:create'])]
     public ?int $y = null;
 
     #[Groups(['unit:move'])]
     #[Assert\NotNull(message: 'Target X position is required', groups: ['unit:move'])]
-    #[Assert\GreaterThanOrEqual(0, groups: ['unit:move'])]
+    #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['unit:move'])]
     public ?int $toX = null;
 
     #[Groups(['unit:move'])]
     #[Assert\NotNull(message: 'Target Y position is required', groups: ['unit:move'])]
-    #[Assert\GreaterThanOrEqual(0, groups: ['unit:move'])]
+    #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['unit:move'])]
     public ?int $toY = null;
 
     #[Groups(['unit:attack'])]
@@ -154,6 +156,12 @@ final class UnitResource
 
     #[Groups(['unit:found-city'])]
     #[Assert\NotBlank(message: 'City name is required', groups: ['unit:found-city'])]
-    #[Assert\Length(min: 2, max: 30, groups: ['unit:found-city'])]
+    #[Assert\Length(
+        min: ValidationConstants::MIN_CITY_NAME_LENGTH, 
+        max: ValidationConstants::MAX_CITY_NAME_LENGTH, 
+        minMessage: 'City name must be at least ' . ValidationConstants::MIN_CITY_NAME_LENGTH . ' characters', 
+        maxMessage: 'City name cannot exceed ' . ValidationConstants::MAX_CITY_NAME_LENGTH . ' characters',
+        groups: ['unit:found-city']
+    )]
     public ?string $cityName = null;
 }

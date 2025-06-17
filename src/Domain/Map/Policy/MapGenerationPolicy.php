@@ -2,22 +2,20 @@
 
 namespace App\Domain\Map\Policy;
 
+use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Map\Exception\InvalidMapDimensionsException;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 
 final readonly class MapGenerationPolicy
 {
-    private const int MIN_DIMENSION = 5;
-    private const int MAX_DIMENSION = 50;
-
-    public function canGenerateMap(int $width, int $height): bool
+    public function validateDimensions(int $width, int $height): void
     {
-        return $this->isDimensionValid($width) && $this->isDimensionValid($height);
-    }
+        if ($width < ValidationConstants::MIN_MAP_SIZE || $width > ValidationConstants::MAX_MAP_SIZE) {
+            throw InvalidMapDimensionsException::invalidWidth($width, ValidationConstants::MIN_MAP_SIZE, ValidationConstants::MAX_MAP_SIZE);
+        }
 
-    public function validateMapGeneration(int $width, int $height): void
-    {
-        if (!$this->isDimensionValid($width) || !$this->isDimensionValid($height)) {
-            throw InvalidMapDimensionsException::create($width, $height);
+        if ($height < ValidationConstants::MIN_MAP_SIZE || $height > ValidationConstants::MAX_MAP_SIZE) {
+            throw InvalidMapDimensionsException::invalidHeight($height, ValidationConstants::MIN_MAP_SIZE, ValidationConstants::MAX_MAP_SIZE);
         }
     }
 
@@ -28,10 +26,5 @@ final readonly class MapGenerationPolicy
             $playerCount <= 4 => ['width' => 15, 'height' => 15],
             default => ['width' => 20, 'height' => 20]
         };
-    }
-
-    private function isDimensionValid(int $dimension): bool
-    {
-        return $dimension >= self::MIN_DIMENSION && $dimension <= self::MAX_DIMENSION;
     }
 } 

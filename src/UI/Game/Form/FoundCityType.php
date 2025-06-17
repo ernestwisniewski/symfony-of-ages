@@ -2,6 +2,7 @@
 
 namespace App\UI\Game\Form;
 
+use App\Domain\Shared\ValueObject\ValidationConstants;
 use App\UI\Game\DTO\FoundCityFormDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -19,7 +20,7 @@ class FoundCityType extends AbstractType
                     'placeholder' => 'Enter city name...',
                     'data-live-debounce' => '300'
                 ],
-                'help' => 'Choose a name for your new city (2-30 characters)',
+                'help' => 'Choose a name for your new city (' . ValidationConstants::MIN_CITY_NAME_LENGTH . '-' . ValidationConstants::MAX_CITY_NAME_LENGTH . ' characters)',
             ]);
     }
 

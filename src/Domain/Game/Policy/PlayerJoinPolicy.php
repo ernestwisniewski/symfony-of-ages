@@ -8,11 +8,13 @@ use App\Domain\Game\Exception\PlayerAlreadyJoinedException;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use App\Domain\Game\Game;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 
 final readonly class PlayerJoinPolicy
 {
     public function __construct(
-        private int $maxPlayersAllowed = 4
+        private int $maxPlayersAllowed = ValidationConstants::MAX_PLAYERS_PER_GAME
     )
     {
     }
@@ -51,5 +53,14 @@ final readonly class PlayerJoinPolicy
     private function hasPlayer(PlayerId $playerId, array $players): bool
     {
         return array_any($players, fn($player) => $player->isEqual($playerId));
+    }
+
+    public function canJoinGame(Game $game): bool
+    {
+        if (count($game->getPlayers()) >= $this->maxPlayersAllowed) {
+            throw GameFullException::create($game->getId(), $this->maxPlayersAllowed);
+        }
+
+        return true;
     }
 }

@@ -7,7 +7,7 @@
         </span>
         <span class="player-count">
             {{ ux_icon('lucide:users') }}
-            {{ this.game.players|length }}/4 Players
+            {{ this.game.players|length }}/{{ constant('App\\Domain\\Shared\\ValueObject\\ValidationConstants::MAX_PLAYERS_PER_GAME') }} Players
         </span>
     </div>
 

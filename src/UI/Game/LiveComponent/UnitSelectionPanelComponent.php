@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\UI\Game\LiveComponent;
 
+use App\Domain\Unit\ValueObject\UnitType;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
@@ -82,6 +83,6 @@ final class UnitSelectionPanelComponent
 
     public function isSettler(): bool
     {
-        return $this->getUnitType() === 'settler';
+        return $this->getUnitType() === UnitType::SETTLER->value;
     }
 }

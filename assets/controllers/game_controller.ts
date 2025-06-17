@@ -93,7 +93,7 @@ export default class extends Controller<HTMLElement> {
           } else {
             tiles2D[row][col] = {
               type: TerrainType.PLAINS,
-              name: 'plains',
+              name: TerrainType.PLAINS,
               properties: {},
               coordinates: {row, col}
             };

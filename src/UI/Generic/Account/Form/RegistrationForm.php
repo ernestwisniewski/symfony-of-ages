@@ -2,6 +2,7 @@
 
 namespace App\UI\Generic\Account\Form;
 
+use App\Domain\Shared\ValueObject\ValidationConstants;
 use App\Infrastructure\Generic\Account\Doctrine\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -36,10 +37,10 @@ class RegistrationForm extends AbstractType
                         'message' => 'Please enter a password',
                     ]),
                     new Length([
-                        'min' => 6,
+                        'min' => ValidationConstants::MIN_PASSWORD_LENGTH,
                         'minMessage' => 'Your password should be at least {{ limit }} characters',
                         // max length allowed by Symfony for security reasons
-                        'max' => 4096,
+                        'max' => ValidationConstants::MAX_PASSWORD_LENGTH,
                     ]),
                 ],
             ])

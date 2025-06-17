@@ -2,9 +2,11 @@
 
 namespace App\Domain\Map\Service;
 
+use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Map\ValueObject\TerrainType;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
+use App\Domain\Unit\ValueObject\UnitType;
 use App\UI\Map\ViewModel\MapTileView;
 
 class MapGeneratorService
@@ -193,7 +195,7 @@ class MapGeneratorService
                 $y = $baseY;
         }
 
-        if ($unitType === 'settler') {
+        if ($unitType === UnitType::SETTLER->value) {
             $x += 1;
             $y += 1;
         }

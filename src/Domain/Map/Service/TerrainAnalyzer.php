@@ -3,6 +3,7 @@
 namespace App\Domain\Map\Service;
 
 use App\Domain\Map\ValueObject\TerrainType;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 
 class TerrainAnalyzer
 {
@@ -54,17 +55,17 @@ class TerrainAnalyzer
 
     public function isDefensivePosition(TerrainType $terrainType): bool
     {
-        return $terrainType->getDefenseBonus() >= 2;
+        return $terrainType->getDefenseBonus() >= ValidationConstants::MIN_DEFENSE_BONUS_FOR_DEFENSIVE_POSITION;
     }
 
     public function allowsQuickTraversal(TerrainType $terrainType): bool
     {
-        return $terrainType->getMovementCost() <= 1 && $terrainType->isPassable();
+        return $terrainType->getMovementCost() <= ValidationConstants::MAX_MOVEMENT_COST_FOR_QUICK_TRAVERSAL && $terrainType->isPassable();
     }
 
     public function requiresSpecialMovement(TerrainType $terrainType): bool
     {
-        return $terrainType->getMovementCost() >= 3 || !$terrainType->isPassable();
+        return $terrainType->getMovementCost() >= ValidationConstants::MIN_MOVEMENT_COST_FOR_SPECIAL_MOVEMENT || !$terrainType->isPassable();
     }
 
     public function getComprehensiveAnalysis(TerrainType $terrainType): array
@@ -136,31 +137,31 @@ class TerrainAnalyzer
 
     private function isEconomicallyViable(TerrainType $terrainType): bool
     {
-        return $terrainType->getResourceYield() >= 3;
+        return $terrainType->getResourceYield() >= ValidationConstants::MIN_RESOURCE_YIELD_FOR_ECONOMICALLY_VIABLE;
     }
 
     private function isStrategicallyImportant(TerrainType $terrainType): bool
     {
-        return $terrainType->getDefenseBonus() >= 3 || $terrainType->getResourceYield() >= 3;
+        return $terrainType->getDefenseBonus() >= ValidationConstants::MIN_DEFENSE_BONUS_FOR_STRATEGIC_IMPORTANCE || $terrainType->getResourceYield() >= ValidationConstants::MIN_RESOURCE_YIELD_FOR_STRATEGIC_IMPORTANCE;
     }
 
     private function isEasyToTraverse(TerrainType $terrainType): bool
     {
-        return $terrainType->getMovementCost() === 1 && $terrainType->isPassable();
+        return $terrainType->getMovementCost() === ValidationConstants::MIN_MOVEMENT_COST_FOR_QUICK_TRAVERSAL && $terrainType->isPassable();
     }
 
     private function isDifficultToTraverse(TerrainType $terrainType): bool
     {
-        return $terrainType->getMovementCost() >= 3;
+        return $terrainType->getMovementCost() >= ValidationConstants::MIN_MOVEMENT_COST_FOR_DIFFICULT_TRAVERSAL;
     }
 
     private function isFortified(TerrainType $terrainType): bool
     {
-        return $terrainType->getDefenseBonus() >= 4;
+        return $terrainType->getDefenseBonus() >= ValidationConstants::MIN_DEFENSE_BONUS_FOR_FORTIFIED;
     }
 
     private function isResourceRich(TerrainType $terrainType): bool
     {
-        return $terrainType->getResourceYield() >= 4;
+        return $terrainType->getResourceYield() >= ValidationConstants::MIN_RESOURCE_YIELD_FOR_RESOURCE_RICH;
     }
 }

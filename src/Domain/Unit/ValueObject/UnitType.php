@@ -58,4 +58,14 @@ enum UnitType: string
             self::SIEGE_ENGINE => 1,
         };
     }
+
+    public static function allValues(): array
+    {
+        return array_map(fn(self $case) => $case->value, self::cases());
+    }
+
+    public static function count(): int
+    {
+        return count(self::cases());
+    }
 } 

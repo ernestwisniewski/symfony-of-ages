@@ -42,8 +42,8 @@ readonly class AssignInitialUnitsHandler
     private function assignUnitsToPlayer(GameId $gameId, PlayerId $playerId): void
     {
         // Get starting positions from the map generator service
-        $warriorPosition = $this->mapGeneratorService->getStartingPosition($playerId, 'warrior');
-        $settlerPosition = $this->mapGeneratorService->getStartingPosition($playerId, 'settler');
+        $warriorPosition = $this->mapGeneratorService->getStartingPosition($playerId, UnitType::WARRIOR->value);
+        $settlerPosition = $this->mapGeneratorService->getStartingPosition($playerId, UnitType::SETTLER->value);
         
         $createdAt = Timestamp::now();
         

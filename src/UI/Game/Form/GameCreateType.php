@@ -2,6 +2,7 @@
 
 namespace App\UI\Game\Form;
 
+use App\Domain\Shared\ValueObject\ValidationConstants;
 use App\UI\Game\DTO\GameCreateFormDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -20,7 +21,7 @@ class GameCreateType extends AbstractType
                     'placeholder' => 'Enter game name...',
                     'data-live-debounce' => '300'
                 ],
-                'help' => 'Choose a unique name for your game (3-50 characters)',
+                'help' => 'Choose a unique name for your game (' . ValidationConstants::MIN_GAME_NAME_LENGTH . '-' . ValidationConstants::MAX_GAME_NAME_LENGTH . ' characters)',
             ]);
     }
 

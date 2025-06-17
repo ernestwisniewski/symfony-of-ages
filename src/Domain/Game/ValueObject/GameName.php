@@ -2,21 +2,36 @@
 
 namespace App\Domain\Game\ValueObject;
 
-use DomainException;
+use App\Domain\Shared\ValueObject\ValidationConstants;
+use App\Domain\Shared\Exception\DomainException;
 
-final class GameName
+final readonly class GameName
 {
-    const int MAX_LENGTH = 120;
-
-    public function __construct(public string $name)
+    public function __construct(
+        private string $value
+    )
     {
-        if (self::MAX_LENGTH < mb_strlen($this->name)) {
-            throw new DomainException('Game name is too long.');
+        $this->validate();
+    }
+
+    private function validate(): void
+    {
+        if (strlen($this->value) < ValidationConstants::MIN_GAME_NAME_LENGTH) {
+            throw new DomainException('Game name must be at least ' . ValidationConstants::MIN_GAME_NAME_LENGTH . ' characters long');
         }
+
+        if (strlen($this->value) > ValidationConstants::MAX_GAME_NAME_LENGTH_DOMAIN) {
+            throw new DomainException('Game name cannot exceed ' . ValidationConstants::MAX_GAME_NAME_LENGTH_DOMAIN . ' characters');
+        }
+    }
+
+    public function getValue(): string
+    {
+        return $this->value;
     }
 
     public function __toString(): string
     {
-        return $this->name;
+        return $this->value;
     }
 }

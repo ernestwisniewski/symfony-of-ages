@@ -4,6 +4,7 @@ namespace App\Domain\Unit\Policy;
 
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 use App\Domain\Unit\Exception\InvalidAttackException;
 use App\Domain\Unit\ValueObject\Health;
 use App\Domain\Unit\ValueObject\UnitId;
@@ -11,7 +12,7 @@ use App\Domain\Unit\ValueObject\UnitType;
 
 final readonly class UnitCombatPolicy
 {
-    private const int ATTACK_RANGE = 1;
+    private const int ATTACK_RANGE = ValidationConstants::ATTACK_RANGE;
 
     public function canAttack(
         UnitId   $attackerId,
@@ -61,8 +62,7 @@ final readonly class UnitCombatPolicy
         $baseDamage = $attackerType->getAttackPower();
         $defense = $defenderType->getDefensePower();
 
-        // Simple damage calculation: attack power minus defense, minimum 1 damage
-        return max(1, $baseDamage - $defense);
+        return max(ValidationConstants::MIN_DAMAGE, $baseDamage - $defense);
     }
 
     private function isWithinAttackRange(Position $attacker, Position $target): bool

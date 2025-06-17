@@ -12,6 +12,7 @@ use App\Application\Api\State\GameStateProvider;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 
 #[ApiResource(
     shortName: 'Game',
@@ -75,7 +76,13 @@ final class GameResource
 
     #[Groups(['game:read', 'game:create'])]
     #[Assert\NotBlank(message: 'Game name is required', groups: ['game:create'])]
-    #[Assert\Length(min: 3, max: 50, groups: ['game:create'])]
+    #[Assert\Length(
+        min: ValidationConstants::MIN_GAME_NAME_LENGTH, 
+        max: ValidationConstants::MAX_GAME_NAME_LENGTH, 
+        minMessage: 'Game name must be at least ' . ValidationConstants::MIN_GAME_NAME_LENGTH . ' characters',
+        maxMessage: 'Game name cannot exceed ' . ValidationConstants::MAX_GAME_NAME_LENGTH . ' characters',
+        groups: ['game:create']
+    )]
     public ?string $name = null;
 
     #[Groups(['game:read'])]

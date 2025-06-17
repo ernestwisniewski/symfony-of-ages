@@ -9,6 +9,7 @@ use App\Application\Game\Query\GetAllGamesQuery;
 use App\Application\Game\Query\GetUserGamesQuery;
 use App\Domain\Game\Game;
 use App\Domain\Game\ValueObject\GameId;
+use App\Domain\Game\ValueObject\GameStatus;
 use App\Domain\Shared\ValueObject\Timestamp;
 use App\Domain\Shared\ValueObject\UserId;
 use App\UI\Game\ViewModel\GameView;
@@ -124,13 +125,13 @@ final class GameListComponent
             'currentTurn' => $game->currentTurn,
             'canStart' => $this->canGameStart($game),
             'playersNeeded' => $this->getPlayersNeeded($game),
-            'isStarted' => $game->status !== 'waiting'
+            'isStarted' => $game->status !== GameStatus::WAITING_FOR_PLAYERS->value
         ];
     }
 
     private function canGameStart(GameView $game): bool
     {
-        return $game->status === 'waiting' && count($game->players) >= $this->minPlayers;
+        return $game->status === GameStatus::WAITING_FOR_PLAYERS->value && count($game->players) >= $this->minPlayers;
     }
 
     private function getPlayersNeeded(GameView $game): int
@@ -145,12 +146,12 @@ final class GameListComponent
 
     public function getWaitingGamesCount(): int
     {
-        return count(array_filter($this->games, fn($game) => $game['status'] === 'waiting'));
+        return count(array_filter($this->games, fn($game) => $game['status'] === GameStatus::WAITING_FOR_PLAYERS->value));
     }
 
     public function getActiveGamesCount(): int
     {
-        return count(array_filter($this->games, fn($game) => $game['status'] === 'in_progress'));
+        return count(array_filter($this->games, fn($game) => $game['status'] === GameStatus::IN_PROGRESS->value));
     }
 
     public function hasGames(): bool

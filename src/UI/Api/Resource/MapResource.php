@@ -9,6 +9,7 @@ use App\Application\Api\State\MapStateProvider;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 
 #[ApiResource(
     shortName: 'Map',
@@ -42,12 +43,22 @@ final class MapResource
     #[Map(if: false)]
     #[Groups(['map:generate'])]
     #[Assert\NotNull(message: 'Map width is required', groups: ['map:generate'])]
-    #[Assert\Range(min: 10, max: 100, groups: ['map:generate'])]
+    #[Assert\Range(
+        min: ValidationConstants::MIN_MAP_SIZE, 
+        max: ValidationConstants::MAX_MAP_SIZE, 
+        notInRangeMessage: 'Map width must be between ' . ValidationConstants::MIN_MAP_SIZE . ' and ' . ValidationConstants::MAX_MAP_SIZE,
+        groups: ['map:generate']
+    )]
     public ?int $mapWidth = null;
 
     #[Map(if: false)]
     #[Groups(['map:generate'])]
     #[Assert\NotNull(message: 'Map height is required', groups: ['map:generate'])]
-    #[Assert\Range(min: 10, max: 100, groups: ['map:generate'])]
+    #[Assert\Range(
+        min: ValidationConstants::MIN_MAP_SIZE, 
+        max: ValidationConstants::MAX_MAP_SIZE, 
+        notInRangeMessage: 'Map height must be between ' . ValidationConstants::MIN_MAP_SIZE . ' and ' . ValidationConstants::MAX_MAP_SIZE,
+        groups: ['map:generate']
+    )]
     public ?int $mapHeight = null;
 }

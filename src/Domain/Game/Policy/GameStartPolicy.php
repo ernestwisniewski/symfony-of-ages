@@ -3,31 +3,32 @@
 namespace App\Domain\Game\Policy;
 
 use App\Domain\Game\Exception\GameAlreadyStartedException;
-use App\Domain\Game\Exception\InsufficientPlayersException;
-use App\Domain\Game\ValueObject\GameId;
-use App\Domain\Shared\ValueObject\Timestamp;
+use App\Domain\Game\Exception\GameNotReadyToStartException;
+use App\Domain\Game\Game;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 
 final readonly class GameStartPolicy
 {
     public function __construct(
-        private int $minPlayersRequired = 2
+        private int $minPlayersRequired = ValidationConstants::MIN_PLAYERS_PER_GAME
     )
     {
     }
 
-    public function canStart(int $playersCount, ?Timestamp $startedAt): bool
+    public function canStartGame(Game $game): bool
     {
-        return $startedAt === null && $playersCount >= $this->minPlayersRequired;
-    }
-
-    public function validateStart(GameId $gameId, int $playersCount, ?Timestamp $startedAt): void
-    {
-        if ($startedAt !== null) {
-            throw GameAlreadyStartedException::create($gameId);
+        if ($game->isStarted()) {
+            throw GameAlreadyStartedException::create($game->getId());
         }
 
-        if ($playersCount < $this->minPlayersRequired) {
-            throw InsufficientPlayersException::create($this->minPlayersRequired, $playersCount);
+        if (count($game->getPlayers()) < $this->minPlayersRequired) {
+            throw GameNotReadyToStartException::insufficientPlayers(
+                $game->getId(),
+                count($game->getPlayers()),
+                $this->minPlayersRequired
+            );
         }
+
+        return true;
     }
 }

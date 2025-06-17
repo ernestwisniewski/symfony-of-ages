@@ -61,7 +61,7 @@
             </div>
 
             <div class="hex-actions">
-                {% if this.getTerrainType() == 'plains' %}
+                {% if this.getTerrainType() == constant('App\\Domain\\Map\\ValueObject\\TerrainType::PLAINS') %}
                     <button class="btn btn-primary"
                             {{ live_action('foundCity') }}>
                         Found City

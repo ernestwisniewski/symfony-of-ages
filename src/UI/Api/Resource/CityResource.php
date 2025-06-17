@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use App\Application\Api\State\CityStateProcessor;
 use App\Application\Api\State\CityStateProvider;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -62,7 +63,13 @@ final class CityResource
 
     #[Groups(['city:read', 'city:create'])]
     #[Assert\NotBlank(message: 'City name is required', groups: ['city:create'])]
-    #[Assert\Length(min: 2, max: 30, groups: ['city:create'])]
+    #[Assert\Length(
+        min: ValidationConstants::MIN_CITY_NAME_LENGTH, 
+        max: ValidationConstants::MAX_CITY_NAME_LENGTH, 
+        minMessage: 'City name must be at least ' . ValidationConstants::MIN_CITY_NAME_LENGTH . ' characters',
+        maxMessage: 'City name cannot exceed ' . ValidationConstants::MAX_CITY_NAME_LENGTH . ' characters',
+        groups: ['city:create']
+    )]
     public ?string $name = null;
 
     #[Groups(['city:read'])]
@@ -77,13 +84,13 @@ final class CityResource
     #[Map(if: false)]
     #[Groups(['city:create'])]
     #[Assert\NotNull(message: 'X position is required', groups: ['city:create'])]
-    #[Assert\GreaterThanOrEqual(0, groups: ['city:create'])]
+    #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['city:create'])]
     public ?int $x = null;
 
     #[Map(if: false)]
     #[Groups(['city:create'])]
     #[Assert\NotNull(message: 'Y position is required', groups: ['city:create'])]
-    #[Assert\GreaterThanOrEqual(0, groups: ['city:create'])]
+    #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['city:create'])]
     public ?int $y = null;
 
     #[Groups(['city:create'])]

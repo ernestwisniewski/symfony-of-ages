@@ -2,15 +2,14 @@
 
 namespace App\Domain\City\ValueObject;
 
+use App\Domain\Shared\ValueObject\ValidationConstants;
 use DomainException;
 
 final readonly class CityName
 {
-    const int MAX_LENGTH = 255;
-
     public function __construct(public string $name)
     {
-        if (trim($name) === '' || mb_strlen($name) > self::MAX_LENGTH) {
+        if (trim($name) === '' || mb_strlen($name) > ValidationConstants::MAX_CITY_NAME_LENGTH_DOMAIN) {
             throw new DomainException('Invalid city name.');
         }
     }
