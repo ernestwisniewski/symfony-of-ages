@@ -10,4 +10,4 @@ final class UnitAlreadyDeadException extends UnitException
     {
         return new self("Unit {$unitId} is already dead and cannot perform actions.");
     }
-} 
+}

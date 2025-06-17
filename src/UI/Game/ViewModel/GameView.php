@@ -1,7 +1,6 @@
 <?php
 
 namespace App\UI\Game\ViewModel;
-
 final class GameView
 {
     public string $id;

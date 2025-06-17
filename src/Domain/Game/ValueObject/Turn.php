@@ -12,7 +12,6 @@ final readonly class Turn
         if ($this->number < ValidationConstants::MIN_TURN_NUMBER) {
             throw new InvalidArgumentException("Turn number cannot be negative.");
         }
-
         if ($this->number > ValidationConstants::MAX_TURN_NUMBER) {
             throw new InvalidArgumentException("Turn number cannot exceed " . ValidationConstants::MAX_TURN_NUMBER . ".");
         }

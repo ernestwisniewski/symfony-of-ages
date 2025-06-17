@@ -9,4 +9,4 @@ final readonly class GetGamePlayersQuery
     public function __construct(public GameId $gameId)
     {
     }
-} 
+}

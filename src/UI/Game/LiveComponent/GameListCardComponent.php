@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\UI\Game\LiveComponent;
@@ -17,7 +16,6 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
-use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -35,7 +33,8 @@ final class GameListCardComponent
         private readonly CommandBus $commandBus,
         private readonly QueryBus   $queryBus,
         private readonly Security   $security
-    ) {
+    )
+    {
     }
 
     public function mount(array $game): void
@@ -50,7 +49,6 @@ final class GameListCardComponent
             gameId: new GameId($this->game['id']),
             startedAt: Timestamp::now()
         ));
-
         $this->dispatchBrowserEvent('game:started', [
             'gameId' => $this->game['id']
         ]);
@@ -65,7 +63,6 @@ final class GameListCardComponent
             userId: new UserId($this->security->getUser()->getId()),
             joinedAt: Timestamp::now()
         ));
-
         $this->dispatchBrowserEvent('game:joined', [
             'gameId' => $this->game['id'],
         ]);
@@ -82,33 +79,30 @@ final class GameListCardComponent
         if (!$currentUserId) {
             return false;
         }
-
-        // Get user IDs participating in this game from the mapping
         $participantUserIds = $this->queryBus->send(new GetUserIdsByGameQuery(
             new GameId($this->game['id'])
         ));
-
         return in_array($currentUserId, $participantUserIds);
     }
 
     public function getCanStart(): bool
     {
         return $this->getIsMyGame() &&
-               !$this->game['isStarted'] &&
-               count($this->game['players']) >= 2;
+            !$this->game['isStarted'] &&
+            count($this->game['players']) >= 2;
     }
 
     public function getCanJoin(): bool
     {
         return !$this->getIsMyGame() &&
-               !$this->getUserIsParticipant() &&
-               !$this->game['isStarted'] &&
-               count($this->game['players']) < 4;
+            !$this->getUserIsParticipant() &&
+            !$this->game['isStarted'] &&
+            count($this->game['players']) < 4;
     }
 
     public function getCanPlay(): bool
     {
         return ($this->getIsMyGame() || $this->getUserIsParticipant()) &&
-               $this->game['isStarted'];
+            $this->game['isStarted'];
     }
 }

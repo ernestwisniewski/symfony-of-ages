@@ -10,4 +10,4 @@ final class GameNotReadyToStartException extends GameException
     {
         return new self("Game {$gameId} cannot be started. Minimum {$requiredPlayers} players required, but only {$actualPlayers} joined.");
     }
-} 
+}

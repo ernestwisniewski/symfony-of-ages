@@ -12,19 +12,14 @@ class MapTileViewEntity
     #[ORM\Id]
     #[ORM\Column(type: 'string')]
     public string $id;
-
     #[ORM\Column(type: 'string')]
     public string $gameId;
-
     #[ORM\Column(type: 'integer')]
     public int $x;
-
     #[ORM\Column(type: 'integer')]
     public int $y;
-
     #[ORM\Column(type: 'string')]
     public string $terrain;
-
     #[ORM\Column(type: 'boolean')]
     public bool $isOccupied = false;
 

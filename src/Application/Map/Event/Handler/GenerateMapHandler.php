@@ -14,7 +14,6 @@ readonly class GenerateMapHandler
 {
     public function __construct(private MapGeneratorService $mapGeneratorService, private CommandBus $bus)
     {
-
     }
 
     #[EventHandler]
@@ -29,6 +28,5 @@ readonly class GenerateMapHandler
                 generatedAt: Timestamp::now()
             )
         );
-
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Domain\Game\ValueObject;
 
-use App\Domain\Shared\ValueObject\ValidationConstants;
 use App\Domain\Shared\Exception\DomainException;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 
 final readonly class GameName
 {
@@ -19,7 +19,6 @@ final readonly class GameName
         if (strlen($this->value) < ValidationConstants::MIN_GAME_NAME_LENGTH) {
             throw new DomainException('Game name must be at least ' . ValidationConstants::MIN_GAME_NAME_LENGTH . ' characters long');
         }
-
         if (strlen($this->value) > ValidationConstants::MAX_GAME_NAME_LENGTH_DOMAIN) {
             throw new DomainException('Game name cannot exceed ' . ValidationConstants::MAX_GAME_NAME_LENGTH_DOMAIN . ' characters');
         }

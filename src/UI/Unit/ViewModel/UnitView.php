@@ -1,7 +1,6 @@
 <?php
 
 namespace App\UI\Unit\ViewModel;
-
 final class UnitView
 {
     public string $id;
@@ -15,4 +14,4 @@ final class UnitView
     public int $attackPower;
     public int $defensePower;
     public int $movementRange;
-} 
+}

@@ -40,4 +40,4 @@ class PlayerUserMappingRepository extends ServiceEntityRepository
         $mappings = $this->findByGameId($gameId);
         return array_map(fn(PlayerUserMappingEntity $mapping) => $mapping->userId, $mappings);
     }
-} 
+}

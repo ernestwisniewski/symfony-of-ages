@@ -5,9 +5,9 @@ namespace App\Domain\Game\Policy;
 use App\Domain\Game\Exception\GameAlreadyStartedException;
 use App\Domain\Game\Exception\GameNotReadyToStartException;
 use App\Domain\Game\Game;
-use App\Domain\Shared\ValueObject\ValidationConstants;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 
 final readonly class GameStartPolicy
 {
@@ -22,7 +22,6 @@ final readonly class GameStartPolicy
         if ($game->isStarted()) {
             throw GameAlreadyStartedException::create($game->getId());
         }
-
         if (count($game->getPlayers()) < $this->minPlayersRequired) {
             throw GameNotReadyToStartException::insufficientPlayers(
                 $game->getId(),
@@ -30,13 +29,12 @@ final readonly class GameStartPolicy
                 $this->minPlayersRequired
             );
         }
-
         return true;
     }
 
     public function validateStart(
-        GameId $gameId,
-        int $playersCount,
+        GameId     $gameId,
+        int        $playersCount,
         ?Timestamp $startedAt
     ): void
     {

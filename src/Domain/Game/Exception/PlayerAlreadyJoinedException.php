@@ -10,4 +10,4 @@ final class PlayerAlreadyJoinedException extends GameException
     {
         return new self("Player {$playerId} has already joined this game.");
     }
-} 
+}

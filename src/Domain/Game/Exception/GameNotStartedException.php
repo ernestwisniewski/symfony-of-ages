@@ -10,4 +10,4 @@ final class GameNotStartedException extends GameException
     {
         return new self("Game {$gameId} has not been started yet.");
     }
-} 
+}

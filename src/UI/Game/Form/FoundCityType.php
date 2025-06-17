@@ -30,4 +30,4 @@ class FoundCityType extends AbstractType
             'data_class' => FoundCityFormDTO::class,
         ]);
     }
-} 
+}

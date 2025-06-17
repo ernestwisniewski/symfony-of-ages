@@ -9,10 +9,10 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Application\Api\State\GameStateProcessor;
 use App\Application\Api\State\GameStateProvider;
+use App\Domain\Shared\ValueObject\ValidationConstants;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Domain\Shared\ValueObject\ValidationConstants;
 
 #[ApiResource(
     shortName: 'Game',
@@ -73,36 +73,28 @@ final class GameResource
     #[Map(source: 'id')]
     #[ApiProperty(identifier: true)]
     public ?string $gameId = null;
-
     #[Groups(['game:read', 'game:create'])]
     #[Assert\NotBlank(message: 'Game name is required', groups: ['game:create'])]
     #[Assert\Length(
-        min: ValidationConstants::MIN_GAME_NAME_LENGTH, 
-        max: ValidationConstants::MAX_GAME_NAME_LENGTH, 
+        min: ValidationConstants::MIN_GAME_NAME_LENGTH,
+        max: ValidationConstants::MAX_GAME_NAME_LENGTH,
         minMessage: 'Game name must be at least ' . ValidationConstants::MIN_GAME_NAME_LENGTH . ' characters',
         maxMessage: 'Game name cannot exceed ' . ValidationConstants::MAX_GAME_NAME_LENGTH . ' characters',
         groups: ['game:create']
     )]
     public ?string $name = null;
-
     #[Groups(['game:read'])]
     public ?string $status = null;
-
     #[Groups(['game:read'])]
     public ?array $players = null;
-
     #[Groups(['game:read'])]
     public ?int $currentTurn = null;
-
     #[Groups(['game:read'])]
     public ?string $activePlayer = null;
-
     #[Groups(['game:read'])]
     public ?string $createdAt = null;
-
     #[Groups(['game:read'])]
     public ?string $startedAt = null;
-
     #[Map(if: false)]
     #[Groups(['game:join'])]
     #[Assert\NotBlank(message: 'Player ID is required', groups: ['game:join'])]

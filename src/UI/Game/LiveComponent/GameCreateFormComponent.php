@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\UI\Game\LiveComponent;
@@ -51,14 +50,10 @@ final class GameCreateFormComponent extends AbstractController
     public function createGame(): Response
     {
         $this->submitForm();
-
-        /** @var GameCreateFormDTO $gameData */
         $gameData = $this->getForm()->getData();
-
         $user = $this->security->getUser();
         $gameId = new GameId(Uuid::v4()->toRfc4122());
         $playerId = new PlayerId(Uuid::v4()->toRfc4122());
-
         $this->commandBus->send(new CreateGameCommand(
             gameId: $gameId,
             playerId: $playerId,
@@ -66,17 +61,13 @@ final class GameCreateFormComponent extends AbstractController
             userId: new UserId($user->getId()),
             createdAt: Timestamp::now()
         ));
-
         $this->addFlash('success', 'Game "' . $gameData->name . '" created successfully!');
-
         $this->dispatchBrowserEvent('flash:success', [
             'message' => "Game '{$gameData->name}' founded successfully!"
         ]);
-
         $this->dispatchBrowserEvent('create-game', [
             'cityName' => $gameData->name,
         ]);
-
         return $this->redirectToRoute('app_games');
     }
 

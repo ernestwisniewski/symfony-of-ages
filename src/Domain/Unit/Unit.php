@@ -6,6 +6,9 @@ use App\Application\Unit\Command\AttackUnitCommand;
 use App\Application\Unit\Command\CreateUnitCommand;
 use App\Application\Unit\Command\DestroyUnitCommand;
 use App\Application\Unit\Command\MoveUnitCommand;
+use App\Domain\Game\ValueObject\GameId;
+use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\Event\UnitWasAttacked;
 use App\Domain\Unit\Event\UnitWasCreated;
 use App\Domain\Unit\Event\UnitWasDestroyed;
@@ -17,9 +20,6 @@ use App\Domain\Unit\Policy\UnitMovementPolicy;
 use App\Domain\Unit\ValueObject\Health;
 use App\Domain\Unit\ValueObject\UnitId;
 use App\Domain\Unit\ValueObject\UnitType;
-use App\Domain\Game\ValueObject\GameId;
-use App\Domain\Player\ValueObject\PlayerId;
-use App\Domain\Shared\ValueObject\Position;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
@@ -46,11 +46,7 @@ class Unit
         UnitCreationPolicy $creationPolicy
     ): array
     {
-        // For unit creation, we would need terrain info and existing units
-        // For now, skip validation as it would require additional context
-
         $maxHealth = $command->type->getMaxHealth();
-
         return [
             new UnitWasCreated(
                 unitId: (string)$command->unitId,
@@ -75,14 +71,12 @@ class Unit
         if ($this->isDead) {
             throw UnitAlreadyDeadException::create($this->unitId);
         }
-
         $movementPolicy->validateMovement(
             $this->position,
             $command->toPosition,
             $this->type,
             $command->existingUnits
         );
-
         return [
             new UnitWasMoved(
                 unitId: (string)$this->unitId,
@@ -104,9 +98,7 @@ class Unit
         if ($this->isDead) {
             throw UnitAlreadyDeadException::create($this->unitId);
         }
-
         $target = $command->targetUnit;
-
         $combatPolicy->validateAttack(
             $this->unitId,
             $this->position,
@@ -116,11 +108,9 @@ class Unit
             $target->ownerId,
             $target->health
         );
-
         $damage = $combatPolicy->calculateDamage($this->type, $target->type);
         $newHealth = $target->health->takeDamage($damage);
         $wasDestroyed = $newHealth->isDead();
-
         $events = [
             new UnitWasAttacked(
                 attackerUnitId: (string)$this->unitId,
@@ -131,14 +121,12 @@ class Unit
                 attackedAt: $command->attackedAt->format()
             )
         ];
-
         if ($wasDestroyed) {
             $events[] = new UnitWasDestroyed(
                 unitId: (string)$target->unitId,
                 destroyedAt: $command->attackedAt->format()
             );
         }
-
         return $events;
     }
 
@@ -148,7 +136,6 @@ class Unit
         if ($this->isDead) {
             throw UnitAlreadyDeadException::create($this->unitId);
         }
-
         return [
             new UnitWasDestroyed(
                 unitId: (string)$this->unitId,
@@ -178,10 +165,8 @@ class Unit
     #[EventSourcingHandler]
     public function whenUnitWasAttacked(UnitWasAttacked $event): void
     {
-        // Only apply if this unit was the defender
         if ($event->defenderUnitId === (string)$this->unitId) {
             $this->health = new Health($event->remainingHealth, $this->health->maximum);
-
             if ($event->wasDestroyed) {
                 $this->isDead = true;
             }
@@ -195,5 +180,4 @@ class Unit
             $this->isDead = true;
         }
     }
-
 }

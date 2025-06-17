@@ -87,79 +87,60 @@ final class UnitResource
     #[Map(source: 'id')]
     #[ApiProperty(identifier: true)]
     public ?string $unitId = null;
-
     #[Groups(['unit:read'])]
     public ?string $ownerId = null;
-
     #[Groups(['unit:read'])]
     public ?string $gameId = null;
-
     #[Groups(['unit:read'])]
     public ?string $type = null;
-
     #[Groups(['unit:read'])]
     public ?array $position = null;
-
     #[Groups(['unit:read'])]
     public ?int $currentHealth = null;
-
     #[Groups(['unit:read'])]
     public ?int $maxHealth = null;
-
     #[Groups(['unit:read'])]
     public ?bool $isDead = null;
-
     #[Groups(['unit:read'])]
     public ?int $attackPower = null;
-
     #[Groups(['unit:read'])]
     public ?int $defensePower = null;
-
     #[Groups(['unit:read'])]
     public ?int $movementRange = null;
-
-
     #[Groups(['unit:create'])]
     #[Assert\NotBlank(message: 'Player ID is required', groups: ['unit:create'])]
     #[Assert\Uuid(groups: ['unit:create'])]
     public ?string $playerId = null;
-
     #[Groups(['unit:create'])]
     #[Assert\NotBlank(message: 'Unit type is required', groups: ['unit:create'])]
     #[Assert\Choice(choices: [UnitType::class, 'allValues'], groups: ['unit:create'])]
     public ?string $unitType = null;
-
     #[Groups(['unit:create'])]
     #[Assert\NotNull(message: 'X position is required', groups: ['unit:create'])]
     #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['unit:create'])]
     public ?int $x = null;
-
     #[Groups(['unit:create'])]
     #[Assert\NotNull(message: 'Y position is required', groups: ['unit:create'])]
     #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['unit:create'])]
     public ?int $y = null;
-
     #[Groups(['unit:move'])]
     #[Assert\NotNull(message: 'Target X position is required', groups: ['unit:move'])]
     #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['unit:move'])]
     public ?int $toX = null;
-
     #[Groups(['unit:move'])]
     #[Assert\NotNull(message: 'Target Y position is required', groups: ['unit:move'])]
     #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['unit:move'])]
     public ?int $toY = null;
-
     #[Groups(['unit:attack'])]
     #[Assert\NotBlank(message: 'Target unit ID is required', groups: ['unit:attack'])]
     #[Assert\Uuid(groups: ['unit:attack'])]
     public ?string $targetUnitId = null;
-
     #[Groups(['unit:found-city'])]
     #[Assert\NotBlank(message: 'City name is required', groups: ['unit:found-city'])]
     #[Assert\Length(
-        min: ValidationConstants::MIN_CITY_NAME_LENGTH, 
-        max: ValidationConstants::MAX_CITY_NAME_LENGTH, 
-        minMessage: 'City name must be at least ' . ValidationConstants::MIN_CITY_NAME_LENGTH . ' characters', 
+        min: ValidationConstants::MIN_CITY_NAME_LENGTH,
+        max: ValidationConstants::MAX_CITY_NAME_LENGTH,
+        minMessage: 'City name must be at least ' . ValidationConstants::MIN_CITY_NAME_LENGTH . ' characters',
         maxMessage: 'City name cannot exceed ' . ValidationConstants::MAX_CITY_NAME_LENGTH . ' characters',
         groups: ['unit:found-city']
     )]

@@ -12,6 +12,7 @@ use App\Domain\Shared\ValueObject\UserId;
 use App\UI\Api\Resource\GameResource;
 use App\UI\Game\ViewModel\GameView;
 use Ecotone\Modelling\QueryBus;
+use RuntimeException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
@@ -29,7 +30,6 @@ final readonly class GameStateProvider implements ProviderInterface
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         $uriTemplate = $operation->getUriTemplate();
-
         return match ($uriTemplate) {
             '/games/{gameId}' => $this->getGame($uriVariables['gameId']),
             '/games' => $this->getAllGames(),
@@ -41,20 +41,16 @@ final readonly class GameStateProvider implements ProviderInterface
     private function getGame(string $gameId): ?GameResource
     {
         try {
-            /** @var GameView $gameView */
             $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($gameId)));
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             throw new NotFoundHttpException("Game with ID $gameId not found");
         }
-
         return $this->objectMapper->map($gameView, GameResource::class);
     }
 
     private function getAllGames(): array
     {
-        /** @var GameView[] $gameViews */
         $gameViews = $this->queryBus->send(new GetAllGamesQuery());
-
         return array_map(
             fn(GameView $gameView): GameResource => $this->objectMapper->map($gameView, GameResource::class),
             $gameViews
@@ -63,9 +59,7 @@ final readonly class GameStateProvider implements ProviderInterface
 
     private function getUserGames(): array
     {
-        /** @var GameView[] $gameViews */
         $gameViews = $this->queryBus->send(new GetUserGamesQuery(new UserId($this->security->getUser()->getId())));
-
         return array_map(
             fn(GameView $gameView): GameResource => $this->objectMapper->map($gameView, GameResource::class),
             $gameViews

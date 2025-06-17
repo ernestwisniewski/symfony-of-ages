@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\UI\Game\LiveComponent;
@@ -20,7 +19,6 @@ final class HexSelectionPanelComponent
 
     #[LiveProp(writable: true)]
     public bool $isVisible = false;
-
     #[LiveProp(writable: true)]
     public ?array $hexData = null;
 

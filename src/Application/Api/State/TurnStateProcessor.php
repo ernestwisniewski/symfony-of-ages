@@ -21,13 +21,11 @@ final readonly class TurnStateProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
         $gameId = $uriVariables['gameId'];
-
         $command = new EndTurnCommand(
             gameId: new GameId($gameId),
             playerId: new PlayerId($data->playerId),
             endedAt: Timestamp::now()
         );
-
         $this->commandBus->send($command);
     }
 }

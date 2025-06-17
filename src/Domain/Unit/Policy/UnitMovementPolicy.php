@@ -27,11 +27,9 @@ final readonly class UnitMovementPolicy
     ): void
     {
         $maxRange = $unitType->getMovementRange();
-
         if (!$this->isWithinRange($from, $to, $maxRange)) {
             throw InvalidMovementException::tooFar($from, $to, $maxRange);
         }
-
         if ($this->isPositionOccupied($to, $existingUnits)) {
             throw InvalidMovementException::positionOccupied($to);
         }

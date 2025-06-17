@@ -5,9 +5,6 @@ namespace App\Infrastructure\Unit\ReadModel\Doctrine;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<UnitViewEntity>
- */
 class UnitViewRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -34,4 +31,4 @@ class UnitViewRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-} 
+}

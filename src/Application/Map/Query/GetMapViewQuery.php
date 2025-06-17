@@ -9,4 +9,4 @@ final readonly class GetMapViewQuery
     public function __construct(public GameId $gameId)
     {
     }
-} 
+}

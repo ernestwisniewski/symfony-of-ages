@@ -7,7 +7,6 @@ use App\Domain\Shared\ValueObject\Timestamp;
 
 class GenerateMapCommand
 {
-
     public function __construct(
         public GameId    $gameId,
         public array     $tiles,

@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Domain\Unit\ValueObject;
-
 enum UnitType: string
 {
     case WARRIOR = 'warrior';
@@ -68,4 +67,4 @@ enum UnitType: string
     {
         return count(self::cases());
     }
-} 
+}

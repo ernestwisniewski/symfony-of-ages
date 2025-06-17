@@ -40,7 +40,6 @@ readonly class PlayerUserMappingProjection
             gameId: $event->gameId,
             createdAt: new DateTimeImmutable()
         );
-
         $this->entityManager->persist($mapping);
         $this->entityManager->flush();
     }
@@ -55,7 +54,6 @@ readonly class PlayerUserMappingProjection
             gameId: $event->gameId,
             createdAt: new DateTimeImmutable($event->joinedAt)
         );
-
         $this->entityManager->persist($mapping);
         $this->entityManager->flush();
     }

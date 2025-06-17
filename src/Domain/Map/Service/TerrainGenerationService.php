@@ -14,15 +14,12 @@ class TerrainGenerationService
         TerrainType::DESERT->value => 10,
         TerrainType::SWAMP->value => 5
     ];
-
     public array $terrainWeights {
         get => self::TERRAIN_WEIGHTS;
     }
-
     public int $totalWeight {
         get => array_sum(self::TERRAIN_WEIGHTS);
     }
-
     public array $idealDistribution {
         get => array_map(
             fn($weight) => round($weight, 2),
@@ -35,21 +32,18 @@ class TerrainGenerationService
         $totalWeight = $this->totalWeight;
         $random = mt_rand(1, $totalWeight);
         $currentWeight = 0;
-
         foreach (self::TERRAIN_WEIGHTS as $terrainValue => $weight) {
             $currentWeight += $weight;
             if ($currentWeight >= $random) {
                 return TerrainType::from($terrainValue);
             }
         }
-
         return TerrainType::PLAINS;
     }
 
     public function createTerrainTile(TerrainType $terrainType, int $row, int $col): array
     {
         $properties = $terrainType->getProperties();
-
         return [
             'type' => $terrainType->value,
             'name' => $properties['name'],
@@ -68,18 +62,14 @@ class TerrainGenerationService
         if (empty($weights)) {
             return false;
         }
-
         $terrainValues = array_map(fn($terrain) => $terrain->value, TerrainType::cases());
-
         $hasValidTerrainTypes = array_all(
             array_keys($weights),
             fn($terrain) => in_array($terrain, $terrainValues)
         );
-
         if (!$hasValidTerrainTypes) {
             return false;
         }
-
         return array_all(
             $weights,
             fn($weight) => is_int($weight) && $weight >= 0

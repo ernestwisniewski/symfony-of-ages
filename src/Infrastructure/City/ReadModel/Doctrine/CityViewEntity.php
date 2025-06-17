@@ -16,20 +16,15 @@ class CityViewEntity
     #[ORM\Column(type: 'string', length: 36)]
     #[Map(target: 'cityId')]
     public string $id;
-
     #[ORM\Column(type: 'string', length: 36)]
     public string $ownerId;
-
     #[ORM\Column(type: 'string', length: 36)]
     public string $gameId;
-
     #[ORM\Column(type: 'string', length: 100)]
     public string $name;
-
     #[Map(target: 'position', transform: PositionToArrayTransformer::class)]
     #[ORM\Column(type: 'integer')]
     public int $x;
-
     #[ORM\Column(type: 'integer')]
     public int $y;
 

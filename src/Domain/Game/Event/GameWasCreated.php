@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Domain\Game\Event;
-
 final readonly class GameWasCreated
 {
     public function __construct(

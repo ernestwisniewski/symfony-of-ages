@@ -37,10 +37,9 @@ class City
     {
         $cityFoundingPolicy->validateCityFounding(
             $command->position,
-            TerrainType::FOREST, // @todo
+            TerrainType::FOREST,
             $command->existingCityPositions
         );
-
         return [
             new CityWasFounded(
                 (string)$command->cityId,

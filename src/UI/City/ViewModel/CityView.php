@@ -1,7 +1,6 @@
 <?php
 
 namespace App\UI\City\ViewModel;
-
 final class CityView
 {
     public string $id;

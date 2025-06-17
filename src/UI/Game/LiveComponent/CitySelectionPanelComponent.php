@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\UI\Game\LiveComponent;
@@ -19,7 +18,6 @@ final class CitySelectionPanelComponent
 
     #[LiveProp(writable: true)]
     public bool $isVisible = false;
-
     #[LiveProp(writable: true)]
     public ?array $cityData = null;
 
@@ -79,4 +77,4 @@ final class CitySelectionPanelComponent
     {
         return $this->cityData['cityId'] ?? '';
     }
-} 
+}

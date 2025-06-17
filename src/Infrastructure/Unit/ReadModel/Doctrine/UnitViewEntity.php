@@ -15,38 +15,27 @@ class UnitViewEntity
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
     public string $id;
-
     #[ORM\Column(type: 'string', length: 36)]
     public string $ownerId;
-
     #[ORM\Column(type: 'string', length: 36)]
     public string $gameId;
-
     #[ORM\Column(type: 'string', length: 50)]
     public string $type;
-
     #[Map(target: 'position', transform: UnitPositionToArrayTransformer::class)]
     #[ORM\Column(type: 'integer')]
     public int $x;
-
     #[ORM\Column(type: 'integer')]
     public int $y;
-
     #[ORM\Column(type: 'integer')]
     public int $currentHealth;
-
     #[ORM\Column(type: 'integer')]
     public int $maxHealth;
-
     #[ORM\Column(type: 'boolean')]
     public bool $isDead = false;
-
     #[ORM\Column(type: 'integer')]
     public int $attackPower;
-
     #[ORM\Column(type: 'integer')]
     public int $defensePower;
-
     #[ORM\Column(type: 'integer')]
     public int $movementRange;
 

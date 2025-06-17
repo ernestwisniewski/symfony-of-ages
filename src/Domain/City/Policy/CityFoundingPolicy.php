@@ -34,7 +34,6 @@ final readonly class CityFoundingPolicy
         if (!$this->isTerrainAllowed($terrain)) {
             throw InvalidTerrainException::create($position, $terrain);
         }
-
         if ($this->isPositionOccupied($position, $existingCityPositions)) {
             throw PositionOccupiedException::create($position);
         }

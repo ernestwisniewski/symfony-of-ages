@@ -20,12 +20,10 @@ final readonly class CityFoundingHandler
     #[EventHandler]
     public function onCityWasFounded(CityWasFounded $event): void
     {
-        // Po założeniu miasta, zniszcz jednostkę, która je założyła
         $command = new DestroyUnitCommand(
             unitId: new UnitId($event->unitId),
             destroyedAt: Timestamp::now()
         );
-
         $this->commandBus->send($command);
     }
-} 
+}

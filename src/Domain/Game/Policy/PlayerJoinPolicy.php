@@ -5,10 +5,10 @@ namespace App\Domain\Game\Policy;
 use App\Domain\Game\Exception\GameAlreadyStartedException;
 use App\Domain\Game\Exception\GameFullException;
 use App\Domain\Game\Exception\PlayerAlreadyJoinedException;
+use App\Domain\Game\Game;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
-use App\Domain\Game\Game;
 use App\Domain\Shared\ValueObject\ValidationConstants;
 
 final readonly class PlayerJoinPolicy
@@ -40,11 +40,9 @@ final readonly class PlayerJoinPolicy
         if ($startedAt !== null) {
             throw GameAlreadyStartedException::create($gameId);
         }
-
         if ($this->hasPlayer($playerId, $existingPlayers)) {
             throw PlayerAlreadyJoinedException::create($playerId);
         }
-
         if (count($existingPlayers) >= $this->maxPlayersAllowed) {
             throw GameFullException::create($this->maxPlayersAllowed);
         }
@@ -60,7 +58,6 @@ final readonly class PlayerJoinPolicy
         if (count($game->getPlayers()) >= $this->maxPlayersAllowed) {
             throw GameFullException::create($game->getId(), $this->maxPlayersAllowed);
         }
-
         return true;
     }
 }

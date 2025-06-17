@@ -1,7 +1,6 @@
 <?php
 
 namespace App\UI\Map\ViewModel;
-
 class MapTileView
 {
     public function __construct(

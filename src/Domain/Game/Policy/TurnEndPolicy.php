@@ -29,7 +29,6 @@ final readonly class TurnEndPolicy
         if ($startedAt === null) {
             throw GameNotStartedException::create($gameId);
         }
-
         if (!$activePlayer->isEqual($playerId)) {
             throw NotPlayerTurnException::create($playerId, $activePlayer);
         }

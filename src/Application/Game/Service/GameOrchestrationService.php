@@ -9,6 +9,7 @@ use App\Application\Map\Query\GetMapTilesQuery;
 use App\Domain\City\Service\CityManagementService;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
+use App\Domain\City\ValueObject\UnitId;
 use App\Domain\Game\Service\GameManagementService;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Map\ValueObject\TerrainType;
@@ -18,7 +19,6 @@ use App\Domain\Shared\ValueObject\Timestamp;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use Symfony\Component\Uid\Uuid;
-use App\Domain\City\ValueObject\UnitId;
 
 final readonly class GameOrchestrationService
 {
@@ -33,38 +33,29 @@ final readonly class GameOrchestrationService
 
     public function joinGameIfPossible(GameId $gameId, PlayerId $playerId): array
     {
-        // This would typically get game state from a repository
-        // For demo purposes, using mock data
-        $existingPlayers = []; // TODO: Get from repository
-        $startedAt = null; // TODO: Get from repository
-
+        $existingPlayers = [];
+        $startedAt = null;
         if (!$this->gameManagementService->canPlayerJoin($playerId, $existingPlayers, $startedAt)) {
             return [
                 'success' => false,
                 'reason' => 'Cannot join game - check if game is started or player already joined'
             ];
         }
-
         $this->commandBus->send(new JoinGameCommand($gameId, $playerId, Timestamp::now()));
-
         return ['success' => true, 'message' => 'Player joined successfully'];
     }
 
     public function startGameIfReady(GameId $gameId): array
     {
-        // Get current game state
-        $playersCount = 2; // TODO: Get from repository
-        $startedAt = null; // TODO: Get from repository
-
+        $playersCount = 2;
+        $startedAt = null;
         if (!$this->gameManagementService->canGameStart($playersCount, $startedAt)) {
             return [
                 'success' => false,
                 'reason' => 'Cannot start game - insufficient players or already started'
             ];
         }
-
         $this->commandBus->send(new StartGameCommand($gameId, Timestamp::now()));
-
         return ['success' => true, 'message' => 'Game started successfully'];
     }
 
@@ -75,31 +66,20 @@ final readonly class GameOrchestrationService
         CityName $cityName
     ): array
     {
-        // Get map tiles for the game
         $mapTiles = $this->queryBus->send(new GetMapTilesQuery($gameId));
-
-        // Get existing city positions (this should come from a repository)
-        $existingCityPositions = []; // TODO: Get from city repository
-
-        // Find suitable positions using the policy
+        $existingCityPositions = [];
         $suitablePositions = $this->cityManagementService->findSuitablePositions(
             $mapTiles,
             $existingCityPositions
         );
-
         if (empty($suitablePositions)) {
             return [
                 'success' => false,
                 'reason' => 'No suitable positions found for city founding'
             ];
         }
-
-        // Choose the first suitable position (in real app, you might have more sophisticated logic)
         $chosenPosition = $suitablePositions[0];
-
-        // Determine terrain at that position
         $terrain = $this->getTerrainAtPosition($mapTiles, $chosenPosition);
-
         $this->commandBus->send(new FoundCityCommand(
             new CityId(Uuid::v4()->toRfc4122()),
             $playerId,
@@ -110,7 +90,6 @@ final readonly class GameOrchestrationService
             Timestamp::now(),
             $existingCityPositions
         ));
-
         return [
             'success' => true,
             'message' => 'City founded successfully',
@@ -126,8 +105,6 @@ final readonly class GameOrchestrationService
                 return TerrainType::from($tile->terrain);
             }
         }
-
-        // Fallback to plains if not found
         return TerrainType::PLAINS;
     }
 }

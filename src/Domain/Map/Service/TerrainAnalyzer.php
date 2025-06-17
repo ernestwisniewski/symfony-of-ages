@@ -14,32 +14,26 @@ class TerrainAnalyzer
         $value += $terrainType->getDefenseBonus();
         $value += $terrainType->isPassable() ? 1 : -2;
         $value -= $terrainType->getMovementCost();
-
         return max(0, $value);
     }
 
     public function calculateTacticalScore(TerrainType $terrainType): float
     {
         $score = 0.0;
-
         if ($terrainType->isPassable()) {
             $score += 2.0;
         }
-
         if ($this->isEasyToTraverse($terrainType)) {
             $score += 1.5;
         } elseif ($this->isDifficultToTraverse($terrainType)) {
             $score -= 1.0;
         }
-
         if ($this->isFortified($terrainType)) {
             $score += 2.0;
         }
-
         if ($this->isResourceRich($terrainType)) {
             $score += 1.5;
         }
-
         return $score;
     }
 

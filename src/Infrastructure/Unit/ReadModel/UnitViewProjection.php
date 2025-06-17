@@ -2,8 +2,8 @@
 
 namespace App\Infrastructure\Unit\ReadModel;
 
-use App\Application\Unit\Query\GetUnitViewQuery;
 use App\Application\Unit\Query\GetUnitsByGameQuery;
+use App\Application\Unit\Query\GetUnitViewQuery;
 use App\Domain\Unit\Event\UnitWasAttacked;
 use App\Domain\Unit\Event\UnitWasCreated;
 use App\Domain\Unit\Event\UnitWasDestroyed;
@@ -35,11 +35,9 @@ readonly class UnitViewProjection
     public function getUnitView(GetUnitViewQuery $query): UnitView
     {
         $entity = $this->repository->find((string)$query->unitId);
-
         if (!$entity) {
             throw new RuntimeException("UnitView for ID {$query->unitId} not found.");
         }
-
         return $this->mapper->map($entity, UnitView::class);
     }
 
@@ -47,7 +45,6 @@ readonly class UnitViewProjection
     public function getUnitsByGame(GetUnitsByGameQuery $query): array
     {
         $entities = $this->repository->findByGameId((string)$query->gameId);
-
         return array_map(
             fn(UnitViewEntity $entity) => $this->mapper->map($entity, UnitView::class),
             $entities
@@ -58,7 +55,6 @@ readonly class UnitViewProjection
     public function applyUnitWasCreated(UnitWasCreated $event): void
     {
         $unitType = UnitType::from($event->type);
-
         $unit = new UnitViewEntity(
             $event->unitId,
             $event->ownerId,
@@ -72,7 +68,6 @@ readonly class UnitViewProjection
             $unitType->getDefensePower(),
             $unitType->getMovementRange()
         );
-
         $this->entityManager->persist($unit);
         $this->entityManager->flush();
     }
@@ -83,7 +78,6 @@ readonly class UnitViewProjection
         $unit = $this->find($event->unitId);
         $unit->x = $event->toX;
         $unit->y = $event->toY;
-
         $this->entityManager->flush();
     }
 
@@ -92,11 +86,9 @@ readonly class UnitViewProjection
     {
         $unit = $this->find($event->defenderUnitId);
         $unit->currentHealth = $event->remainingHealth;
-
         if ($event->wasDestroyed) {
             $unit->isDead = true;
         }
-
         $this->entityManager->flush();
     }
 
@@ -105,18 +97,15 @@ readonly class UnitViewProjection
     {
         $unit = $this->find($event->unitId);
         $unit->isDead = true;
-
         $this->entityManager->flush();
     }
 
     private function find(string $unitId): UnitViewEntity
     {
         $unit = $this->repository->find($unitId);
-
         if (!$unit) {
             throw new RuntimeException("UnitViewEntity for ID $unitId not found");
         }
-
         return $unit;
     }
 }

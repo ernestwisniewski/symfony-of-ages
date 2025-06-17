@@ -7,15 +7,14 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Application\City\Command\FoundCityCommand;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
+use App\Domain\City\ValueObject\UnitId;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Shared\ValueObject\Timestamp;
-use App\UI\Api\Resource\CityResource;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Uid\Uuid;
-use App\Domain\City\ValueObject\UnitId;
 
 final readonly class CityStateProcessor implements ProcessorInterface
 {
@@ -43,7 +42,7 @@ final readonly class CityStateProcessor implements ProcessorInterface
             name: new CityName($data->name),
             position: new Position($data->x, $data->y),
             foundedAt: Timestamp::now(),
-            existingCityPositions: [] // TODO: Get from repository if needed for validation
+            existingCityPositions: []
         ));
     }
 }

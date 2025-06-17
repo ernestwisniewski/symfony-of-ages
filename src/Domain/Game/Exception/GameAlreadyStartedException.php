@@ -10,4 +10,4 @@ final class GameAlreadyStartedException extends GameException
     {
         return new self("Game {$gameId} was already started.");
     }
-} 
+}

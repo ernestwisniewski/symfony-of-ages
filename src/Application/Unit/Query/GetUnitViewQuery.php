@@ -9,4 +9,4 @@ final readonly class GetUnitViewQuery
     public function __construct(public UnitId $unitId)
     {
     }
-} 
+}

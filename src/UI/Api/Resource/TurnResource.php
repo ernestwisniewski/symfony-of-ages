@@ -40,16 +40,12 @@ final class TurnResource
     #[Groups(['turn:read'])]
     #[ApiProperty(identifier: true)]
     public ?string $gameId = null;
-
     #[Groups(['turn:read'])]
     public ?string $activePlayer = null;
-
     #[Groups(['turn:read'])]
     public ?int $currentTurn = null;
-
     #[Groups(['turn:read'])]
     public ?string $turnEndedAt = null;
-
     #[Groups(['turn:end'])]
     #[Assert\NotBlank(message: 'Player ID is required', groups: ['turn:end'])]
     #[Assert\Uuid(groups: ['turn:end'])]

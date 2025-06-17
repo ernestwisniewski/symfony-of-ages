@@ -2,29 +2,21 @@
 
 namespace App\Tests\Functional\Api;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Infrastructure\Generic\Account\Doctrine\User;
 use App\Tests\Factory\UserFactory;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\Test\Factories;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
-class GameApiTest extends ApiTestCase
+class GameApiTest extends BaseFunctionalTestCase
 {
     use Factories;
 
     private User $testUser;
-    private EntityManagerInterface $entityManager;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
-
-        // Clean database before each test
-        $this->cleanDatabase();
 
         // Create user with properly hashed password
         $this->testUser = UserFactory::createOne([
@@ -39,24 +31,6 @@ class GameApiTest extends ApiTestCase
         // Persist the user
         $this->entityManager->persist($this->testUser);
         $this->entityManager->flush();
-    }
-
-    private function cleanDatabase(): void
-    {
-        // Get all entity classes
-        $metadatas = $this->entityManager->getMetadataFactory()->getAllMetadata();
-
-        // Disable foreign key checks for PostgreSQL
-        $this->entityManager->getConnection()->executeStatement('SET session_replication_role = replica');
-
-        foreach ($metadatas as $metadata) {
-            $tableName = $metadata->getTableName();
-            $quotedTableName = '"' . $tableName . '"';
-            $this->entityManager->getConnection()->executeStatement("TRUNCATE TABLE $quotedTableName CASCADE");
-        }
-
-        // Re-enable foreign key checks for PostgreSQL
-        $this->entityManager->getConnection()->executeStatement('SET session_replication_role = DEFAULT');
     }
 
     private function createAuthenticatedClient()

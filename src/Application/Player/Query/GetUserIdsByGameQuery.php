@@ -8,6 +8,7 @@ final readonly class GetUserIdsByGameQuery
 {
     public function __construct(
         public GameId $gameId
-    ) {
+    )
+    {
     }
-} 
+}

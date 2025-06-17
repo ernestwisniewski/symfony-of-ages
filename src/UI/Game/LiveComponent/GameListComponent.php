@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\UI\Game\LiveComponent;
@@ -30,13 +29,10 @@ final class GameListComponent
 
     #[LiveProp(writable: true)]
     public array $games = [];
-
     #[LiveProp(writable: true)]
     public int $minPlayers = Game::MIN_PLAYERS;
-
     #[LiveProp(writable: true)]
     public int $maxPlayers = Game::MAX_PLAYERS;
-
     #[LiveProp(writable: true)]
     public bool $showUserGames = false;
 
@@ -48,9 +44,6 @@ final class GameListComponent
     {
     }
 
-    /**
-     * Initialize component with games data
-     */
     public function mount(bool $showUserGames = false): void
     {
         $this->showUserGames = $showUserGames;
@@ -66,7 +59,6 @@ final class GameListComponent
             gameId: new GameId($gameId),
             startedAt: Timestamp::now()
         ));
-
         $this->loadGames();
     }
 
@@ -98,15 +90,12 @@ final class GameListComponent
     private function loadGames(): void
     {
         if ($this->showUserGames) {
-            /** @var GameView[] $games */
             $games = $this->queryBus->send(new GetUserGamesQuery(
                 new UserId($this->security->getUser()->getId())
             ));
         } else {
-            /** @var GameView[] $games */
             $games = $this->queryBus->send(new GetAllGamesQuery());
         }
-
         $this->games = array_map(fn(GameView $game) => $this->formatGameData($game), $games);
     }
 

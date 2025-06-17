@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Domain\Unit\Event;
-
 final readonly class UnitWasAttacked
 {
     public function __construct(

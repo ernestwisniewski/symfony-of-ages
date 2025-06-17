@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\UI\Game\LiveComponent;
@@ -34,7 +33,6 @@ final class FoundCityFormComponent extends AbstractController
 
     #[LiveProp]
     public ?FoundCityFormDTO $initialFormData = null;
-
     #[LiveProp]
     public array $unitData = [];
 
@@ -53,10 +51,7 @@ final class FoundCityFormComponent extends AbstractController
     public function foundCity(): void
     {
         $this->submitForm();
-
-        /** @var FoundCityFormDTO $formData */
         $formData = $this->getForm()->getData();
-
         $command = new FoundCityCommand(
             cityId: new CityId(Uuid::v4()->toRfc4122()),
             ownerId: new PlayerId($this->unitData['ownerId']),
@@ -67,13 +62,10 @@ final class FoundCityFormComponent extends AbstractController
             foundedAt: Timestamp::now(),
             existingCityPositions: []
         );
-
         $this->commandBus->send($command);
-
         $this->dispatchBrowserEvent('flash:success', [
             'message' => "City '{$formData->cityName}' founded successfully!"
         ]);
-
         $this->dispatchBrowserEvent('found-city', [
             'cityName' => $formData->cityName,
             'position' => $this->unitData['position']

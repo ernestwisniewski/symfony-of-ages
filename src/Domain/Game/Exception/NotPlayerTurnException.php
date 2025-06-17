@@ -10,4 +10,4 @@ final class NotPlayerTurnException extends GameException
     {
         return new self("It is not player {$playerId}'s turn. Current active player is {$activePlayer}.");
     }
-} 
+}

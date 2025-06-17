@@ -28,4 +28,3 @@ final readonly class Position
         return $this->x === $other->x && $this->y === $other->y;
     }
 }
-

@@ -11,4 +11,4 @@ final readonly class GetUserGamesQuery
     )
     {
     }
-} 
+}

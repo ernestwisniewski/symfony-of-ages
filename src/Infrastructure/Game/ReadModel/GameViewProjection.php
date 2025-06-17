@@ -3,9 +3,9 @@
 namespace App\Infrastructure\Game\ReadModel;
 
 use App\Application\Game\Query\GetAllGamesQuery;
+use App\Application\Game\Query\GetGamePlayersQuery;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Application\Game\Query\GetUserGamesQuery;
-use App\Application\Game\Query\GetGamePlayersQuery;
 use App\Domain\Game\Event\GameWasCreated;
 use App\Domain\Game\Event\GameWasStarted;
 use App\Domain\Game\Event\PlayerEndedTurn;
@@ -21,7 +21,6 @@ use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use RuntimeException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Projection("game_view", Game::class)]
@@ -50,7 +49,6 @@ readonly class GameViewProjection
             ->setParameter('userId', $query->userId->id)
             ->getQuery()
             ->getResult();
-
         return array_map(
             fn(GameViewEntity $entity): GameView => $this->objectMapper->map($entity, GameView::class),
             $gameViewEntities
@@ -61,7 +59,6 @@ readonly class GameViewProjection
     public function getAllGames(GetAllGamesQuery $query): array
     {
         $gameViewEntities = $this->gameViewRepository->findAll();
-
         return array_map(
             fn(GameViewEntity $entity): GameView => $this->objectMapper->map($entity, GameView::class),
             $gameViewEntities
@@ -88,7 +85,6 @@ readonly class GameViewProjection
             players: [$event->playerId],
             userId: $event->userId
         );
-
         $this->save($gameView);
     }
 
@@ -99,7 +95,6 @@ readonly class GameViewProjection
         $players = $gameView->players;
         $players[] = $event->playerId;
         $gameView->players = array_values(array_unique($players));
-
         $this->saveChanges();
     }
 
@@ -112,7 +107,6 @@ readonly class GameViewProjection
         $gameView->currentTurnAt = new DateTimeImmutable($event->startedAt);
         $gameView->activePlayer = $gameView->players[0];
         $gameView->status = GameStatus::IN_PROGRESS->value;
-
         $this->saveChanges();
     }
 
@@ -123,31 +117,24 @@ readonly class GameViewProjection
         $players = $gameView->players;
         $current = $gameView->activePlayer;
         $index = array_search($current, $players, true);
-
         if ($index === false) {
             throw new RuntimeException("Active player {$current} not found in players list");
         }
-
         $next = $players[($index + 1) % count($players)];
-
         $gameView->activePlayer = $next;
         $gameView->currentTurnAt = new DateTimeImmutable($event->endedAt);
-
         if ($index === count($players) - 1) {
             $gameView->currentTurn = $gameView->currentTurn + 1;
         }
-
         $this->saveChanges();
     }
 
     private function find(string $gameId): GameViewEntity
     {
         $gameView = $this->gameViewRepository->find($gameId);
-
         if (!$gameView) {
             throw new RuntimeException("GameViewEntity for ID $gameId not found");
         }
-
         return $gameView;
     }
 

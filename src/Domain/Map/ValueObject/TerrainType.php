@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Domain\Map\ValueObject;
-
 enum TerrainType: string
 {
     case PLAINS = 'plains';
@@ -18,11 +17,11 @@ enum TerrainType: string
 
     public function getMovementCost(): int
     {
-        return match($this) {
+        return match ($this) {
             self::PLAINS => 1,
             self::FOREST => 2,
             self::MOUNTAIN => 3,
-            self::WATER => 0, // impassable
+            self::WATER => 0,
             self::DESERT => 2,
             self::SWAMP => 3
         };
@@ -30,7 +29,7 @@ enum TerrainType: string
 
     public function getDefenseBonus(): int
     {
-        return match($this) {
+        return match ($this) {
             self::PLAINS => 0,
             self::FOREST => 2,
             self::MOUNTAIN => 4,
@@ -42,7 +41,7 @@ enum TerrainType: string
 
     public function getResourceYield(): int
     {
-        return match($this) {
+        return match ($this) {
             self::PLAINS => 2,
             self::FOREST => 3,
             self::MOUNTAIN => 4,
@@ -54,7 +53,7 @@ enum TerrainType: string
 
     public function getProductionBonus(): int
     {
-        return match($this) {
+        return match ($this) {
             self::PLAINS => 0,
             self::FOREST => 1,
             self::MOUNTAIN => 2,
@@ -66,7 +65,7 @@ enum TerrainType: string
 
     public function getFoodBonus(): int
     {
-        return match($this) {
+        return match ($this) {
             self::PLAINS => 1,
             self::FOREST => 0,
             self::MOUNTAIN => 0,
@@ -78,7 +77,7 @@ enum TerrainType: string
 
     public function getGoldBonus(): int
     {
-        return match($this) {
+        return match ($this) {
             self::PLAINS => 0,
             self::FOREST => 0,
             self::MOUNTAIN => 1,
@@ -90,19 +89,19 @@ enum TerrainType: string
 
     public function getColor(): int
     {
-        return match($this) {
-            self::PLAINS => 0x90EE90, // light green
-            self::FOREST => 0x228B22, // forest green
-            self::MOUNTAIN => 0x8B4513, // saddle brown
-            self::WATER => 0x4169E1, // royal blue
-            self::DESERT => 0xF4A460, // sandy brown
-            self::SWAMP => 0x556B2F  // dark olive green
+        return match ($this) {
+            self::PLAINS => 0x90EE90,
+            self::FOREST => 0x228B22,
+            self::MOUNTAIN => 0x8B4513,
+            self::WATER => 0x4169E1,
+            self::DESERT => 0xF4A460,
+            self::SWAMP => 0x556B2F
         };
     }
 
     public function getDisplayName(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PLAINS => 'Plains',
             self::FOREST => 'Forest',
             self::MOUNTAIN => 'Mountain',

@@ -14,16 +14,12 @@ class MapViewEntity
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
     public string $gameId;
-
     #[ORM\Column(type: 'integer')]
     public int $width;
-
     #[ORM\Column(type: 'integer')]
     public int $height;
-
     #[ORM\Column(type: 'json')]
     public array $tiles;
-
     #[ORM\Column(type: 'string', length: 30)]
     public string $generatedAt;
 

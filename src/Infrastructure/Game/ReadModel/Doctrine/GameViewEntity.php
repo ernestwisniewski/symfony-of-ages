@@ -16,37 +16,27 @@ class GameViewEntity
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
     public string $id;
-
     #[ORM\Column(type: 'string', length: 120)]
     public string $name;
-
     #[ORM\Column(type: 'string', length: 36)]
     public string $activePlayer;
-
     #[ORM\Column(type: 'integer')]
     public int $currentTurn;
-
     #[Map(transform: [DateTimeToStringTransformer::class, 'format'])]
     #[ORM\Column(type: 'datetime_immutable')]
     public DateTimeImmutable $createdAt;
-
     #[ORM\Column(type: 'string', length: 20)]
     public string $status;
-
     #[ORM\Column(type: 'json')]
     public array $players;
-
     #[ORM\Column(type: 'integer')]
     public int $userId;
-
     #[Map(transform: [DateTimeToStringTransformer::class, 'format'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     public ?DateTimeImmutable $startedAt = null;
-
     #[Map(transform: [DateTimeToStringTransformer::class, 'format'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     public ?DateTimeImmutable $currentTurnAt = null;
-
 
     public function __construct(
         string            $id,

@@ -7,17 +7,16 @@ use App\Application\Map\Query\GetMapTilesQuery;
 use App\Application\Map\Query\GetMapViewQuery;
 use App\Domain\Game\Event\MapWasGenerated;
 use App\Domain\Game\Game;
-use App\Infrastructure\Map\ReadModel\Doctrine\MapTileViewEntity;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapTileViewRepository;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapViewEntity;
 use App\Infrastructure\Map\ReadModel\Doctrine\MapViewRepository;
 use App\UI\Map\ViewModel\MapTileView;
 use App\UI\Map\ViewModel\MapView;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use Exception;
 use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Uid\Uuid;
@@ -41,7 +40,6 @@ readonly class MapProjection
         foreach ($this->find($query->gameId) as $mapTile) {
             $map[] = $this->objectMapper->map($mapTile, MapTileView::class);
         }
-
         return $map;
     }
 
@@ -49,11 +47,9 @@ readonly class MapProjection
     public function getMapView(GetMapViewQuery $query): MapView
     {
         $mapViewEntity = $this->mapViewRepository->find((string)$query->gameId);
-
         if (!$mapViewEntity) {
             throw new RuntimeException("MapView for game ID {$query->gameId} not found");
         }
-
         return $this->objectMapper->map($mapViewEntity, MapView::class);
     }
 
@@ -61,11 +57,9 @@ readonly class MapProjection
     public function findMapByGame(FindMapByGame $query): ?MapView
     {
         $mapViewEntity = $this->mapViewRepository->find($query->gameId);
-
         if (!$mapViewEntity) {
             return null;
         }
-
         return $this->objectMapper->map($mapViewEntity, MapView::class);
     }
 
@@ -73,7 +67,6 @@ readonly class MapProjection
     public function onMapGenerated(MapWasGenerated $event): void
     {
         $tiles = json_decode($event->tiles, true);
-
         $mapView = new MapViewEntity(
             $event->gameId,
             $event->width,
@@ -83,23 +76,18 @@ readonly class MapProjection
         );
         $this->entityManager->persist($mapView);
         $this->entityManager->flush();
-
         $conn = $this->entityManager->getConnection();
-        
         $chunkSize = 1000;
         $sqlPrefix = <<<SQL
             INSERT INTO map_tile_view (id, game_id, x, y, terrain, is_occupied)
             VALUES
         SQL;
-
         $conn->beginTransaction();
-        
         try {
             foreach (array_chunk($tiles, $chunkSize) as $chunk) {
                 $values = [];
                 $params = [];
                 $paramIndex = 0;
-
                 foreach ($chunk as $t) {
                     $values[] = "( :u{$paramIndex}, :g{$paramIndex}, :x{$paramIndex}, :y{$paramIndex}, :tr{$paramIndex}, :o{$paramIndex} )";
                     $params["u{$paramIndex}"] = Uuid::v4()->toRfc4122();
@@ -110,27 +98,22 @@ readonly class MapProjection
                     $params["o{$paramIndex}"] = 'false';
                     ++$paramIndex;
                 }
-
                 $sql = $sqlPrefix . implode(',', $values);
                 $conn->executeStatement($sql, $params);
             }
-            
             $conn->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $conn->rollBack();
             throw $e;
         }
     }
 
-    /** @return MapTileViewEntity[] */
     private function find(string $gameId): array
     {
         $mapView = $this->mapTileViewRepository->findByGameId($gameId);
-
         if (!$mapView) {
             throw new RuntimeException("MapViewEntity for game ID $gameId not found");
         }
-
         return $mapView;
     }
 }

@@ -7,11 +7,11 @@ use ApiPlatform\State\ProviderInterface;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Domain\Game\ValueObject\GameId;
 use App\UI\Api\Resource\TurnResource;
-use App\UI\Game\ViewModel\GameView;
 use App\UI\Turn\ViewModel\TurnView;
 use Ecotone\Modelling\QueryBus;
-use Symfony\Component\ObjectMapper\ObjectMapperInterface;
+use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class TurnStateProvider implements ProviderInterface
 {
@@ -25,9 +25,8 @@ final readonly class TurnStateProvider implements ProviderInterface
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?TurnResource
     {
         try {
-            /** @var GameView $gameView */
             $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($uriVariables['gameId'])));
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             throw new NotFoundHttpException("Game with ID {$uriVariables['gameId']} not found");
         }
         $turnView = new TurnView();

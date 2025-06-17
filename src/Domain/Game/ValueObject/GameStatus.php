@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Domain\Game\ValueObject;
-
 enum GameStatus: string
 {
     case WAITING_FOR_PLAYERS = 'waiting';

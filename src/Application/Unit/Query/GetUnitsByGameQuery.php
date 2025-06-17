@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Application\Unit\Query;
@@ -10,6 +9,7 @@ final readonly class GetUnitsByGameQuery
 {
     public function __construct(
         public GameId $gameId,
-    ) {
+    )
+    {
     }
-} 
+}

@@ -12,15 +12,13 @@ use App\Domain\Game\ValueObject\GameName;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
 use App\Domain\Shared\ValueObject\UserId;
-use App\Infrastructure\Generic\Account\Doctrine\User;
 use App\UI\Api\Resource\GameResource;
+use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Uid\Uuid;
-use Ecotone\Modelling\AggregateNotFoundException;
 
 final readonly class GameStateProcessor implements ProcessorInterface
 {
@@ -34,7 +32,6 @@ final readonly class GameStateProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
         $userId = new UserId($this->security->getUser()->getId());
-
         match ($operation->getUriTemplate()) {
             '/games' => $this->createGame($data, $userId),
             '/games/{gameId}/start' => $this->startGame($uriVariables['gameId']),

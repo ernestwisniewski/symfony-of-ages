@@ -27,7 +27,6 @@ final readonly class UnitCreationPolicy
         if (!$this->isTerrainPassable($terrain)) {
             throw InvalidMovementException::invalidTerrain($position);
         }
-
         if ($this->isPositionOccupied($position, $existingUnits)) {
             throw InvalidMovementException::positionOccupied($position);
         }

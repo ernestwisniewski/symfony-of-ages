@@ -22,4 +22,4 @@ final class UnitId
     {
         return $this->id === $other->id;
     }
-} 
+}

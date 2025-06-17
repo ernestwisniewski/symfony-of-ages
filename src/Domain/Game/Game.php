@@ -37,7 +37,6 @@ class Game
 
     const int MIN_PLAYERS = ValidationConstants::MIN_PLAYERS_PER_GAME;
     const int MAX_PLAYERS = ValidationConstants::MAX_PLAYERS_PER_GAME;
-
     #[Identifier]
     private GameId $gameId;
     private GameName $name;
@@ -72,7 +71,6 @@ class Game
             count($this->players),
             $this->startedAt
         );
-
         return [
             new GameWasStarted(
                 (string)$command->gameId,
@@ -90,7 +88,6 @@ class Game
             $this->players,
             $this->startedAt
         );
-
         return [
             new PlayerWasJoined(
                 (string)$command->gameId,
@@ -110,7 +107,6 @@ class Game
             $this->activePlayer,
             $this->startedAt
         );
-
         return [
             new PlayerEndedTurn(
                 (string)$command->gameId,
@@ -123,7 +119,6 @@ class Game
     #[CommandHandler]
     public function generateMap(GenerateMapCommand $command): array
     {
-
         $tiles = array_map(
             fn(MapTileView $tile) => [
                 'x' => $tile->x,
@@ -132,7 +127,6 @@ class Game
             ],
             $command->tiles,
         );
-
         return [
             new MapWasGenerated(
                 gameId: $command->gameId,
@@ -178,7 +172,6 @@ class Game
         if ($this->isLastPlayer()) {
             $this->currentTurn = $this->currentTurn->next();
         }
-
         $this->activePlayer = $this->getNextPlayer();
         $this->currentTurnAt = Timestamp::fromString($event->endedAt);
     }
@@ -209,7 +202,6 @@ class Game
                 return $this->players[($i + 1) % count($this->players)];
             }
         }
-
         throw new DomainException(
             sprintf(
                 'Active player %s not found in player list. Game state is corrupted.',
@@ -222,7 +214,6 @@ class Game
     {
         $lastIndex = count($this->players) - 1;
         $lastPlayer = $this->players[$lastIndex];
-
         return $lastPlayer->isEqual($this->activePlayer);
     }
 
@@ -241,4 +232,3 @@ class Game
         return $this->startedAt !== null;
     }
 }
-

@@ -30,7 +30,6 @@ class TerrainClusteringService
         if ($sameNeighborCount >= 2) {
             return false;
         }
-
         $clusterChance = $this->getClusteringProbability($terrainType);
         return mt_rand(1, 100) <= ($clusterChance * 100);
     }
@@ -40,20 +39,16 @@ class TerrainClusteringService
         if (empty($neighbors)) {
             return null;
         }
-
         if (mt_rand(1, 100) > 30) {
             return null;
         }
-
         $differentNeighbors = array_filter(
             $neighbors,
             fn($neighbor) => TerrainType::from($neighbor['type']) !== $currentTerrain
         );
-
         if (empty($differentNeighbors)) {
             return null;
         }
-
         return $differentNeighbors[array_rand($differentNeighbors)];
     }
 
@@ -67,7 +62,6 @@ class TerrainClusteringService
             TerrainType::DESERT->value => [TerrainType::PLAINS, TerrainType::MOUNTAIN],
             TerrainType::SWAMP->value => [TerrainType::WATER, TerrainType::FOREST]
         ];
-
         return in_array($terrain2, $compatibility[$terrain1->value] ?? []);
     }
 
@@ -90,16 +84,13 @@ class TerrainClusteringService
     public function isValidClusteringConfiguration(array $clusterConfig): bool
     {
         $terrainValues = array_map(fn($terrain) => $terrain->value, TerrainType::cases());
-
         $hasValidTerrainTypes = array_all(
             array_keys($clusterConfig),
             fn($terrain) => in_array($terrain, $terrainValues)
         );
-
         if (!$hasValidTerrainTypes) {
             return false;
         }
-
         return array_all(
             $clusterConfig,
             fn($probability) => is_float($probability) && $probability >= 0.0 && $probability <= 1.0

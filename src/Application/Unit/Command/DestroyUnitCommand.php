@@ -2,8 +2,8 @@
 
 namespace App\Application\Unit\Command;
 
-use App\Domain\Unit\ValueObject\UnitId;
 use App\Domain\Shared\ValueObject\Timestamp;
+use App\Domain\Unit\ValueObject\UnitId;
 
 final readonly class DestroyUnitCommand
 {
@@ -13,4 +13,4 @@ final readonly class DestroyUnitCommand
     )
     {
     }
-} 
+}

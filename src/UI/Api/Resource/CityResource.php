@@ -54,45 +54,37 @@ final class CityResource
     #[Groups(['city:read'])]
     #[ApiProperty(identifier: true)]
     public ?string $cityId = null;
-
     #[Groups(['city:read'])]
     public ?string $ownerId = null;
-
     #[Groups(['city:read'])]
     public ?string $gameId = null;
-
     #[Groups(['city:read', 'city:create'])]
     #[Assert\NotBlank(message: 'City name is required', groups: ['city:create'])]
     #[Assert\Length(
-        min: ValidationConstants::MIN_CITY_NAME_LENGTH, 
-        max: ValidationConstants::MAX_CITY_NAME_LENGTH, 
+        min: ValidationConstants::MIN_CITY_NAME_LENGTH,
+        max: ValidationConstants::MAX_CITY_NAME_LENGTH,
         minMessage: 'City name must be at least ' . ValidationConstants::MIN_CITY_NAME_LENGTH . ' characters',
         maxMessage: 'City name cannot exceed ' . ValidationConstants::MAX_CITY_NAME_LENGTH . ' characters',
         groups: ['city:create']
     )]
     public ?string $name = null;
-
     #[Groups(['city:read'])]
     public ?array $position = null;
-
     #[Groups(['city:create'])]
     #[Assert\NotBlank(message: 'Player ID is required', groups: ['city:create'])]
     #[Assert\Uuid(groups: ['city:create'])]
     #[Map(if: false)]
     public ?string $playerId = null;
-
     #[Map(if: false)]
     #[Groups(['city:create'])]
     #[Assert\NotNull(message: 'X position is required', groups: ['city:create'])]
     #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['city:create'])]
     public ?int $x = null;
-
     #[Map(if: false)]
     #[Groups(['city:create'])]
     #[Assert\NotNull(message: 'Y position is required', groups: ['city:create'])]
     #[Assert\GreaterThanOrEqual(ValidationConstants::MIN_POSITION_VALUE, groups: ['city:create'])]
     public ?int $y = null;
-
     #[Groups(['city:create'])]
     #[Assert\NotBlank(message: 'Unit ID is required', groups: ['city:create'])]
     #[Assert\Uuid(groups: ['city:create'])]

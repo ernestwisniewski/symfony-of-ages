@@ -38,16 +38,13 @@ final readonly class CityManagementService
     ): array
     {
         $suitablePositions = [];
-
         foreach ($mapTiles as $tile) {
             $position = new Position($tile['x'], $tile['y']);
             $terrain = TerrainType::from($tile['terrain']);
-
             if ($this->canFoundCity($position, $terrain, $existingCityPositions)) {
                 $suitablePositions[] = $position;
             }
         }
-
         return $suitablePositions;
     }
 }

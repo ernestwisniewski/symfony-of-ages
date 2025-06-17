@@ -6,4 +6,4 @@ use App\Domain\Shared\Exception\DomainException;
 
 abstract class GameException extends DomainException
 {
-} 
+}

@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Domain\Map\Exception;
-
 final class InvalidMapDimensionsException extends MapException
 {
     public static function create(int $width, int $height): self
@@ -18,4 +17,4 @@ final class InvalidMapDimensionsException extends MapException
     {
         return new self("Invalid map height: {$height}. Must be between {$min} and {$max}.");
     }
-} 
+}

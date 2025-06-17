@@ -43,15 +43,12 @@ final readonly class UnitCombatPolicy
         if ($attackerId->isEqual($targetId)) {
             throw InvalidAttackException::cannotAttackSelf($attackerId);
         }
-
         if ($attackerOwner->isEqual($targetOwner)) {
             throw InvalidAttackException::cannotAttackFriendly($attackerId, $targetId);
         }
-
         if ($targetHealth->isDead()) {
             throw InvalidAttackException::targetAlreadyDead($targetId);
         }
-
         if (!$this->isWithinAttackRange($attackerPosition, $targetPosition)) {
             throw InvalidAttackException::targetTooFar($attackerPosition, $targetPosition);
         }
@@ -61,7 +58,6 @@ final readonly class UnitCombatPolicy
     {
         $baseDamage = $attackerType->getAttackPower();
         $defense = $defenderType->getDefensePower();
-
         return max(ValidationConstants::MIN_DAMAGE, $baseDamage - $defense);
     }
 
