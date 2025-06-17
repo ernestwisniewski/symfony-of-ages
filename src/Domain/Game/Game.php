@@ -225,5 +225,20 @@ class Game
 
         return $lastPlayer->isEqual($this->activePlayer);
     }
+
+    public function getId(): GameId
+    {
+        return $this->gameId;
+    }
+
+    public function getPlayers(): array
+    {
+        return $this->players;
+    }
+
+    public function isStarted(): bool
+    {
+        return $this->startedAt !== null;
+    }
 }
 

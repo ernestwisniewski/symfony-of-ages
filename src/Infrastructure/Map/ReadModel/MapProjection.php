@@ -85,31 +85,40 @@ readonly class MapProjection
         $this->entityManager->flush();
 
         $conn = $this->entityManager->getConnection();
-        $chunkSize = 10;
+        
+        $chunkSize = 1000;
         $sqlPrefix = <<<SQL
             INSERT INTO map_tile_view (id, game_id, x, y, terrain, is_occupied)
             VALUES
         SQL;
 
-        $paramIndex = 0;
+        $conn->beginTransaction();
+        
+        try {
+            foreach (array_chunk($tiles, $chunkSize) as $chunk) {
+                $values = [];
+                $params = [];
+                $paramIndex = 0;
 
-        foreach (array_chunk($tiles, $chunkSize) as $chunk) {
-            $values = [];
-            $params = [];
+                foreach ($chunk as $t) {
+                    $values[] = "( :u{$paramIndex}, :g{$paramIndex}, :x{$paramIndex}, :y{$paramIndex}, :tr{$paramIndex}, :o{$paramIndex} )";
+                    $params["u{$paramIndex}"] = Uuid::v4()->toRfc4122();
+                    $params["g{$paramIndex}"] = $event->gameId;
+                    $params["x{$paramIndex}"] = $t['x'];
+                    $params["y{$paramIndex}"] = $t['y'];
+                    $params["tr{$paramIndex}"] = $t['terrain'];
+                    $params["o{$paramIndex}"] = 'false';
+                    ++$paramIndex;
+                }
 
-            foreach ($chunk as $t) {
-                $values[] = "( :u{$paramIndex}, :g{$paramIndex}, :x{$paramIndex}, :y{$paramIndex}, :tr{$paramIndex}, :o{$paramIndex} )";
-                $params["u{$paramIndex}"] = Uuid::v4()->toRfc4122();
-                $params["g{$paramIndex}"] = $event->gameId;
-                $params["x{$paramIndex}"] = $t['x'];
-                $params["y{$paramIndex}"] = $t['y'];
-                $params["tr{$paramIndex}"] = $t['terrain'];
-                $params["o{$paramIndex}"] = 'false';
-                ++$paramIndex;
+                $sql = $sqlPrefix . implode(',', $values);
+                $conn->executeStatement($sql, $params);
             }
-
-            $sql = $sqlPrefix . implode(',', $values);
-            $conn->executeStatement($sql, $params);
+            
+            $conn->commit();
+        } catch (\Exception $e) {
+            $conn->rollBack();
+            throw $e;
         }
     }
 

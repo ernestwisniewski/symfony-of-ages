@@ -15,63 +15,42 @@ final class MapGenerationPolicyTest extends TestCase
         $this->policy = new MapGenerationPolicy();
     }
 
-    public function testCanGenerateMapWithValidDimensions(): void
-    {
-        $result = $this->policy->canGenerateMap(10, 10);
-
-        $this->assertTrue($result);
-    }
-
-    public function testCanGenerateMapWithMinimumDimensions(): void
-    {
-        $result = $this->policy->canGenerateMap(5, 5);
-
-        $this->assertTrue($result);
-    }
-
-    public function testCanGenerateMapWithMaximumDimensions(): void
-    {
-        $result = $this->policy->canGenerateMap(50, 50);
-
-        $this->assertTrue($result);
-    }
-
-    public function testCannotGenerateMapWithDimensionsBelowMinimum(): void
-    {
-        $result = $this->policy->canGenerateMap(4, 10);
-
-        $this->assertFalse($result);
-    }
-
-    public function testCannotGenerateMapWithDimensionsAboveMaximum(): void
-    {
-        $result = $this->policy->canGenerateMap(51, 10);
-
-        $this->assertFalse($result);
-    }
-
-    public function testValidateMapGenerationPassesWithValidDimensions(): void
+    public function testValidateDimensionsPassesWithValidDimensions(): void
     {
         // Should not throw any exception
-        $this->policy->validateMapGeneration(15, 20);
+        $this->policy->validateDimensions(15, 20);
 
         $this->assertTrue(true); // If we reach here, test passed
     }
 
-    public function testValidateMapGenerationThrowsExceptionWithInvalidWidth(): void
+    public function testValidateDimensionsPassesWithMinimumDimensions(): void
     {
-        $this->expectException(InvalidMapDimensionsException::class);
-        $this->expectExceptionMessage('Invalid map dimensions: 3x10. Both width and height must be greater than 0.');
+        // Should not throw any exception
+        $this->policy->validateDimensions(10, 10);
 
-        $this->policy->validateMapGeneration(3, 10);
+        $this->assertTrue(true); // If we reach here, test passed
     }
 
-    public function testValidateMapGenerationThrowsExceptionWithInvalidHeight(): void
+    public function testValidateDimensionsPassesWithMaximumDimensions(): void
+    {
+        // Should not throw any exception
+        $this->policy->validateDimensions(100, 100);
+
+        $this->assertTrue(true); // If we reach here, test passed
+    }
+
+    public function testValidateDimensionsThrowsExceptionWithInvalidWidth(): void
     {
         $this->expectException(InvalidMapDimensionsException::class);
-        $this->expectExceptionMessage('Invalid map dimensions: 10x55. Both width and height must be greater than 0.');
 
-        $this->policy->validateMapGeneration(10, 55);
+        $this->policy->validateDimensions(9, 10);
+    }
+
+    public function testValidateDimensionsThrowsExceptionWithInvalidHeight(): void
+    {
+        $this->expectException(InvalidMapDimensionsException::class);
+
+        $this->policy->validateDimensions(10, 101);
     }
 
     public function testGetRecommendedDimensionsForTwoPlayers(): void

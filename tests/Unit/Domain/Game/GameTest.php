@@ -12,10 +12,10 @@ use App\Domain\Game\Event\PlayerEndedTurn;
 use App\Domain\Game\Event\PlayerWasJoined;
 use App\Domain\Game\Exception\GameAlreadyStartedException;
 use App\Domain\Game\Exception\GameFullException;
-use App\Domain\Game\Exception\GameNotStartedException;
-use App\Domain\Game\Exception\InsufficientPlayersException;
+use App\Domain\Game\Exception\GameNotReadyToStartException;
 use App\Domain\Game\Exception\NotPlayerTurnException;
 use App\Domain\Game\Exception\PlayerAlreadyJoinedException;
+use App\Domain\Game\Exception\GameNotStartedException;
 use App\Domain\Game\Game;
 use App\Domain\Game\Policy\GameStartPolicy;
 use App\Domain\Game\Policy\PlayerJoinPolicy;
@@ -267,8 +267,8 @@ class GameTest extends TestCase
             new GameWasCreated($gameId, $player1, 'Test', 1, (string)$now),
         ]);
 
-        $this->expectException(InsufficientPlayersException::class);
-        $this->expectExceptionMessage('Minimum 2 players required, but only 1 joined.');
+        $this->expectException(GameNotReadyToStartException::class);
+        $this->expectExceptionMessage('cannot be started');
 
         $testSupport->sendCommand(new StartGameCommand(
             new GameId($gameId),

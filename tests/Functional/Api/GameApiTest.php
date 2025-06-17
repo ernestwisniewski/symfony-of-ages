@@ -131,7 +131,7 @@ class GameApiTest extends ApiTestCase
     {
         // Given
         $client = $this->createAuthenticatedClient();
-        $longName = str_repeat('A', 51);
+        $longName = str_repeat('A', 101); // Więcej niż MAX_GAME_NAME_LENGTH (100)
 
         // When
         $client->request('POST', '/api/games', [

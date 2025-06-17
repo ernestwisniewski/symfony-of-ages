@@ -18,4 +18,10 @@ api_platform:
         json: ['application/json']
         html: ['text/html']
     swagger:
-        versions: [3] 
+        versions: [3]
+        api_keys:
+            JWT:
+                name: Authorization
+                type: header
+    oauth:
+        enabled: false 
