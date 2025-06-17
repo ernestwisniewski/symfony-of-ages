@@ -1,5 +1,5 @@
 import {Assets} from 'pixi.js';
-import { TerrainType } from '../../api';
+import {TerrainType} from '../../api';
 
 // Terrain texture imports for Vite asset handling
 import plainsImg from '../../images/terrain/plains.png';

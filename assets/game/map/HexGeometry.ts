@@ -45,6 +45,6 @@ export class HexGeometry {
     const x = col * this.stepX + (row & 1 ? this.shiftX : 0);
     const y = row * this.stepY;
 
-    return { x, y };
+    return {x, y};
   }
 }

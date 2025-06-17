@@ -1,0 +1,75 @@
+<div class="selection-panel {{ this.isVisible ? 'visible' : 'hidden' }}"
+     {{ stimulus_controller('live unit-panel') }}
+     {{ attributes }}>
+    {% if this.isVisible %}
+        <div class="panel-header">
+            <h3>Unit Information</h3>
+            <button class="panel-close"
+                    type="button"
+                    {{ live_action('close') }}>
+                &times;
+            </button>
+        </div>
+
+        <div class="panel-content">
+            <div class="unit-info">
+                <div class="info-row">
+                    <span class="info-label">Type:</span>
+                    <span class="info-value">{{ this.getUnitType() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Owner:</span>
+                    <span class="info-value">{{ this.getUnitOwner() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Position:</span>
+                    <span class="info-value">
+                        ({{ this.getUnitPosition().x }}, {{ this.getUnitPosition().y }})
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Movement Points:</span>
+                    <span class="info-value">{{ this.getUnitMovementRange() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Health:</span>
+                    <span class="info-value">{{ this.getUnitHealth() }}%</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Attack:</span>
+                    <span class="info-value">{{ this.getUnitAttack() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Defense:</span>
+                    <span class="info-value">{{ this.getUnitDefense() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value">{{ this.isUnitDead() ? 'Dead' : 'Alive' }}</span>
+                </div>
+            </div>
+
+            <div class="unit-actions">
+                {% if this.isSettler() %}
+                    <div class="found-city-section" style="margin-bottom: 16px;">
+                        {{ component('FoundCityFormComponent', {
+                            unitData: this.unitData
+                        }) }}
+                    </div>
+                {% endif %}
+                <button class="btn btn-primary"
+                        {{ stimulus_action('unit-panel', 'move') }}>
+                    Move Unit
+                </button>
+                <button class="btn btn-secondary"
+                        {{ stimulus_action('unit-panel', 'attack') }}>
+                    Attack
+                </button>
+                <button class="btn btn-warning"
+                        {{ stimulus_action('unit-panel', 'fortify') }}>
+                    Fortify
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>

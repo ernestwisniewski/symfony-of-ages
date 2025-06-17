@@ -158,7 +158,7 @@ export class GameMap {
 
       // Emit custom event for external handling
       const customEvent = new CustomEvent('cityclick', {
-        detail: { cityData: event.cityData }
+        detail: {cityData: event.cityData}
       });
       document.dispatchEvent(customEvent);
     });
@@ -171,7 +171,7 @@ export class GameMap {
 
       // Emit custom event for external handling
       const customEvent = new CustomEvent('unitclick', {
-        detail: { unitData: event.unitData }
+        detail: {unitData: event.unitData}
       });
       document.dispatchEvent(customEvent);
     });

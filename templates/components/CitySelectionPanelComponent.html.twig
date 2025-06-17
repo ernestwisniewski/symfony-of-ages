@@ -1,0 +1,64 @@
+<div class="selection-panel {{ this.isVisible ? 'visible' : 'hidden' }}"
+    {{ stimulus_controller('live city-panel') }}
+     {{ attributes }}>
+    {% if this.isVisible %}
+        <div class="panel-header">
+            <h3>City Information</h3>
+            <button class="panel-close"
+                    type="button"
+                    {{ live_action('close') }}>
+                &times;
+            </button>
+        </div>
+
+        <div class="panel-content">
+            <div class="city-info">
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value">{{ this.getCityName() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Owner:</span>
+                    <span class="info-value">{{ this.getCityOwner() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Position:</span>
+                    <span class="info-value">
+                        ({{ this.getCityPosition().x }}, {{ this.getCityPosition().y }})
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Population:</span>
+                    <span class="info-value">{{ this.getCityPopulation() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Production:</span>
+                    <span class="info-value">{{ this.getCityProduction() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Food:</span>
+                    <span class="info-value">{{ this.getCityFood() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Gold:</span>
+                    <span class="info-value">{{ this.getCityGold() }}</span>
+                </div>
+            </div>
+
+            <div class="city-actions">
+                <button class="btn btn-primary"
+                        {{ live_action('manageProduction') }}>
+                    Manage Production
+                </button>
+                <button class="btn btn-secondary"
+                        {{ live_action('manageBuildings') }}>
+                    Manage Buildings
+                </button>
+                <button class="btn btn-warning"
+                        {{ live_action('manageUnits') }}>
+                    Manage Units
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>

@@ -2,7 +2,7 @@ import {Container} from 'pixi.js';
 import {HexTile} from './HexTile';
 import {HexGeometry} from './HexGeometry';
 import {HexRenderer} from './HexRenderer';
-import type { TerrainTile } from '../core';
+import type {TerrainTile} from '../core';
 
 /**
  * Interface for hex grid configuration
@@ -55,7 +55,7 @@ export class HexGrid extends Container {
         // Add coordinates to terrain data for easier access
         const terrainDataWithCoords: TerrainTile = {
           ...terrainData,
-          coordinates: { row: r, col: c }
+          coordinates: {row: r, col: c}
         };
 
         const hex = new HexTile({
@@ -100,10 +100,10 @@ export class HexGrid extends Container {
       if (gameMap && !gameMap.isDragging) {
         // Extract coordinates and emit event for GameMap to handle
         if (event.data) {
-          const { row, col } = this.getHexCoordinates(event);
+          const {row, col} = this.getHexCoordinates(event);
 
           // Emit event that GameMap can listen to
-          this.emit('hexclick', { row, col, terrainData: event.data });
+          this.emit('hexclick', {row, col, terrainData: event.data});
         }
       }
     });
@@ -126,11 +126,11 @@ export class HexGrid extends Container {
     }
 
     // Fallback: calculate from position (less reliable)
-    const position = eventData.position || { x: 0, y: 0 };
+    const position = eventData.position || {x: 0, y: 0};
     const col = Math.round(position.x / (this.config.size * Math.sqrt(3)));
     const row = Math.round(position.y / (this.config.size * 1.5));
 
-    return { row, col };
+    return {row, col};
   }
 
   /**
@@ -175,7 +175,7 @@ export class HexGrid extends Container {
     const centerX = (actualBounds.minX + actualBounds.maxX) / 2;
     const centerY = (actualBounds.minY + actualBounds.maxY) / 2;
 
-    return { x: centerX, y: centerY };
+    return {x: centerX, y: centerY};
   }
 
   /**
@@ -197,7 +197,7 @@ export class HexGrid extends Container {
    * Calculates actual bounds including hex radius
    */
   private calculateActualBounds(cornerPositions: any) {
-    const { topLeft, topRight, bottomLeft, bottomRight } = cornerPositions;
+    const {topLeft, topRight, bottomLeft, bottomRight} = cornerPositions;
 
     const minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
     const maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
@@ -221,6 +221,6 @@ export class HexGrid extends Container {
   private calculateCenterFromBounds(bounds: any): { x: number; y: number } {
     const centerX = bounds.x + (bounds.width / 2);
     const centerY = bounds.y + (bounds.height / 2);
-    return { x: centerX, y: centerY };
+    return {x: centerX, y: centerY};
   }
 }

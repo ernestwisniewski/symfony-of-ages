@@ -1,7 +1,7 @@
 <div class="game-list-container" {{ attributes }} >
     <div class="game-list-filters">
         <div class="filter-panel">
-            <button class="btn btn-outline filter-btn" data-action="click->game-list#toggleUserGames">
+            <button class="btn btn-outline filter-btn">
                 <i class="icon icon--lucide icon--lucide-filter"></i>
                 {% if this.showUserGames %}
                     <span {{ live_action('toggleUserGames') }}>Show All Games</span>

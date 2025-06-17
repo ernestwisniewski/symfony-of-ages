@@ -1,0 +1,81 @@
+<div class="selection-panel {{ this.isVisible ? 'visible' : 'hidden' }}"
+    {{ stimulus_controller('live hex-panel') }}
+     {{ attributes }}>
+    {% if this.isVisible %}
+        <div class="panel-header">
+            <h3>Terrain Information</h3>
+            <button class="panel-close"
+                    type="button"
+                    {{ live_action('close') }}>
+                &times;
+            </button>
+        </div>
+
+        <div class="panel-content">
+            <div class="hex-info">
+                <div class="info-row">
+                    <span class="info-label">Terrain:</span>
+                    <span class="info-value">{{ this.getTerrainName() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Type:</span>
+                    <span class="info-value">{{ this.getTerrainType() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Position:</span>
+                    <span class="info-value">{{ this.getCoordinates() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Movement Cost:</span>
+                    <span class="info-value">{{ this.getMovementCost() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Defense Bonus:</span>
+                    <span class="info-value">+{{ this.getDefenseBonus() }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Total Resources:</span>
+                    <span class="info-value">{{ this.getResources() }}</span>
+                </div>
+
+                {% if this.hasResource('foodBonus') %}
+                    <div class="info-row resource-row">
+                        <span class="info-label">Food:</span>
+                        <span class="info-value">+{{ this.getResourceAmount('foodBonus') }}</span>
+                    </div>
+                {% endif %}
+
+                {% if this.hasResource('productionBonus') %}
+                    <div class="info-row resource-row">
+                        <span class="info-label">Production:</span>
+                        <span class="info-value">+{{ this.getResourceAmount('productionBonus') }}</span>
+                    </div>
+                {% endif %}
+
+                {% if this.hasResource('goldBonus') %}
+                    <div class="info-row resource-row">
+                        <span class="info-label">Gold:</span>
+                        <span class="info-value">+{{ this.getResourceAmount('goldBonus') }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="hex-actions">
+                {% if this.getTerrainType() == 'plains' %}
+                    <button class="btn btn-primary"
+                            {{ live_action('foundCity') }}>
+                        Found City
+                    </button>
+                {% endif %}
+                <button class="btn btn-secondary"
+                        {{ live_action('buildRoad') }}>
+                    Build Road
+                </button>
+                <button class="btn btn-warning"
+                        {{ live_action('buildMine') }}>
+                    Build Mine
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>

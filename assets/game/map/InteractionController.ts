@@ -1,6 +1,6 @@
-import { Application, FederatedPointerEvent } from 'pixi.js';
-import { CameraController } from './CameraController';
-import type { Position } from './types';
+import {Application, FederatedPointerEvent} from 'pixi.js';
+import {CameraController} from './CameraController';
+import type {Position} from './types';
 
 /**
  * InteractionController handles all user interactions

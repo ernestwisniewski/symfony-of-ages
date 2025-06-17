@@ -1,8 +1,8 @@
-import { GameMap } from './map/GameMap';
-import { SelectionSystem } from './selection/SelectionSystem';
-import { ColorUtils } from './utils/ColorUtils';
-import type { GameResource, UnitResource, CityResource, MapResource } from '../api';
-import type { TerrainTile, MapConfig, GameData, UnitData, CityData, MapData } from './core';
+import {GameMap} from './map/GameMap';
+import {SelectionSystem} from './selection/SelectionSystem';
+import {ColorUtils} from './utils/ColorUtils';
+import type {CityResource, GameResource, UnitResource} from '../api';
+import type {CityData, GameData, MapConfig, TerrainTile, UnitData} from './core';
 
 /**
  * GameManager handles map rendering and game interactions
@@ -55,7 +55,7 @@ export class GameManager {
       ownerId: unitResource.ownerId || '',
       gameId: unitResource.gameId || '',
       type: unitResource.type || '',
-      position: unitResource.position || { x: 0, y: 0 },
+      position: unitResource.position || {x: 0, y: 0},
       currentHealth: unitResource.currentHealth || 0,
       maxHealth: unitResource.maxHealth || 0,
       isDead: unitResource.isDead || false,
@@ -74,7 +74,7 @@ export class GameManager {
       ownerId: cityResource.ownerId || '',
       gameId: cityResource.gameId || '',
       name: cityResource.name || '',
-      position: cityResource.position || { x: 0, y: 0 }
+      position: cityResource.position || {x: 0, y: 0}
     };
   }
 
@@ -92,11 +92,11 @@ export class GameManager {
   private setupEventHandlers(): void {
     // Handle hex clicks for selection and interaction
     this.gameMap.onHexClick = (row: number, col: number, terrainData: TerrainTile) => {
-      this.selectionSystem.selectHex(terrainData, { row, col });
+      this.selectionSystem.selectHex(terrainData, {row, col});
 
       // Emit custom event for external handling
       this.gameMap.getElement().dispatchEvent(new CustomEvent('hexclick', {
-        detail: { row, col, terrainData }
+        detail: {row, col, terrainData}
       }));
     };
 
@@ -119,7 +119,7 @@ export class GameManager {
 
         // Emit custom event for external handling
         this.gameMap.getElement().dispatchEvent(new CustomEvent('unitclick', {
-          detail: { unitData }
+          detail: {unitData}
         }));
       }
       // Check if it's city data
@@ -139,7 +139,7 @@ export class GameManager {
 
         // Emit custom event for external handling
         this.gameMap.getElement().dispatchEvent(new CustomEvent('cityclick', {
-          detail: { cityData }
+          detail: {cityData}
         }));
       }
     };

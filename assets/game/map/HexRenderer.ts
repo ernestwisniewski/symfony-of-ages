@@ -1,5 +1,5 @@
-import { Container, ColorMatrixFilter } from 'pixi.js';
-import { DropShadowFilter } from '@pixi/filter-drop-shadow';
+import {ColorMatrixFilter, Container} from 'pixi.js';
+import {DropShadowFilter} from '@pixi/filter-drop-shadow';
 
 /**
  * HexRenderer handles visual effects and filters for hex tiles
@@ -30,7 +30,7 @@ export class HexRenderer {
       alpha: HexRenderer.SHADOW_ALPHA,
       blur: HexRenderer.SHADOW_BLUR,
       distance: HexRenderer.SHADOW_DISTANCE,
-      offset: { x: HexRenderer.SHADOW_OFFSET_X, y: HexRenderer.SHADOW_OFFSET_Y },
+      offset: {x: HexRenderer.SHADOW_OFFSET_X, y: HexRenderer.SHADOW_OFFSET_Y},
       quality: HexRenderer.SHADOW_QUALITY
     });
 
@@ -58,4 +58,4 @@ export class HexRenderer {
   static removeHoverEffect(container: Container): void {
     container.filters = [];
   }
-} 
+}

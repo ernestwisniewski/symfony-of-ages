@@ -153,7 +153,6 @@
     padding: var(--spacing-md);
     border-bottom: 1px solid var(--color-primary);
     background: linear-gradient(145deg, var(--color-bg-primary), var(--color-bg-secondary));
-    margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) var(--spacing-md) calc(-1 * var(--spacing-md));
 }
 
 .panel-header h3 {
@@ -187,6 +186,7 @@
 }
 
 .panel-content {
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);

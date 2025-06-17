@@ -1,6 +1,6 @@
 /**
  * Core Game Types and Interfaces
- * 
+ *
  * This file contains TypeScript interfaces for internal game logic and rendering.
  * These types are used for game state management and UI interactions.
  */
@@ -192,6 +192,7 @@ export interface SelectableObject {
   readonly type: string;
   readonly position: GridPosition;
   readonly displayName: string;
+
   getSelectionInfo(): Record<string, any>;
 }
 
@@ -228,12 +229,12 @@ export function isGridPosition(obj: any): obj is GridPosition {
  * Convert Position to GridPosition
  */
 export function positionToGrid(position: Position): GridPosition {
-  return { row: position.y, col: position.x };
+  return {row: position.y, col: position.x};
 }
 
 /**
  * Convert GridPosition to Position
  */
 export function gridToPosition(grid: GridPosition): Position {
-  return { x: grid.col, y: grid.row };
-} 
+  return {x: grid.col, y: grid.row};
+}

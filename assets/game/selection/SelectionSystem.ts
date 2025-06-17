@@ -1,7 +1,7 @@
-import { SelectionManager } from './SelectionManager';
-import { SelectableHex } from './SelectableHex';
-import { SelectablePlayer } from './SelectablePlayer';
-import type { PlayerData, GridPosition, TerrainTile } from '../core';
+import {SelectionManager} from './SelectionManager';
+import {SelectableHex} from './SelectableHex';
+import {SelectablePlayer} from './SelectablePlayer';
+import type {GridPosition, PlayerData, TerrainTile} from '../core';
 
 /**
  * SelectionSystem coordinates all selection-related functionality
@@ -50,4 +50,4 @@ export class SelectionSystem {
   destroy(): void {
     this.selectionManager.clearSelection();
   }
-} 
+}

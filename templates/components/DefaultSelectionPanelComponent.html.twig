@@ -1,0 +1,26 @@
+<div class="selection-panel {{ this.isVisible ? 'visible' : 'hidden' }}"
+    {{ stimulus_controller('live default-panel') }}
+     {{ attributes }}>
+    {% if this.isVisible %}
+        <div class="panel-header">
+            <h3>Information Panel</h3>
+            <button class="panel-close"
+                    type="button"
+                    {{ live_action('close') }}>
+                &times;
+            </button>
+        </div>
+
+        <div class="panel-content">
+            <div class="default-info">
+                <p>Select an object on the map to view its details.</p>
+                <p>Available objects:</p>
+                <ul>
+                    <li>Hex tiles - Click on map tiles to view terrain information</li>
+                    <li>Units - Click on units to manage them</li>
+                    <li>Cities - Click on cities to manage production and buildings</li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+</div>

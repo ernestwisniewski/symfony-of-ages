@@ -1,6 +1,6 @@
-import { Container, Graphics } from 'pixi.js';
-import { HexGeometry } from './HexGeometry';
-import type { MapConfig } from './types';
+import {Container, Graphics} from 'pixi.js';
+import {HexGeometry} from './HexGeometry';
+import type {MapConfig} from './types';
 
 /**
  * DebugRenderer handles debug visualization
@@ -52,12 +52,12 @@ export class DebugRenderer {
     const graphics = new Graphics();
 
     graphics.circle(0, 0, radius);
-    graphics.fill({ color: color, alpha: DebugRenderer.DEBUG_MARKER_ALPHA });
+    graphics.fill({color: color, alpha: DebugRenderer.DEBUG_MARKER_ALPHA});
     graphics.moveTo(-DebugRenderer.DEBUG_MARKER_SIZE, 0);
     graphics.lineTo(DebugRenderer.DEBUG_MARKER_SIZE, 0);
     graphics.moveTo(0, -DebugRenderer.DEBUG_MARKER_SIZE);
     graphics.lineTo(0, DebugRenderer.DEBUG_MARKER_SIZE);
-    graphics.stroke({ color: color, width: DebugRenderer.DEBUG_MARKER_WIDTH });
+    graphics.stroke({color: color, width: DebugRenderer.DEBUG_MARKER_WIDTH});
 
     marker.addChild(graphics);
     return marker;

@@ -1,4 +1,4 @@
-import type { SelectableObject, SelectionData, GridPosition } from '../core/types';
+import type {SelectableObject, SelectionData} from '../core/types';
 
 /**
  * SelectionManager handles object selection state
@@ -67,4 +67,4 @@ export class SelectionManager {
       this.changeCallback(data);
     }
   }
-} 
+}

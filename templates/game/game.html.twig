@@ -15,7 +15,7 @@
         <!-- Game Map Canvas -->
         <div class="game-map-container">
             <div
-                    {{ stimulus_controller('game') }}
+                {{ stimulus_controller('game') }}
                 data-game-game-id-value="{{ game.id }}"
                 data-game-map-data-value="{{ map|json_encode|e('html_attr') }}"
                 data-game-game-data-value="{{ game|json_encode|e('html_attr') }}"
@@ -23,7 +23,12 @@
                 data-game-cities-data-value="{{ cities|json_encode|e('html_attr') }}"
                 style="width: 100%; height: 100%;"
             ></div>
-            {{ component('SelectionPanelComponent') }}
+
+            <!-- Selection Panels -->
+            {{ component('UnitSelectionPanelComponent') }}
+            {{ component('CitySelectionPanelComponent') }}
+            {{ component('HexSelectionPanelComponent') }}
+            {{ component('DefaultSelectionPanelComponent') }}
         </div>
     </div>
 {% endblock %}

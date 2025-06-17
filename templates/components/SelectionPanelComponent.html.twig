@@ -1,9 +1,0 @@
-<div class="selection-panel {{ isVisible ? 'visible' : 'hidden' }}"
-    {{ stimulus_controller('selection-panel live') }}
-    {{ attributes }}>
-    {% if isVisible %}
-        <div class="selection-content">
-            {% include this.getPartialTemplate() %}
-        </div>
-    {% endif %}
-</div>

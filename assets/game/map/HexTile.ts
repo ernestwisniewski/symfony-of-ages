@@ -1,7 +1,6 @@
-import {Graphics, Texture, Assets} from 'pixi.js';
-import {Color} from 'pixi.js';
+import {Assets, Color, Graphics, Texture} from 'pixi.js';
 import {getTerrainTexture} from './TerrainTextures';
-import type { TerrainTile } from '../core';
+import type {TerrainTile} from '../core';
 
 /**
  * Interface for hex tile configuration
@@ -204,7 +203,7 @@ export class HexTile extends Graphics {
       ? new Color(this.defaultState.fillColor).multiply([HexTile.HOVER_MULTIPLIER, HexTile.HOVER_MULTIPLIER, HexTile.HOVER_MULTIPLIER]).toNumber()
       : this.defaultState.fillColor;
 
-    this.fill({ color: fillColor });
+    this.fill({color: fillColor});
   }
 
   /**

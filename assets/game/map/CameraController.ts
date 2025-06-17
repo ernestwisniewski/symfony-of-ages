@@ -1,6 +1,6 @@
-import { Application, Container } from 'pixi.js';
-import { HexGrid } from './HexGrid';
-import type { MapConfig } from './types';
+import {Application, Container} from 'pixi.js';
+import {HexGrid} from './HexGrid';
+import type {MapConfig} from './types';
 
 /**
  * CameraController handles all camera-related operations
@@ -195,11 +195,18 @@ export class CameraController {
 
   private shouldCenterMapOnScreen(constraintData: any): boolean {
     return constraintData.mapScreenWidth <= constraintData.screenWidth &&
-           constraintData.mapScreenHeight <= constraintData.screenHeight;
+      constraintData.mapScreenHeight <= constraintData.screenHeight;
   }
 
   private calculateConstrainedPosition(constraintData: any) {
-    const { adaptiveMargin, mapScreenWidth, mapScreenHeight, screenWidth, screenHeight, currentPosition } = constraintData;
+    const {
+      adaptiveMargin,
+      mapScreenWidth,
+      mapScreenHeight,
+      screenWidth,
+      screenHeight,
+      currentPosition
+    } = constraintData;
 
     const bounds = {
       minX: adaptiveMargin - (mapScreenWidth / 2),
@@ -219,7 +226,7 @@ export class CameraController {
       newY = this.constrainAxisPosition(currentPosition.y, bounds.minY, bounds.maxY, 'Y');
     }
 
-    return { x: newX, y: newY };
+    return {x: newX, y: newY};
   }
 
   private constrainAxisPosition(current: number, min: number, max: number, axis: string): number {

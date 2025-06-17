@@ -1,11 +1,10 @@
-import { Container } from 'pixi.js';
-import { City } from './City';
-import { Unit } from './Unit';
-import { HexGrid } from '../map/HexGrid';
-import { HexGeometry } from '../map/HexGeometry';
-import { CameraController } from '../map/CameraController';
-import type { CityData, UnitData } from '../core/types';
-import type { MapConfig } from '../map/types';
+import {City} from './City';
+import {Unit} from './Unit';
+import {HexGrid} from '../map/HexGrid';
+import {HexGeometry} from '../map/HexGeometry';
+import {CameraController} from '../map/CameraController';
+import type {CityData, UnitData} from '../core/types';
+import type {MapConfig} from '../map/types';
 
 /**
  * PlayerManager handles all player-related operations
@@ -120,7 +119,7 @@ export class PlayerManager {
     // Remove cities that no longer exist
     const currentCityIds = new Set(this.cities.keys());
     const newCityIds = new Set(citiesData.map(city => city.id));
-    
+
     // Remove cities that are no longer in the data
     for (const cityId of currentCityIds) {
       if (!newCityIds.has(cityId)) {
@@ -141,7 +140,7 @@ export class PlayerManager {
     // Remove units that no longer exist
     const currentUnitIds = new Set(this.units.keys());
     const newUnitIds = new Set(unitsData.map(unit => unit.id));
-    
+
     // Remove units that are no longer in the data
     for (const unitId of currentUnitIds) {
       if (!newUnitIds.has(unitId)) {
@@ -222,15 +221,15 @@ export class PlayerManager {
     // Convert grid coordinates to world coordinates
     const hexGeometry = new HexGeometry(this.config.size);
     const worldPos = hexGeometry.calculatePosition(y, x);
-    
+
     // Account for hexGrid transforms
     const hexGridWorldX = this.hexGrid.x;
     const hexGridWorldY = this.hexGrid.y;
-    
+
     const worldX = hexGridWorldX + (worldPos.x - this.hexGrid.pivot.x) * this.hexGrid.scale.x;
     const worldY = hexGridWorldY + (worldPos.y - this.hexGrid.pivot.y) * this.hexGrid.scale.y;
 
-    return { x: worldX, y: worldY };
+    return {x: worldX, y: worldY};
   }
 
   /**
