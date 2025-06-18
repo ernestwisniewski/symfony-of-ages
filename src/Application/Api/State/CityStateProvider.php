@@ -5,12 +5,12 @@ namespace App\Application\Api\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Application\City\Query\GetCityViewQuery;
+use App\Application\Exception\ResourceNotFoundException;
 use App\Domain\City\ValueObject\CityId;
 use App\Infrastructure\City\ReadModel\Doctrine\CityViewRepository;
 use App\UI\Api\Resource\CityResource;
 use Ecotone\Modelling\QueryBus;
 use RuntimeException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class CityStateProvider implements ProviderInterface
@@ -36,7 +36,7 @@ final readonly class CityStateProvider implements ProviderInterface
         try {
             $cityView = $this->queryBus->send(new GetCityViewQuery(new CityId($cityId)));
         } catch (RuntimeException $e) {
-            throw new NotFoundHttpException("City with ID $cityId not found");
+            throw ResourceNotFoundException::cityNotFound($cityId);
         }
         return $this->objectMapper->map($cityView, CityResource::class);
     }

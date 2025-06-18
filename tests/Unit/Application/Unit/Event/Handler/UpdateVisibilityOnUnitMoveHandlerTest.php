@@ -2,11 +2,10 @@
 
 namespace App\Tests\Unit\Application\Unit\Event\Handler;
 
-use App\Application\City\Query\GetCitiesByGameQuery;
+use App\Application\City\Query\GetCitiesByPlayerQuery;
 use App\Application\Unit\Event\Handler\UpdateVisibilityOnUnitMoveHandler;
-use App\Application\Unit\Query\GetUnitsByGameQuery;
+use App\Application\Unit\Query\GetUnitsByPlayerQuery;
 use App\Application\Visibility\Service\VisibilityApplicationService;
-use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Unit\Event\UnitWasMoved;
 use Ecotone\Modelling\QueryBus;
@@ -14,15 +13,18 @@ use PHPUnit\Framework\TestCase;
 
 class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
 {
-    private UpdateVisibilityOnUnitMoveHandler $handler;
     private QueryBus $queryBus;
     private VisibilityApplicationService $visibilityService;
+    private UpdateVisibilityOnUnitMoveHandler $handler;
 
     protected function setUp(): void
     {
         $this->queryBus = $this->createMock(QueryBus::class);
         $this->visibilityService = $this->createMock(VisibilityApplicationService::class);
-        $this->handler = new UpdateVisibilityOnUnitMoveHandler($this->queryBus, $this->visibilityService);
+        $this->handler = new UpdateVisibilityOnUnitMoveHandler(
+            $this->queryBus,
+            $this->visibilityService
+        );
     }
 
     public function testHandle(): void
@@ -30,7 +32,6 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
         $event = new UnitWasMoved(
             '123e4567-e89b-12d3-a456-426614174001',
             '123e4567-e89b-12d3-a456-426614174002',
-            '123e4567-e89b-12d3-a456-426614174003',
             5,
             5,
             6,
@@ -45,7 +46,7 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
                 'type' => 'warrior'
             ],
             (object) [
-                'ownerId' => '123e4567-e89b-12d3-a456-426614174004',
+                'ownerId' => '123e4567-e89b-12d3-a456-426614174005',
                 'position' => ['x' => 7, 'y' => 7],
                 'type' => 'scout'
             ]
@@ -54,8 +55,13 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
         $cities = [
             (object) [
                 'ownerId' => '123e4567-e89b-12d3-a456-426614174002',
-                'position' => ['x' => 8, 'y' => 8],
+                'position' => ['x' => 5, 'y' => 5],
                 'level' => 1
+            ],
+            (object) [
+                'ownerId' => '123e4567-e89b-12d3-a456-426614174005',
+                'position' => ['x' => 8, 'y' => 8],
+                'level' => 2
             ]
         ];
 
@@ -64,11 +70,13 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
             ->method('send')
             ->willReturnCallback(function ($query) use ($units, $cities, &$callCount) {
                 if ($callCount === 0) {
-                    $this->assertInstanceOf(GetUnitsByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetUnitsByPlayerQuery::class, $query);
+                    $this->assertEquals('123e4567-e89b-12d3-a456-426614174002', (string)$query->playerId);
                     $callCount++;
                     return $units;
                 } else {
-                    $this->assertInstanceOf(GetCitiesByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetCitiesByPlayerQuery::class, $query);
+                    $this->assertEquals('123e4567-e89b-12d3-a456-426614174002', (string)$query->playerId);
                     return $cities;
                 }
             });
@@ -77,9 +85,8 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
             ->method('updatePlayerVisibility')
             ->with(
                 $this->callback(fn(PlayerId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(GameId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174003'),
-                $this->callback(fn(array $units) => count($units) === 1 && $units[0]->ownerId === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(array $cities) => count($cities) === 1 && $cities[0]->ownerId === '123e4567-e89b-12d3-a456-426614174002')
+                $units,
+                $cities
             );
 
         $this->handler->handle($event);
@@ -90,7 +97,6 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
         $event = new UnitWasMoved(
             '123e4567-e89b-12d3-a456-426614174001',
             '123e4567-e89b-12d3-a456-426614174002',
-            '123e4567-e89b-12d3-a456-426614174003',
             5,
             5,
             6,
@@ -100,7 +106,7 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
 
         $units = [
             (object) [
-                'ownerId' => '123e4567-e89b-12d3-a456-426614174004',
+                'ownerId' => '123e4567-e89b-12d3-a456-426614174005',
                 'position' => ['x' => 7, 'y' => 7],
                 'type' => 'scout'
             ]
@@ -108,8 +114,8 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
 
         $cities = [
             (object) [
-                'ownerId' => '123e4567-e89b-12d3-a456-426614174004',
-                'position' => ['x' => 8, 'y' => 8],
+                'ownerId' => '123e4567-e89b-12d3-a456-426614174002',
+                'position' => ['x' => 5, 'y' => 5],
                 'level' => 1
             ]
         ];
@@ -119,11 +125,11 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
             ->method('send')
             ->willReturnCallback(function ($query) use ($units, $cities, &$callCount) {
                 if ($callCount === 0) {
-                    $this->assertInstanceOf(GetUnitsByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetUnitsByPlayerQuery::class, $query);
                     $callCount++;
                     return $units;
                 } else {
-                    $this->assertInstanceOf(GetCitiesByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetCitiesByPlayerQuery::class, $query);
                     return $cities;
                 }
             });
@@ -132,9 +138,8 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
             ->method('updatePlayerVisibility')
             ->with(
                 $this->callback(fn(PlayerId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(GameId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174003'),
-                $this->callback(fn(array $units) => count($units) === 0),
-                $this->callback(fn(array $cities) => count($cities) === 0)
+                $units,
+                $cities
             );
 
         $this->handler->handle($event);
@@ -145,7 +150,6 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
         $event = new UnitWasMoved(
             '123e4567-e89b-12d3-a456-426614174001',
             '123e4567-e89b-12d3-a456-426614174002',
-            '123e4567-e89b-12d3-a456-426614174003',
             5,
             5,
             6,
@@ -165,24 +169,30 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
                 'type' => 'scout'
             ],
             (object) [
-                'ownerId' => '123e4567-e89b-12d3-a456-426614174004',
+                'ownerId' => '123e4567-e89b-12d3-a456-426614174005',
                 'position' => ['x' => 8, 'y' => 8],
-                'type' => 'cavalry'
+                'type' => 'archer'
             ]
         ];
 
-        $cities = [];
+        $cities = [
+            (object) [
+                'ownerId' => '123e4567-e89b-12d3-a456-426614174002',
+                'position' => ['x' => 5, 'y' => 5],
+                'level' => 1
+            ]
+        ];
 
         $callCount = 0;
         $this->queryBus->expects($this->exactly(2))
             ->method('send')
             ->willReturnCallback(function ($query) use ($units, $cities, &$callCount) {
                 if ($callCount === 0) {
-                    $this->assertInstanceOf(GetUnitsByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetUnitsByPlayerQuery::class, $query);
                     $callCount++;
                     return $units;
                 } else {
-                    $this->assertInstanceOf(GetCitiesByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetCitiesByPlayerQuery::class, $query);
                     return $cities;
                 }
             });
@@ -191,9 +201,8 @@ class UpdateVisibilityOnUnitMoveHandlerTest extends TestCase
             ->method('updatePlayerVisibility')
             ->with(
                 $this->callback(fn(PlayerId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(GameId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174003'),
-                $this->callback(fn(array $units) => count($units) === 2),
-                $this->callback(fn(array $cities) => count($cities) === 0)
+                $units,
+                $cities
             );
 
         $this->handler->handle($event);

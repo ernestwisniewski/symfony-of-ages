@@ -22,10 +22,10 @@ class PlayerUserMappingEntity
     public DateTimeImmutable $createdAt;
 
     public function __construct(
-        string             $id,
-        string             $playerId,
-        int                $userId,
-        string             $gameId,
+        string            $id,
+        string            $playerId,
+        int               $userId,
+        string            $gameId,
         DateTimeImmutable $createdAt
     )
     {

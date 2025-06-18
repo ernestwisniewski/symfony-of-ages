@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Unit\ReadModel;
 
 use App\Application\Unit\Query\GetUnitsByGameQuery;
+use App\Application\Unit\Query\GetUnitsByPlayerQuery;
 use App\Application\Unit\Query\GetUnitViewQuery;
 use App\Domain\Unit\Event\UnitWasAttacked;
 use App\Domain\Unit\Event\UnitWasCreated;
@@ -10,6 +11,7 @@ use App\Domain\Unit\Event\UnitWasDestroyed;
 use App\Domain\Unit\Event\UnitWasMoved;
 use App\Domain\Unit\Unit;
 use App\Domain\Unit\ValueObject\UnitType;
+use App\Infrastructure\Exception\EntityNotFoundException;
 use App\Infrastructure\Unit\ReadModel\Doctrine\UnitViewEntity;
 use App\Infrastructure\Unit\ReadModel\Doctrine\UnitViewRepository;
 use App\UI\Unit\ViewModel\UnitView;
@@ -17,7 +19,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
-use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Projection("unit_view", Unit::class)]
@@ -36,7 +37,7 @@ readonly class UnitViewProjection
     {
         $entity = $this->repository->find((string)$query->unitId);
         if (!$entity) {
-            throw new RuntimeException("UnitView for ID {$query->unitId} not found.");
+            throw EntityNotFoundException::unitViewNotFound((string)$query->unitId);
         }
         return $this->mapper->map($entity, UnitView::class);
     }
@@ -51,6 +52,16 @@ readonly class UnitViewProjection
         );
     }
 
+    #[QueryHandler]
+    public function getUnitsByPlayer(GetUnitsByPlayerQuery $query): array
+    {
+        $entities = $this->repository->findByOwner((string)$query->playerId);
+        return array_map(
+            fn(UnitViewEntity $entity) => $this->mapper->map($entity, UnitView::class),
+            $entities
+        );
+    }
+
     #[EventHandler]
     public function applyUnitWasCreated(UnitWasCreated $event): void
     {
@@ -58,7 +69,7 @@ readonly class UnitViewProjection
         $unit = new UnitViewEntity(
             $event->unitId,
             $event->ownerId,
-            $event->gameId,
+            '', // gameId will be handled separately in infrastructure
             $event->type,
             $event->x,
             $event->y,
@@ -104,7 +115,7 @@ readonly class UnitViewProjection
     {
         $unit = $this->repository->find($unitId);
         if (!$unit) {
-            throw new RuntimeException("UnitViewEntity for ID $unitId not found");
+            throw EntityNotFoundException::unitViewNotFound($unitId);
         }
         return $unit;
     }

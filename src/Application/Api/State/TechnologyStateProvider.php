@@ -4,6 +4,7 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Application\Exception\ResourceNotFoundException;
 use App\Application\Technology\Query\GetAllTechnologiesQuery;
 use App\Application\Technology\Query\GetTechnologyDetailsQuery;
 use App\Application\Technology\Query\GetTechnologyQuery;
@@ -13,7 +14,6 @@ use App\UI\Api\Resource\TechnologyResource;
 use App\UI\Technology\ViewModel\TechnologyView;
 use Ecotone\Modelling\QueryBus;
 use RuntimeException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class TechnologyStateProvider implements ProviderInterface
@@ -41,11 +41,9 @@ final readonly class TechnologyStateProvider implements ProviderInterface
         try {
             $technologyView = $this->queryBus->send(new GetTechnologyDetailsQuery(new TechnologyId($technologyId)));
         } catch (RuntimeException $e) {
-            throw new NotFoundHttpException("Technology with ID $technologyId not found");
+            throw ResourceNotFoundException::technologyNotFound($technologyId);
         }
-        if (!$technologyView) {
-            throw new NotFoundHttpException("Technology with ID $technologyId not found");
-        }
+
         return $this->objectMapper->map($technologyView, TechnologyResource::class);
     }
 
@@ -63,7 +61,7 @@ final readonly class TechnologyStateProvider implements ProviderInterface
         try {
             $technologyTreeView = $this->queryBus->send(new GetTechnologyQuery(new PlayerId($playerId)));
         } catch (RuntimeException $e) {
-            throw new NotFoundHttpException("Technology tree for player $playerId not found");
+            throw ResourceNotFoundException::technologyTreeNotFound($playerId);
         }
         return [
             'playerId' => $technologyTreeView->playerId,

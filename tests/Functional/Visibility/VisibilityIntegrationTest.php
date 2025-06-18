@@ -33,20 +33,19 @@ class VisibilityIntegrationTest extends BaseFunctionalTestCase
     public function testUpdatePlayerVisibilityWithUnit(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $units = [
             (object) [
-                'position' => ['x' => 5, 'y' => 5],
+                'position' => new \App\Domain\Shared\ValueObject\Position(5, 5),
                 'type' => UnitType::SCOUT->value
             ]
         ];
         
         $cities = [];
 
-        $this->visibilityService->updatePlayerVisibility($playerId, $gameId, $units, $cities);
+        $this->visibilityService->updatePlayerVisibility($playerId, $units, $cities);
 
-        $visibilityEntities = $this->visibilityRepository->findByPlayerAndGame('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002');
+        $visibilityEntities = $this->visibilityRepository->findByPlayerId('123e4567-e89b-12d3-a456-426614174001');
         
         $this->assertGreaterThan(0, count($visibilityEntities));
         
@@ -57,20 +56,19 @@ class VisibilityIntegrationTest extends BaseFunctionalTestCase
     public function testUpdatePlayerVisibilityWithCity(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $units = [];
         
         $cities = [
             (object) [
-                'position' => ['x' => 5, 'y' => 5],
+                'position' => new \App\Domain\Shared\ValueObject\Position(5, 5),
                 'level' => 2
             ]
         ];
 
-        $this->visibilityService->updatePlayerVisibility($playerId, $gameId, $units, $cities);
+        $this->visibilityService->updatePlayerVisibility($playerId, $units, $cities);
 
-        $visibilityEntities = $this->visibilityRepository->findByPlayerAndGame('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002');
+        $visibilityEntities = $this->visibilityRepository->findByPlayerId('123e4567-e89b-12d3-a456-426614174001');
         
         $this->assertGreaterThan(0, count($visibilityEntities));
         
@@ -81,25 +79,24 @@ class VisibilityIntegrationTest extends BaseFunctionalTestCase
     public function testUpdatePlayerVisibilityWithMultipleSources(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $units = [
             (object) [
-                'position' => ['x' => 5, 'y' => 5],
+                'position' => new \App\Domain\Shared\ValueObject\Position(5, 5),
                 'type' => UnitType::WARRIOR->value
             ]
         ];
         
         $cities = [
             (object) [
-                'position' => ['x' => 6, 'y' => 6],
+                'position' => new \App\Domain\Shared\ValueObject\Position(6, 6),
                 'level' => 1
             ]
         ];
 
-        $this->visibilityService->updatePlayerVisibility($playerId, $gameId, $units, $cities);
+        $this->visibilityService->updatePlayerVisibility($playerId, $units, $cities);
 
-        $visibilityEntities = $this->visibilityRepository->findByPlayerAndGame('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002');
+        $visibilityEntities = $this->visibilityRepository->findByPlayerId('123e4567-e89b-12d3-a456-426614174001');
         
         $this->assertGreaterThan(0, count($visibilityEntities));
     }

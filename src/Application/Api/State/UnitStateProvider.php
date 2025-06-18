@@ -4,13 +4,13 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Application\Exception\ResourceNotFoundException;
 use App\Application\Unit\Query\GetUnitViewQuery;
 use App\Domain\Unit\ValueObject\UnitId;
 use App\Infrastructure\Unit\ReadModel\Doctrine\UnitViewRepository;
 use App\UI\Api\Resource\UnitResource;
 use Ecotone\Modelling\QueryBus;
 use RuntimeException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class UnitStateProvider implements ProviderInterface
@@ -38,7 +38,7 @@ final readonly class UnitStateProvider implements ProviderInterface
         try {
             $unitView = $this->queryBus->send(new GetUnitViewQuery(new UnitId($unitId)));
         } catch (RuntimeException $e) {
-            throw new NotFoundHttpException("Unit with ID $unitId not found");
+            throw ResourceNotFoundException::unitNotFound($unitId);
         }
         return $this->objectMapper->map($unitView, UnitResource::class);
     }

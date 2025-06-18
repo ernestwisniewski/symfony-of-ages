@@ -4,12 +4,12 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Application\Exception\ResourceNotFoundException;
 use App\Application\Map\Query\GetMapViewQuery;
 use App\Domain\Game\ValueObject\GameId;
 use App\UI\Api\Resource\MapResource;
 use Ecotone\Modelling\QueryBus;
 use RuntimeException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class MapStateProvider implements ProviderInterface
@@ -27,7 +27,7 @@ final readonly class MapStateProvider implements ProviderInterface
         try {
             $mapView = $this->queryBus->send(new GetMapViewQuery(new GameId($gameId)));
         } catch (RuntimeException $e) {
-            throw new NotFoundHttpException("Map for game $gameId not found");
+            throw ResourceNotFoundException::mapNotFound($gameId);
         }
         return $this->objectMapper->map($mapView, MapResource::class);
     }

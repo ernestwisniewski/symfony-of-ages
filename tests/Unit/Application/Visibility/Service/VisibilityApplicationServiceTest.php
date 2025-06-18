@@ -30,18 +30,17 @@ class VisibilityApplicationServiceTest extends TestCase
     public function testUpdatePlayerVisibility(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $units = [
             (object) [
-                'position' => ['x' => 5, 'y' => 5],
+                'position' => new \App\Domain\Shared\ValueObject\Position(5, 5),
                 'type' => 'warrior'
             ]
         ];
         
         $cities = [
             (object) [
-                'position' => ['x' => 6, 'y' => 6],
+                'position' => new \App\Domain\Shared\ValueObject\Position(6, 6),
                 'level' => 1
             ]
         ];
@@ -50,32 +49,29 @@ class VisibilityApplicationServiceTest extends TestCase
             ->method('send')
             ->with($this->callback(function (UpdateVisibilityCommand $command) {
                 return $command->playerId === '123e4567-e89b-12d3-a456-426614174001' &&
-                       $command->gameId === '123e4567-e89b-12d3-a456-426614174002' &&
                        count($command->unitPositions) === 1 &&
                        count($command->cityPositions) === 1;
             }));
 
-        $this->service->updatePlayerVisibility($playerId, $gameId, $units, $cities);
+        $this->service->updatePlayerVisibility($playerId, $units, $cities);
     }
 
     public function testGetPlayerVisibility(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $expectedVisibility = [
-            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 5, 5, 'active', '2024-01-01T00:00:00Z')
+            new \App\UI\Visibility\ViewModel\PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', 5, 5, 'active', '2024-01-01T00:00:00Z')
         ];
 
         $this->queryBus->expects($this->once())
             ->method('send')
-            ->with($this->callback(function (GetPlayerVisibilityQuery $query) {
-                return (string)$query->playerId === '123e4567-e89b-12d3-a456-426614174001' &&
-                       (string)$query->gameId === '123e4567-e89b-12d3-a456-426614174002';
+            ->with($this->callback(function (\App\Application\Visibility\Query\GetPlayerVisibilityQuery $query) {
+                return (string)$query->playerId === '123e4567-e89b-12d3-a456-426614174001';
             }))
             ->willReturn($expectedVisibility);
 
-        $result = $this->service->getPlayerVisibility($playerId, $gameId);
+        $result = $this->service->getPlayerVisibility($playerId);
         
         $this->assertEquals($expectedVisibility, $result);
     }
@@ -85,8 +81,8 @@ class VisibilityApplicationServiceTest extends TestCase
         $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $expectedVisibility = [
-            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 5, 5, 'active', '2024-01-01T00:00:00Z'),
-            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174003', '123e4567-e89b-12d3-a456-426614174002', 6, 6, 'discovered', '2024-01-01T00:00:00Z')
+            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', 5, 5, 'active', '2024-01-01T00:00:00Z'),
+            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174003', 6, 6, 'discovered', '2024-01-01T00:00:00Z')
         ];
 
         $this->queryBus->expects($this->once())
@@ -104,45 +100,42 @@ class VisibilityApplicationServiceTest extends TestCase
     public function testIsHexVisibleForPlayer(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $visibility = [
-            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 5, 5, 'active', '2024-01-01T00:00:00Z'),
-            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 6, 6, 'discovered', '2024-01-01T00:00:00Z')
+            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', 5, 5, 'active', '2024-01-01T00:00:00Z'),
+            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', 6, 6, 'discovered', '2024-01-01T00:00:00Z')
         ];
 
         $this->queryBus->expects($this->exactly(3))
             ->method('send')
             ->willReturn($visibility);
 
-        $this->assertTrue($this->service->isHexVisibleForPlayer(5, 5, $playerId, $gameId));
-        $this->assertFalse($this->service->isHexVisibleForPlayer(6, 6, $playerId, $gameId));
-        $this->assertFalse($this->service->isHexVisibleForPlayer(7, 7, $playerId, $gameId));
+        $this->assertTrue($this->service->isHexVisibleForPlayer(5, 5, $playerId));
+        $this->assertFalse($this->service->isHexVisibleForPlayer(6, 6, $playerId));
+        $this->assertFalse($this->service->isHexVisibleForPlayer(7, 7, $playerId));
     }
 
     public function testIsHexDiscoveredForPlayer(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $visibility = [
-            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 5, 5, 'active', '2024-01-01T00:00:00Z'),
-            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 6, 6, 'discovered', '2024-01-01T00:00:00Z')
+            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', 5, 5, 'active', '2024-01-01T00:00:00Z'),
+            new PlayerVisibilityView('123e4567-e89b-12d3-a456-426614174001', 6, 6, 'discovered', '2024-01-01T00:00:00Z')
         ];
 
         $this->queryBus->expects($this->exactly(3))
             ->method('send')
             ->willReturn($visibility);
 
-        $this->assertTrue($this->service->isHexDiscoveredForPlayer(5, 5, $playerId, $gameId));
-        $this->assertTrue($this->service->isHexDiscoveredForPlayer(6, 6, $playerId, $gameId));
-        $this->assertFalse($this->service->isHexDiscoveredForPlayer(7, 7, $playerId, $gameId));
+        $this->assertTrue($this->service->isHexDiscoveredForPlayer(5, 5, $playerId));
+        $this->assertTrue($this->service->isHexDiscoveredForPlayer(6, 6, $playerId));
+        $this->assertFalse($this->service->isHexDiscoveredForPlayer(7, 7, $playerId));
     }
 
     public function testUpdatePlayerVisibilityWithEmptyData(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
 
         $this->commandBus->expects($this->once())
             ->method('send')
@@ -151,13 +144,12 @@ class VisibilityApplicationServiceTest extends TestCase
                        count($command->cityPositions) === 0;
             }));
 
-        $this->service->updatePlayerVisibility($playerId, $gameId, [], []);
+        $this->service->updatePlayerVisibility($playerId, [], []);
     }
 
     public function testUpdatePlayerVisibilityWithMultipleUnits(): void
     {
         $playerId = new PlayerId('123e4567-e89b-12d3-a456-426614174001');
-        $gameId = new GameId('123e4567-e89b-12d3-a456-426614174002');
         
         $units = [
             (object) ['position' => ['x' => 5, 'y' => 5], 'type' => 'warrior'],
@@ -170,6 +162,6 @@ class VisibilityApplicationServiceTest extends TestCase
                 return count($command->unitPositions) === 2;
             }));
 
-        $this->service->updatePlayerVisibility($playerId, $gameId, $units, []);
+        $this->service->updatePlayerVisibility($playerId, $units, []);
     }
 } 

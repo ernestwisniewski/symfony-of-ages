@@ -10,6 +10,7 @@ use App\Domain\Diplomacy\Event\DiplomacyAccepted;
 use App\Domain\Diplomacy\Event\DiplomacyDeclined;
 use App\Domain\Diplomacy\Event\DiplomacyEnded;
 use App\Domain\Diplomacy\Event\DiplomacyProposed;
+use App\Domain\Diplomacy\Exception\DiplomacyOperationException;
 use App\Domain\Diplomacy\Policy\DiplomacyPolicy;
 use App\Domain\Diplomacy\ValueObject\AgreementStatus;
 use App\Domain\Diplomacy\ValueObject\AgreementType;
@@ -44,9 +45,9 @@ final class DiplomacyAgreement
     public static function propose(ProposeDiplomacyCommand $command, DiplomacyPolicy $policy): array
     {
         if (!$policy->canPropose($command->initiatorId, $command->targetId, $command->agreementType)) {
-            throw new \InvalidArgumentException('Cannot propose diplomacy to yourself');
+            throw DiplomacyOperationException::cannotProposeToSelf();
         }
-        
+
         return [
             new DiplomacyProposed(
                 (string)$command->diplomacyId,
@@ -63,13 +64,13 @@ final class DiplomacyAgreement
     public function accept(AcceptDiplomacyCommand $command, DiplomacyPolicy $policy): array
     {
         if (!$policy->canAccept($command->acceptedBy, $this->relation)) {
-            throw new \InvalidArgumentException('Only the target player can accept this diplomacy proposal');
+            throw DiplomacyOperationException::onlyTargetCanAccept();
         }
-        
+
         if ($this->status !== AgreementStatus::PROPOSED) {
-            throw new \InvalidArgumentException('Can only accept proposed diplomacy agreements');
+            throw DiplomacyOperationException::canOnlyAcceptProposed();
         }
-        
+
         return [
             new DiplomacyAccepted(
                 (string)$this->diplomacyId,
@@ -83,13 +84,13 @@ final class DiplomacyAgreement
     public function decline(DeclineDiplomacyCommand $command, DiplomacyPolicy $policy): array
     {
         if (!$policy->canDecline($command->declinedBy, $this->relation)) {
-            throw new \InvalidArgumentException('Only the target player can decline this diplomacy proposal');
+            throw DiplomacyOperationException::onlyTargetCanDecline();
         }
-        
+
         if ($this->status !== AgreementStatus::PROPOSED) {
-            throw new \InvalidArgumentException('Can only decline proposed diplomacy agreements');
+            throw DiplomacyOperationException::canOnlyDeclineProposed();
         }
-        
+
         return [
             new DiplomacyDeclined(
                 (string)$this->diplomacyId,
@@ -103,13 +104,13 @@ final class DiplomacyAgreement
     public function end(EndDiplomacyCommand $command, DiplomacyPolicy $policy): array
     {
         if (!$policy->canEnd($command->endedBy, $this->relation)) {
-            throw new \InvalidArgumentException('Only involved players can end this diplomacy agreement');
+            throw DiplomacyOperationException::onlyInvolvedCanEnd();
         }
-        
+
         if ($this->status !== AgreementStatus::ACCEPTED) {
-            throw new \InvalidArgumentException('Can only end accepted diplomacy agreements');
+            throw DiplomacyOperationException::canOnlyEndAccepted();
         }
-        
+
         return [
             new DiplomacyEnded(
                 (string)$this->diplomacyId,

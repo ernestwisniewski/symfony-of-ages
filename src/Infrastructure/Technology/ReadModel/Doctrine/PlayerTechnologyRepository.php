@@ -22,16 +22,6 @@ class PlayerTechnologyRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByGameId(string $gameId): array
-    {
-        return $this->createQueryBuilder('pt')
-            ->where('pt.gameId = :gameId')
-            ->setParameter('gameId', $gameId)
-            ->orderBy('pt.discoveredAt', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
     public function findByPlayerAndTechnology(string $playerId, string $technologyId): ?PlayerTechnologyEntity
     {
         return $this->createQueryBuilder('pt')

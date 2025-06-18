@@ -12,6 +12,7 @@ use App\Domain\Game\Event\PlayerEndedTurn;
 use App\Domain\Game\Event\PlayerWasJoined;
 use App\Domain\Game\Game;
 use App\Domain\Game\ValueObject\GameStatus;
+use App\Infrastructure\Exception\EntityNotFoundException;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewEntity;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewRepository;
 use App\UI\Game\ViewModel\GameView;
@@ -20,7 +21,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
-use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Projection("game_view", Game::class)]
@@ -118,7 +118,7 @@ readonly class GameViewProjection
         $current = $gameView->activePlayer;
         $index = array_search($current, $players, true);
         if ($index === false) {
-            throw new RuntimeException("Active player {$current} not found in players list");
+            throw EntityNotFoundException::activePlayerNotFound($current);
         }
         $next = $players[($index + 1) % count($players)];
         $gameView->activePlayer = $next;
@@ -133,7 +133,7 @@ readonly class GameViewProjection
     {
         $gameView = $this->gameViewRepository->find($gameId);
         if (!$gameView) {
-            throw new RuntimeException("GameViewEntity for ID $gameId not found");
+            throw EntityNotFoundException::gameViewNotFound($gameId);
         }
         return $gameView;
     }

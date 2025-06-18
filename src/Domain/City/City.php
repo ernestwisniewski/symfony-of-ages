@@ -7,7 +7,6 @@ use App\Domain\City\Event\CityWasFounded;
 use App\Domain\City\Policy\CityFoundingPolicy;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
-use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Map\ValueObject\TerrainType;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
@@ -25,7 +24,6 @@ class City
     #[Identifier]
     private CityId $cityId;
     private PlayerId $ownerId;
-    private GameId $gameId;
     private CityName $name;
     private Position $position;
 
@@ -44,7 +42,6 @@ class City
             new CityWasFounded(
                 (string)$command->cityId,
                 (string)$command->ownerId,
-                (string)$command->gameId,
                 (string)$command->unitId,
                 (string)$command->name,
                 $command->position->x,
@@ -59,7 +56,6 @@ class City
     {
         $this->cityId = new CityId($event->cityId);
         $this->ownerId = new PlayerId($event->ownerId);
-        $this->gameId = new GameId($event->gameId);
         $this->name = new CityName($event->name);
         $this->position = new Position($event->x, $event->y);
     }

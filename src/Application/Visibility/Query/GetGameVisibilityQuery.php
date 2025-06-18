@@ -8,6 +8,7 @@ final readonly class GetGameVisibilityQuery
 {
     public function __construct(
         public GameId $gameId
-    ) {
+    )
+    {
     }
-} 
+}

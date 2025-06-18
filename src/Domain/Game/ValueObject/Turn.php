@@ -2,18 +2,18 @@
 
 namespace App\Domain\Game\ValueObject;
 
+use App\Domain\Game\Exception\GameException;
 use App\Domain\Shared\ValueObject\ValidationConstants;
-use InvalidArgumentException;
 
 final readonly class Turn
 {
     public function __construct(private int $number)
     {
         if ($this->number < ValidationConstants::MIN_TURN_NUMBER) {
-            throw new InvalidArgumentException("Turn number cannot be negative.");
+            throw InvalidTurnException::negative($this->number);
         }
         if ($this->number > ValidationConstants::MAX_TURN_NUMBER) {
-            throw new InvalidArgumentException("Turn number cannot exceed " . ValidationConstants::MAX_TURN_NUMBER . ".");
+            throw InvalidTurnException::exceedsMax($this->number, ValidationConstants::MAX_TURN_NUMBER);
         }
     }
 
@@ -30,5 +30,18 @@ final readonly class Turn
     public function __toString(): string
     {
         return (string)$this->number;
+    }
+}
+
+class InvalidTurnException extends GameException
+{
+    public static function negative(int $number): self
+    {
+        return new self("Turn number cannot be negative: $number.");
+    }
+
+    public static function exceedsMax(int $number, int $max): self
+    {
+        return new self("Turn number cannot exceed $max. Given: $number.");
     }
 }

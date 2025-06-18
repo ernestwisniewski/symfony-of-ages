@@ -2,14 +2,22 @@
 
 namespace App\Domain\Player\ValueObject;
 
-use DomainException;
+use App\Domain\Shared\Exception\DomainException;
+
+class InvalidPlayerNameException extends DomainException
+{
+    public static function invalid(string $name): self
+    {
+        return new self("Invalid player name: '$name'");
+    }
+}
 
 final class PlayerName
 {
     public function __construct(public string $name)
     {
         if (trim($name) === '' || mb_strlen($name) > 50) {
-            throw new DomainException("Invalid player name.");
+            throw InvalidPlayerNameException::invalid($name);
         }
     }
 

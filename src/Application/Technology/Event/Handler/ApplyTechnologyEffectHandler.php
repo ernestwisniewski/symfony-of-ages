@@ -21,12 +21,12 @@ final readonly class ApplyTechnologyEffectHandler
         if (empty($event->technologyId)) {
             return;
         }
-        
+
         $technologyType = TechnologyType::tryFrom($event->technologyId);
         if (!$technologyType) {
             return;
         }
-        
+
         // For now, we'll just log that the technology was discovered
         // In the future, you can add specific effects based on the technology type
         $this->applyTechnologyEffects($technologyType, $event);
@@ -40,7 +40,7 @@ final readonly class ApplyTechnologyEffectHandler
             'technologyId' => $event->technologyId,
             'technologyType' => $technologyType
         ];
-        
+
         // Apply specific effects based on technology type
         match ($technologyType) {
             TechnologyType::AGRICULTURE => $this->applyAgricultureEffects($context),

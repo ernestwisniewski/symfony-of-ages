@@ -3,7 +3,7 @@
 namespace App\Domain\Unit\ValueObject;
 
 use App\Domain\Shared\ValueObject\ValidationConstants;
-use DomainException;
+use App\Domain\Unit\Exception\UnitException;
 
 final readonly class Health
 {
@@ -13,16 +13,16 @@ final readonly class Health
     )
     {
         if ($current < ValidationConstants::MIN_HEALTH_VALUE) {
-            throw new DomainException('Health cannot be negative');
+            throw InvalidHealthException::negative($current);
         }
         if ($maximum <= ValidationConstants::MIN_HEALTH_VALUE) {
-            throw new DomainException('Maximum health must be positive');
+            throw InvalidHealthException::maxNotPositive($maximum);
         }
         if ($current > $maximum) {
-            throw new DomainException('Current health cannot exceed maximum');
+            throw InvalidHealthException::currentExceedsMax($current, $maximum);
         }
         if ($maximum > ValidationConstants::MAX_HEALTH_VALUE) {
-            throw new DomainException('Maximum health cannot exceed ' . ValidationConstants::MAX_HEALTH_VALUE);
+            throw InvalidHealthException::maxExceedsLimit($maximum, ValidationConstants::MAX_HEALTH_VALUE);
         }
     }
 
@@ -49,7 +49,7 @@ final readonly class Health
     public function takeDamage(int $damage): self
     {
         if ($damage < ValidationConstants::MIN_HEALTH_VALUE) {
-            throw new DomainException('Damage cannot be negative');
+            throw InvalidHealthException::damageNegative($damage);
         }
         $newCurrent = max(ValidationConstants::MIN_HEALTH_VALUE, $this->current - $damage);
         return new self($newCurrent, $this->maximum);
@@ -58,9 +58,42 @@ final readonly class Health
     public function heal(int $healing): self
     {
         if ($healing < ValidationConstants::MIN_HEALTH_VALUE) {
-            throw new DomainException('Healing cannot be negative');
+            throw InvalidHealthException::healingNegative($healing);
         }
         $newCurrent = min($this->maximum, $this->current + $healing);
         return new self($newCurrent, $this->maximum);
+    }
+}
+
+class InvalidHealthException extends UnitException
+{
+    public static function negative(int $value): self
+    {
+        return new self("Health cannot be negative: $value");
+    }
+
+    public static function maxNotPositive(int $value): self
+    {
+        return new self("Maximum health must be positive: $value");
+    }
+
+    public static function currentExceedsMax(int $current, int $max): self
+    {
+        return new self("Current health ($current) cannot exceed maximum ($max)");
+    }
+
+    public static function maxExceedsLimit(int $max, int $limit): self
+    {
+        return new self("Maximum health cannot exceed $limit. Given: $max");
+    }
+
+    public static function damageNegative(int $damage): self
+    {
+        return new self("Damage cannot be negative: $damage");
+    }
+
+    public static function healingNegative(int $healing): self
+    {
+        return new self("Healing cannot be negative: $healing");
     }
 }

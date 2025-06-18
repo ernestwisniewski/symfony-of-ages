@@ -23,7 +23,6 @@ use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
 use App\Domain\Shared\ValueObject\ValidationConstants;
 use App\UI\Map\ViewModel\MapTileView;
-use DomainException;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
@@ -202,12 +201,7 @@ class Game
                 return $this->players[($i + 1) % count($this->players)];
             }
         }
-        throw new DomainException(
-            sprintf(
-                'Active player %s not found in player list. Game state is corrupted.',
-                (string)$this->activePlayer
-            )
-        );
+        throw GameStateCorruptedException::activePlayerNotFound($this->activePlayer);
     }
 
     private function isLastPlayer(): bool

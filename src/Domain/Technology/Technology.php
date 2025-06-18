@@ -4,10 +4,10 @@ namespace App\Domain\Technology;
 
 use App\Application\Technology\Command\CreateTechnologyCommand;
 use App\Application\Technology\Command\DiscoverTechnologyCommand;
-use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Technology\Event\TechnologyWasDiscovered;
 use App\Domain\Technology\Exception\InsufficientResourcesException;
+use App\Domain\Technology\Exception\InvalidTechnologyIdException;
 use App\Domain\Technology\Exception\PrerequisiteNotMetException;
 use App\Domain\Technology\Exception\TechnologyAlreadyDiscoveredException;
 use App\Domain\Technology\Policy\TechnologyPolicy;
@@ -26,7 +26,6 @@ class Technology
 
     #[Identifier]
     private PlayerId $playerId;
-    private GameId $gameId;
     private array $unlockedTechnologies = [];
     private int $sciencePoints = 0;
 
@@ -41,7 +40,6 @@ class Technology
             new TechnologyWasDiscovered(
                 technologyId: '',
                 playerId: (string)$command->playerId,
-                gameId: (string)$command->gameId,
                 discoveredAt: $command->createdAt->format()
             )
         ];
@@ -50,29 +48,28 @@ class Technology
     #[CommandHandler]
     public function discoverTechnology(
         DiscoverTechnologyCommand $command,
-        TechnologyPolicy         $prerequisitesPolicy
+        TechnologyPolicy          $prerequisitesPolicy
     ): array
     {
         if ($this->hasTechnology($command->technologyId)) {
             throw TechnologyAlreadyDiscoveredException::create($command->technologyId);
         }
-        
+
         $technology = $this->getTechnologyDefinition($command->technologyId);
         $missingPrerequisites = $prerequisitesPolicy->getMissingPrerequisites($technology, $this->unlockedTechnologies);
         if (!empty($missingPrerequisites)) {
             throw PrerequisiteNotMetException::create($command->technologyId, $missingPrerequisites);
         }
-        
+
         $availableSciencePoints = 100;
         if ($availableSciencePoints < $technology['cost']) {
             throw InsufficientResourcesException::create($command->technologyId, $technology['cost'], $availableSciencePoints);
         }
-        
+
         return [
             new TechnologyWasDiscovered(
                 technologyId: (string)$command->technologyId,
                 playerId: (string)$this->playerId,
-                gameId: (string)$this->gameId,
                 discoveredAt: $command->discoveredAt->format()
             )
         ];
@@ -83,7 +80,6 @@ class Technology
     {
         if (empty($event->technologyId)) {
             $this->playerId = new PlayerId($event->playerId);
-            $this->gameId = new GameId($event->gameId);
             $this->unlockedTechnologies = [];
             $this->sciencePoints = 0;
         } else {
@@ -114,11 +110,6 @@ class Technology
         return $this->playerId;
     }
 
-    public function getGameId(): GameId
-    {
-        return $this->gameId;
-    }
-
     public function getSciencePoints(): int
     {
         return $this->sciencePoints;
@@ -128,9 +119,9 @@ class Technology
     {
         $technologyType = TechnologyType::tryFrom((string)$technologyId);
         if (!$technologyType) {
-            throw new \InvalidArgumentException('Invalid technology ID: ' . (string)$technologyId);
+            throw InvalidTechnologyIdException::invalid((string)$technologyId);
         }
-        
+
         return [
             'id' => (string)$technologyId,
             'name' => $technologyType->getDisplayName(),

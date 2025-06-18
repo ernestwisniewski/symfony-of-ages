@@ -2,11 +2,11 @@
 
 namespace App\UI\Api\Resource;
 
-use App\Application\Api\State\VisibilityStateProvider;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use App\Application\Api\State\VisibilityStateProvider;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
@@ -41,13 +41,14 @@ final class VisibilityResource
         #[Groups(['visibility:read'])]
         public string $gameId = '',
         #[Groups(['visibility:read'])]
-        public int $x = 0,
+        public int    $x = 0,
         #[Groups(['visibility:read'])]
-        public int $y = 0,
+        public int    $y = 0,
         #[Groups(['visibility:read'])]
         public string $state = '',
         #[Groups(['visibility:read'])]
         public string $updatedAt = ''
-    ) {
+    )
+    {
     }
-} 
+}

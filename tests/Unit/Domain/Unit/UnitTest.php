@@ -52,7 +52,6 @@ class UnitTest extends TestCase
         $command = new CreateUnitCommand(
             new UnitId($unitId),
             new PlayerId($ownerId),
-            new GameId($gameId),
             $type,
             $position,
             $createdAt
@@ -69,7 +68,6 @@ class UnitTest extends TestCase
             new UnitWasCreated(
                 unitId: $unitId,
                 ownerId: $ownerId,
-                gameId: $gameId,
                 type: $type->value,
                 x: $position->x,
                 y: $position->y,
@@ -85,7 +83,6 @@ class UnitTest extends TestCase
         // Given
         $unitId = Uuid::v4()->toRfc4122();
         $ownerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $type = UnitType::WARRIOR;
         $fromPosition = new Position(5, 5);
         $toPosition = new Position(6, 5);
@@ -102,7 +99,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $unitId,
                     $ownerId,
-                    $gameId,
                     $type->value,
                     $fromPosition->x,
                     $fromPosition->y,
@@ -123,7 +119,6 @@ class UnitTest extends TestCase
             new UnitWasMoved(
                 unitId: $unitId,
                 ownerId: $ownerId,
-                gameId: $gameId,
                 fromX: $fromPosition->x,
                 fromY: $fromPosition->y,
                 toX: $toPosition->x,
@@ -138,7 +133,6 @@ class UnitTest extends TestCase
         // Given
         $unitId = Uuid::v4()->toRfc4122();
         $ownerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $type = UnitType::WARRIOR;
         $fromPosition = new Position(5, 5);
         $toPosition = new Position(6, 5);
@@ -154,7 +148,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $unitId,
                     $ownerId,
-                    $gameId,
                     $type->value,
                     $fromPosition->x,
                     $fromPosition->y,
@@ -187,7 +180,6 @@ class UnitTest extends TestCase
         $defenderId = Uuid::v4()->toRfc4122();
         $attackerOwnerId = Uuid::v4()->toRfc4122();
         $defenderOwnerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $attackerType = UnitType::WARRIOR;
         $defenderType = UnitType::ARCHER;
         $attackerPosition = new Position(5, 5);
@@ -211,7 +203,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $attackerId,
                     $attackerOwnerId,
-                    $gameId,
                     $attackerType->value,
                     $attackerPosition->x,
                     $attackerPosition->y,
@@ -260,7 +251,6 @@ class UnitTest extends TestCase
         $defenderId = Uuid::v4()->toRfc4122();
         $attackerOwnerId = Uuid::v4()->toRfc4122();
         $defenderOwnerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $attackerType = UnitType::WARRIOR;
         $defenderType = UnitType::ARCHER;
         $attackerPosition = new Position(5, 5);
@@ -283,7 +273,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $attackerId,
                     $attackerOwnerId,
-                    $gameId,
                     $attackerType->value,
                     $attackerPosition->x,
                     $attackerPosition->y,
@@ -313,7 +302,6 @@ class UnitTest extends TestCase
         // Given
         $unitId = Uuid::v4()->toRfc4122();
         $ownerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $type = UnitType::SCOUT;
         $position = new Position(3, 7);
         $createdAt = Timestamp::now();
@@ -321,7 +309,6 @@ class UnitTest extends TestCase
         $event = new UnitWasCreated(
             $unitId,
             $ownerId,
-            $gameId,
             $type->value,
             $position->x,
             $position->y,
@@ -356,7 +343,6 @@ class UnitTest extends TestCase
         // Given
         $unitId = Uuid::v4()->toRfc4122();
         $ownerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $type = UnitType::CAVALRY;
         $initialPosition = new Position(5, 5);
         $newPosition = new Position(7, 6);
@@ -370,7 +356,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $unitId,
                     $ownerId,
-                    $gameId,
                     $type->value,
                     $initialPosition->x,
                     $initialPosition->y,
@@ -381,7 +366,6 @@ class UnitTest extends TestCase
                 new UnitWasMoved(
                     $unitId,
                     $ownerId,
-                    $gameId,
                     $initialPosition->x,
                     $initialPosition->y,
                     $newPosition->x,
@@ -415,7 +399,6 @@ class UnitTest extends TestCase
         $unitId = Uuid::v4()->toRfc4122();
         $attackerId = Uuid::v4()->toRfc4122();
         $ownerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $type = UnitType::WARRIOR;
         $position = new Position(5, 5);
         $createdAt = Timestamp::now();
@@ -431,7 +414,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $unitId,
                     $ownerId,
-                    $gameId,
                     $type->value,
                     $position->x,
                     $position->y,
@@ -470,7 +452,6 @@ class UnitTest extends TestCase
         // Given
         $unitId = Uuid::v4()->toRfc4122();
         $ownerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $type = UnitType::WARRIOR;
         $position = new Position(5, 5);
         $createdAt = Timestamp::now();
@@ -483,7 +464,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $unitId,
                     $ownerId,
-                    $gameId,
                     $type->value,
                     $position->x,
                     $position->y,
@@ -515,7 +495,6 @@ class UnitTest extends TestCase
         $otherUnitId = Uuid::v4()->toRfc4122();
         $attackerId = Uuid::v4()->toRfc4122();
         $ownerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $type = UnitType::WARRIOR;
         $position = new Position(5, 5);
         $createdAt = Timestamp::now();
@@ -528,7 +507,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $unitId,
                     $ownerId,
-                    $gameId,
                     $type->value,
                     $position->x,
                     $position->y,
@@ -567,7 +545,6 @@ class UnitTest extends TestCase
         $unitId = Uuid::v4()->toRfc4122();
         $otherUnitId = Uuid::v4()->toRfc4122();
         $ownerId = Uuid::v4()->toRfc4122();
-        $gameId = Uuid::v4()->toRfc4122();
         $type = UnitType::WARRIOR;
         $position = new Position(5, 5);
         $createdAt = Timestamp::now();
@@ -580,7 +557,6 @@ class UnitTest extends TestCase
                 new UnitWasCreated(
                     $unitId,
                     $ownerId,
-                    $gameId,
                     $type->value,
                     $position->x,
                     $position->y,

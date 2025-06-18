@@ -5,6 +5,8 @@ namespace App\Application\Api\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Application\Diplomacy\Service\DiplomacyApplicationService;
+use App\Application\Exception\InvalidOperationException;
+use App\Application\Exception\ResourceNotFoundException;
 use App\Domain\Diplomacy\ValueObject\AgreementType;
 use App\Domain\Diplomacy\ValueObject\DiplomacyId;
 use App\Domain\Game\ValueObject\GameId;
@@ -12,9 +14,8 @@ use App\Domain\Player\ValueObject\PlayerId;
 use App\Infrastructure\Diplomacy\ReadModel\Doctrine\DiplomacyViewRepository;
 use App\Infrastructure\Player\ReadModel\Doctrine\PlayerUserMappingRepository;
 use App\UI\Api\Resource\DiplomacyResource;
+use InvalidArgumentException;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final readonly class DiplomacyStateProcessor implements ProcessorInterface
 {
@@ -37,23 +38,21 @@ final readonly class DiplomacyStateProcessor implements ProcessorInterface
                 '/diplomacy/{diplomacyId}/end' => $this->endDiplomacy($uriVariables['diplomacyId']),
                 default => null,
             };
-        } catch (\InvalidArgumentException $e) {
-            throw new BadRequestHttpException($e->getMessage());
+        } catch (InvalidArgumentException $e) {
+            throw InvalidOperationException::invalidRequest($e->getMessage());
         }
     }
 
     private function getCurrentPlayerId(string $gameId): PlayerId
     {
         $user = $this->security->getUser();
-        if (!$user) {
-            throw new BadRequestHttpException('User not authenticated');
-        }
+
         $mapping = $this->playerUserMappingRepository->findOneBy([
             'userId' => $user->getId(),
             'gameId' => $gameId
         ]);
         if (!$mapping) {
-            throw new BadRequestHttpException('Player not found for this user in this game');
+            throw InvalidOperationException::playerNotInGame($user->getId(), $gameId);
         }
         return new PlayerId($mapping->playerId);
     }
@@ -62,7 +61,7 @@ final readonly class DiplomacyStateProcessor implements ProcessorInterface
     {
         $diplomacy = $this->diplomacyViewRepository->find($diplomacyId);
         if (!$diplomacy) {
-            throw new NotFoundHttpException('Diplomacy agreement not found');
+            throw ResourceNotFoundException::diplomacyNotFound($diplomacyId);
         }
         return $diplomacy->gameId;
     }

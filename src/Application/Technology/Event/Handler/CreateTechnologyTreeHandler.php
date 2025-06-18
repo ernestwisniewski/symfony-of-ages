@@ -22,7 +22,6 @@ final readonly class CreateTechnologyTreeHandler
     {
         $this->commandBus->send(new CreateTechnologyCommand(
             new PlayerId($event->playerId),
-            new \App\Domain\Game\ValueObject\GameId($event->gameId),
             Timestamp::fromString($event->joinedAt),
             0
         ));

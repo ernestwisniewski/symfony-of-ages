@@ -3,26 +3,28 @@
 namespace App\Tests\Unit\Application\City\Event\Handler;
 
 use App\Application\City\Event\Handler\UpdateVisibilityOnCityFoundedHandler;
-use App\Application\City\Query\GetCitiesByGameQuery;
-use App\Application\Unit\Query\GetUnitsByGameQuery;
+use App\Application\City\Query\GetCitiesByPlayerQuery;
+use App\Application\Unit\Query\GetUnitsByPlayerQuery;
 use App\Application\Visibility\Service\VisibilityApplicationService;
 use App\Domain\City\Event\CityWasFounded;
-use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use Ecotone\Modelling\QueryBus;
 use PHPUnit\Framework\TestCase;
 
 class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
 {
-    private UpdateVisibilityOnCityFoundedHandler $handler;
     private QueryBus $queryBus;
     private VisibilityApplicationService $visibilityService;
+    private UpdateVisibilityOnCityFoundedHandler $handler;
 
     protected function setUp(): void
     {
         $this->queryBus = $this->createMock(QueryBus::class);
         $this->visibilityService = $this->createMock(VisibilityApplicationService::class);
-        $this->handler = new UpdateVisibilityOnCityFoundedHandler($this->queryBus, $this->visibilityService);
+        $this->handler = new UpdateVisibilityOnCityFoundedHandler(
+            $this->queryBus,
+            $this->visibilityService
+        );
     }
 
     public function testHandle(): void
@@ -30,7 +32,6 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
         $event = new CityWasFounded(
             '123e4567-e89b-12d3-a456-426614174001',
             '123e4567-e89b-12d3-a456-426614174002',
-            '123e4567-e89b-12d3-a456-426614174003',
             '123e4567-e89b-12d3-a456-426614174004',
             'New City',
             5,
@@ -69,11 +70,13 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             ->method('send')
             ->willReturnCallback(function ($query) use ($units, $cities, &$callCount) {
                 if ($callCount === 0) {
-                    $this->assertInstanceOf(GetUnitsByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetUnitsByPlayerQuery::class, $query);
+                    $this->assertEquals('123e4567-e89b-12d3-a456-426614174002', (string)$query->playerId);
                     $callCount++;
                     return $units;
                 } else {
-                    $this->assertInstanceOf(GetCitiesByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetCitiesByPlayerQuery::class, $query);
+                    $this->assertEquals('123e4567-e89b-12d3-a456-426614174002', (string)$query->playerId);
                     return $cities;
                 }
             });
@@ -82,9 +85,8 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             ->method('updatePlayerVisibility')
             ->with(
                 $this->callback(fn(PlayerId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(GameId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174003'),
-                $this->callback(fn(array $units) => count($units) === 1 && $units[0]->ownerId === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(array $cities) => count($cities) === 1 && $cities[0]->ownerId === '123e4567-e89b-12d3-a456-426614174002')
+                $units,
+                $cities
             );
 
         $this->handler->handle($event);
@@ -95,7 +97,6 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
         $event = new CityWasFounded(
             '123e4567-e89b-12d3-a456-426614174001',
             '123e4567-e89b-12d3-a456-426614174002',
-            '123e4567-e89b-12d3-a456-426614174003',
             '123e4567-e89b-12d3-a456-426614174004',
             'New City',
             5,
@@ -103,13 +104,7 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             '2024-01-01T00:00:00Z'
         );
 
-        $units = [
-            (object) [
-                'ownerId' => '123e4567-e89b-12d3-a456-426614174005',
-                'position' => ['x' => 7, 'y' => 7],
-                'type' => 'scout'
-            ]
-        ];
+        $units = []; // No units for this player
 
         $cities = [
             (object) [
@@ -124,11 +119,11 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             ->method('send')
             ->willReturnCallback(function ($query) use ($units, $cities, &$callCount) {
                 if ($callCount === 0) {
-                    $this->assertInstanceOf(GetUnitsByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetUnitsByPlayerQuery::class, $query);
                     $callCount++;
                     return $units;
                 } else {
-                    $this->assertInstanceOf(GetCitiesByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetCitiesByPlayerQuery::class, $query);
                     return $cities;
                 }
             });
@@ -137,9 +132,8 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             ->method('updatePlayerVisibility')
             ->with(
                 $this->callback(fn(PlayerId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(GameId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174003'),
-                $this->callback(fn(array $units) => count($units) === 0),
-                $this->callback(fn(array $cities) => count($cities) === 1 && $cities[0]->ownerId === '123e4567-e89b-12d3-a456-426614174002')
+                $units,
+                $cities
             );
 
         $this->handler->handle($event);
@@ -150,7 +144,6 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
         $event = new CityWasFounded(
             '123e4567-e89b-12d3-a456-426614174001',
             '123e4567-e89b-12d3-a456-426614174002',
-            '123e4567-e89b-12d3-a456-426614174003',
             '123e4567-e89b-12d3-a456-426614174004',
             'New City',
             5,
@@ -176,11 +169,6 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
                 'ownerId' => '123e4567-e89b-12d3-a456-426614174002',
                 'position' => ['x' => 7, 'y' => 7],
                 'level' => 2
-            ],
-            (object) [
-                'ownerId' => '123e4567-e89b-12d3-a456-426614174005',
-                'position' => ['x' => 8, 'y' => 8],
-                'level' => 1
             ]
         ];
 
@@ -189,11 +177,11 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             ->method('send')
             ->willReturnCallback(function ($query) use ($units, $cities, &$callCount) {
                 if ($callCount === 0) {
-                    $this->assertInstanceOf(GetUnitsByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetUnitsByPlayerQuery::class, $query);
                     $callCount++;
                     return $units;
                 } else {
-                    $this->assertInstanceOf(GetCitiesByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetCitiesByPlayerQuery::class, $query);
                     return $cities;
                 }
             });
@@ -202,9 +190,8 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             ->method('updatePlayerVisibility')
             ->with(
                 $this->callback(fn(PlayerId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(GameId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174003'),
-                $this->callback(fn(array $units) => count($units) === 1),
-                $this->callback(fn(array $cities) => count($cities) === 2)
+                $units,
+                $cities
             );
 
         $this->handler->handle($event);
@@ -215,7 +202,6 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
         $event = new CityWasFounded(
             '123e4567-e89b-12d3-a456-426614174001',
             '123e4567-e89b-12d3-a456-426614174002',
-            '123e4567-e89b-12d3-a456-426614174003',
             '123e4567-e89b-12d3-a456-426614174004',
             'New City',
             5,
@@ -223,17 +209,20 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             '2024-01-01T00:00:00Z'
         );
 
+        $units = [];
+        $cities = [];
+
         $callCount = 0;
         $this->queryBus->expects($this->exactly(2))
             ->method('send')
-            ->willReturnCallback(function ($query) use (&$callCount) {
+            ->willReturnCallback(function ($query) use ($units, $cities, &$callCount) {
                 if ($callCount === 0) {
-                    $this->assertInstanceOf(GetUnitsByGameQuery::class, $query);
+                    $this->assertInstanceOf(GetUnitsByPlayerQuery::class, $query);
                     $callCount++;
-                    return [];
+                    return $units;
                 } else {
-                    $this->assertInstanceOf(GetCitiesByGameQuery::class, $query);
-                    return [];
+                    $this->assertInstanceOf(GetCitiesByPlayerQuery::class, $query);
+                    return $cities;
                 }
             });
 
@@ -241,7 +230,6 @@ class UpdateVisibilityOnCityFoundedHandlerTest extends TestCase
             ->method('updatePlayerVisibility')
             ->with(
                 $this->callback(fn(PlayerId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174002'),
-                $this->callback(fn(GameId $id) => (string)$id === '123e4567-e89b-12d3-a456-426614174003'),
                 $this->callback(fn(array $units) => count($units) === 0),
                 $this->callback(fn(array $cities) => count($cities) === 0)
             );

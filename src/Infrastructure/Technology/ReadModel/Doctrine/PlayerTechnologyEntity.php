@@ -18,21 +18,17 @@ class PlayerTechnologyEntity
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
     public string $technologyId;
-    #[ORM\Column(type: 'string', length: 36)]
-    public string $gameId;
     #[ORM\Column(type: 'datetime_immutable')]
     public DateTimeImmutable $discoveredAt;
 
     public function __construct(
         string $playerId,
         string $technologyId,
-        string $gameId,
         string $discoveredAt
     )
     {
         $this->playerId = $playerId;
         $this->technologyId = $technologyId;
-        $this->gameId = $gameId;
         $this->discoveredAt = new DateTimeImmutable($discoveredAt);
     }
 }

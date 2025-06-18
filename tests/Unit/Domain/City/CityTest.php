@@ -36,7 +36,6 @@ final class CityTest extends TestCase
         $command = new FoundCityCommand(
             new CityId($cityId),
             new PlayerId($playerId),
-            new GameId($gameId),
             new UnitId($unitId),
             $cityName,
             $position,
@@ -58,7 +57,6 @@ final class CityTest extends TestCase
             new CityWasFounded(
                 cityId: $cityId,
                 ownerId: $playerId,
-                gameId: $gameId,
                 unitId: $unitId,
                 name: (string)$cityName,
                 x: $position->x,

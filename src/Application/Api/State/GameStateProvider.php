@@ -4,6 +4,7 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Application\Exception\ResourceNotFoundException;
 use App\Application\Game\Query\GetAllGamesQuery;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Application\Game\Query\GetUserGamesQuery;
@@ -14,7 +15,6 @@ use App\UI\Game\ViewModel\GameView;
 use Ecotone\Modelling\QueryBus;
 use RuntimeException;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class GameStateProvider implements ProviderInterface
@@ -43,7 +43,7 @@ final readonly class GameStateProvider implements ProviderInterface
         try {
             $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($gameId)));
         } catch (RuntimeException $e) {
-            throw new NotFoundHttpException("Game with ID $gameId not found");
+            throw ResourceNotFoundException::gameNotFound($gameId);
         }
         return $this->objectMapper->map($gameView, GameResource::class);
     }

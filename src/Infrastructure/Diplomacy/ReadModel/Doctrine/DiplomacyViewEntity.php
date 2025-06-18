@@ -19,8 +19,6 @@ class DiplomacyViewEntity
     public string $initiatorId;
     #[ORM\Column(type: 'string', length: 36)]
     public string $targetId;
-    #[ORM\Column(type: 'string', length: 36)]
-    public string $gameId;
     #[ORM\Column(type: 'string', length: 50)]
     public string $agreementType;
     #[ORM\Column(type: 'string', length: 20)]
@@ -38,7 +36,6 @@ class DiplomacyViewEntity
         string             $diplomacyId,
         string             $initiatorId,
         string             $targetId,
-        string             $gameId,
         string             $agreementType,
         string             $status,
         DateTimeImmutable  $proposedAt,
@@ -50,7 +47,6 @@ class DiplomacyViewEntity
         $this->diplomacyId = $diplomacyId;
         $this->initiatorId = $initiatorId;
         $this->targetId = $targetId;
-        $this->gameId = $gameId;
         $this->agreementType = $agreementType;
         $this->status = $status;
         $this->proposedAt = $proposedAt;

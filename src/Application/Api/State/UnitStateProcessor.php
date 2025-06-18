@@ -5,6 +5,7 @@ namespace App\Application\Api\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Application\City\Command\FoundCityCommand;
+use App\Application\Exception\InvalidOperationException;
 use App\Application\Unit\Command\AttackUnitCommand;
 use App\Application\Unit\Command\CreateUnitCommand;
 use App\Application\Unit\Command\MoveUnitCommand;
@@ -22,7 +23,6 @@ use App\Domain\Unit\ValueObject\UnitType;
 use App\UI\Api\Resource\UnitResource;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class UnitStateProcessor implements ProcessorInterface
@@ -42,7 +42,7 @@ final readonly class UnitStateProcessor implements ProcessorInterface
             str_contains($uriTemplate, '/units/{unitId}/move') => $this->moveUnit($data, $uriVariables['unitId']),
             str_contains($uriTemplate, '/units/{unitId}/attack') => $this->attackUnit($data, $uriVariables['unitId'], $operation),
             str_contains($uriTemplate, '/units/{unitId}/found-city') => $this->foundCity($data, $uriVariables['unitId']),
-            default => throw new BadRequestHttpException('Unsupported operation'),
+            default => throw InvalidOperationException::unsupportedOperation($uriTemplate),
         };
     }
 
@@ -54,7 +54,6 @@ final readonly class UnitStateProcessor implements ProcessorInterface
         $command = new CreateUnitCommand(
             unitId: $unitId,
             ownerId: new PlayerId($data->playerId),
-            gameId: new GameId($gameId),
             type: $unitType,
             position: new Position($data->x, $data->y),
             createdAt: $createdAt
@@ -98,7 +97,6 @@ final readonly class UnitStateProcessor implements ProcessorInterface
         $command = new FoundCityCommand(
             cityId: new CityId(Uuid::v4()->toRfc4122()),
             ownerId: new PlayerId($unit->ownerId),
-            gameId: new GameId($unit->gameId),
             unitId: new UnitId($unitId),
             name: new CityName($data->cityName),
             position: new Position($unit->position['x'], $unit->position['y']),

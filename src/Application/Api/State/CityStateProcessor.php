@@ -5,6 +5,7 @@ namespace App\Application\Api\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Application\City\Command\FoundCityCommand;
+use App\Application\Exception\InvalidOperationException;
 use App\Domain\City\ValueObject\CityId;
 use App\Domain\City\ValueObject\CityName;
 use App\Domain\City\ValueObject\UnitId;
@@ -13,7 +14,6 @@ use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Shared\ValueObject\Timestamp;
 use Ecotone\Modelling\CommandBus;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class CityStateProcessor implements ProcessorInterface
@@ -28,7 +28,7 @@ final readonly class CityStateProcessor implements ProcessorInterface
     {
         match ($operation->getUriTemplate()) {
             '/games/{gameId}/cities' => $this->foundCity($uriVariables['gameId'], $data),
-            default => throw new BadRequestHttpException('Unsupported operation'),
+            default => throw InvalidOperationException::unsupportedOperation($operation->getUriTemplate()),
         };
     }
 

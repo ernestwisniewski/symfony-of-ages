@@ -3,17 +3,18 @@
 namespace App\Infrastructure\City\ReadModel;
 
 use App\Application\City\Query\GetCitiesByGameQuery;
+use App\Application\City\Query\GetCitiesByPlayerQuery;
 use App\Application\City\Query\GetCityViewQuery;
 use App\Domain\City\City;
 use App\Domain\City\Event\CityWasFounded;
 use App\Infrastructure\City\ReadModel\Doctrine\CityViewEntity;
 use App\Infrastructure\City\ReadModel\Doctrine\CityViewRepository;
+use App\Infrastructure\Exception\EntityNotFoundException;
 use App\UI\City\ViewModel\CityView;
 use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
-use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 #[Projection("city_view", City::class)]
@@ -32,7 +33,7 @@ readonly class CityViewProjection
     {
         $entity = $this->repository->find((string)$query->cityId);
         if (!$entity) {
-            throw new RuntimeException("CityView for ID {$query->cityId} not found.");
+            throw EntityNotFoundException::cityViewNotFound((string)$query->cityId);
         }
         return $this->mapper->map($entity, CityView::class);
     }
@@ -47,13 +48,23 @@ readonly class CityViewProjection
         );
     }
 
+    #[QueryHandler]
+    public function getCitiesByPlayer(GetCitiesByPlayerQuery $query): array
+    {
+        $entities = $this->repository->findByOwner((string)$query->playerId);
+        return array_map(
+            fn(CityViewEntity $entity) => $this->mapper->map($entity, CityView::class),
+            $entities
+        );
+    }
+
     #[EventHandler]
     public function applyCityWasFounded(CityWasFounded $event): void
     {
         $city = new CityViewEntity(
             $event->cityId,
             $event->ownerId,
-            $event->gameId,
+            '', // gameId will be handled separately in infrastructure
             $event->name,
             $event->x,
             $event->y

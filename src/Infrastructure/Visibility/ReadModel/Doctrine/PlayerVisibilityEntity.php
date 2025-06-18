@@ -18,10 +18,6 @@ class PlayerVisibilityEntity
     public string $playerId;
 
     #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 36)]
-    public string $gameId;
-
-    #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     public int $x;
 
@@ -36,18 +32,17 @@ class PlayerVisibilityEntity
     public DateTimeImmutable $updatedAt;
 
     public function __construct(
-        string $playerId,
-        string $gameId,
-        int $x,
-        int $y,
-        string $state,
+        string            $playerId,
+        int               $x,
+        int               $y,
+        string            $state,
         DateTimeImmutable $updatedAt
-    ) {
+    )
+    {
         $this->playerId = $playerId;
-        $this->gameId = $gameId;
         $this->x = $x;
         $this->y = $y;
         $this->state = $state;
         $this->updatedAt = $updatedAt;
     }
-} 
+}

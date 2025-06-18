@@ -61,7 +61,6 @@ final readonly class DiplomacyProjection
             $event->diplomacyId,
             $event->initiatorId,
             $event->targetId,
-            $event->gameId,
             $event->agreementType,
             'proposed',
             DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $event->proposedAt)

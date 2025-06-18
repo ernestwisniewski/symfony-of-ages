@@ -4,13 +4,13 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Application\Exception\ResourceNotFoundException;
 use App\Application\Game\Query\GetGameViewQuery;
 use App\Domain\Game\ValueObject\GameId;
 use App\UI\Api\Resource\TurnResource;
 use App\UI\Turn\ViewModel\TurnView;
 use Ecotone\Modelling\QueryBus;
 use RuntimeException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 final readonly class TurnStateProvider implements ProviderInterface
@@ -27,7 +27,7 @@ final readonly class TurnStateProvider implements ProviderInterface
         try {
             $gameView = $this->queryBus->send(new GetGameViewQuery(new GameId($uriVariables['gameId'])));
         } catch (RuntimeException $e) {
-            throw new NotFoundHttpException("Game with ID {$uriVariables['gameId']} not found");
+            throw ResourceNotFoundException::gameNotFound($uriVariables['gameId']);
         }
         $turnView = new TurnView();
         $turnView->gameId = $gameView->id;

@@ -3,7 +3,6 @@
 namespace App\Domain\Visibility;
 
 use App\Application\Visibility\Command\UpdateVisibilityCommand;
-use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\ValueObject\UnitType;
@@ -24,7 +23,6 @@ final class PlayerVisibility
 
     #[Identifier]
     private PlayerId $playerId;
-    private GameId $gameId;
     private array $visibleHexes = [];
     private array $discoveredHexes = [];
 
@@ -34,7 +32,6 @@ final class PlayerVisibility
         return [
             new VisibilityUpdated(
                 $command->playerId,
-                $command->gameId,
                 0,
                 0,
                 VisibilityState::ACTIVE->value,
@@ -44,45 +41,56 @@ final class PlayerVisibility
     }
 
     #[CommandHandler]
-    public function updateVisibility(UpdateVisibilityCommand $command, VisibilityCalculator $calculator): array
+    public function updateVisibility(UpdateVisibilityCommand $command, $calculator): array
     {
         $events = [];
-        $newActiveHexes = [];
 
-        foreach ($command->unitPositions as $unitData) {
-            $position = new Position($unitData['x'], $unitData['y']);
-            $unitType = UnitType::from($unitData['type']);
+        // Update visibility for units
+        foreach ($command->unitPositions as $unitPosition) {
+            if (isset($unitPosition['x']) && isset($unitPosition['y'])) {
+                $position = new Position($unitPosition['x'], $unitPosition['y']);
+                $unitType = UnitType::from($unitPosition['type']);
+            } elseif (is_object($unitPosition) && isset($unitPosition->position) && $unitPosition->position instanceof Position) {
+                $position = $unitPosition->position;
+                $unitType = is_object($unitPosition->type) ? $unitPosition->type : UnitType::from($unitPosition->type);
+            } else {
+                throw new \InvalidArgumentException('Invalid unitPosition structure');
+            }
             $visibleHexes = $calculator->calculateUnitVisibility($position, $unitType);
-            $newActiveHexes = array_merge($newActiveHexes, $visibleHexes);
-        }
 
-        foreach ($command->cityPositions as $cityData) {
-            $position = new Position($cityData['x'], $cityData['y']);
-            $cityLevel = $cityData['level'] ?? 1;
-            $visibleHexes = $calculator->calculateCityVisibility($position, $cityLevel);
-            $newActiveHexes = array_merge($newActiveHexes, $visibleHexes);
-        }
-
-        $newActiveHexes = array_unique($newActiveHexes, SORT_REGULAR);
-
-        foreach ($newActiveHexes as $hex) {
-            $hexKey = $hex->x . ':' . $hex->y;
-            
-            if (!isset($this->visibleHexes[$hexKey])) {
-                if (!isset($this->discoveredHexes[$hexKey])) {
-                    $events[] = new VisibilityRevealed(
-                        (string)$this->playerId,
-                        (string)$this->gameId,
-                        $hex->x,
-                        $hex->y,
-                        $command->updatedAt->format()
-                    );
-                }
+            foreach ($visibleHexes as $hex) {
+                $x = is_array($hex) ? $hex['x'] : $hex->x;
+                $y = is_array($hex) ? $hex['y'] : $hex->y;
                 $events[] = new VisibilityUpdated(
-                    (string)$this->playerId,
-                    (string)$this->gameId,
-                    $hex->x,
-                    $hex->y,
+                    $command->playerId,
+                    $x,
+                    $y,
+                    VisibilityState::ACTIVE->value,
+                    $command->updatedAt->format()
+                );
+            }
+        }
+
+        // Update visibility for cities
+        foreach ($command->cityPositions as $cityPosition) {
+            if (isset($cityPosition['x']) && isset($cityPosition['y'])) {
+                $position = new Position($cityPosition['x'], $cityPosition['y']);
+                $cityLevel = $cityPosition['level'] ?? 1;
+            } elseif (is_object($cityPosition) && isset($cityPosition->position) && $cityPosition->position instanceof Position) {
+                $position = $cityPosition->position;
+                $cityLevel = $cityPosition->level ?? 1;
+            } else {
+                throw new \InvalidArgumentException('Invalid cityPosition structure');
+            }
+            $visibleHexes = $calculator->calculateCityVisibility($position, $cityLevel);
+
+            foreach ($visibleHexes as $hex) {
+                $x = is_array($hex) ? $hex['x'] : $hex->x;
+                $y = is_array($hex) ? $hex['y'] : $hex->y;
+                $events[] = new VisibilityUpdated(
+                    $command->playerId,
+                    $x,
+                    $y,
                     VisibilityState::ACTIVE->value,
                     $command->updatedAt->format()
                 );
@@ -96,44 +104,47 @@ final class PlayerVisibility
     public function whenVisibilityUpdated(VisibilityUpdated $event): void
     {
         $this->playerId = new PlayerId($event->playerId);
-        $this->gameId = new GameId($event->gameId);
+        $hexKey = $event->x . ',' . $event->y;
         
-        $hexKey = $event->x . ':' . $event->y;
-        $state = VisibilityState::from($event->state);
-        
-        if ($state->isActive()) {
-            $this->visibleHexes[$hexKey] = new Position($event->x, $event->y);
-        } elseif ($state->isDiscovered()) {
-            $this->discoveredHexes[$hexKey] = new Position($event->x, $event->y);
+        if ($event->state === VisibilityState::ACTIVE->value) {
+            $this->visibleHexes[$hexKey] = true;
+            $this->discoveredHexes[$hexKey] = true;
+        } elseif ($event->state === VisibilityState::DISCOVERED->value) {
+            $this->discoveredHexes[$hexKey] = true;
         }
     }
 
     #[EventSourcingHandler]
     public function whenVisibilityRevealed(VisibilityRevealed $event): void
     {
-        $hexKey = $event->x . ':' . $event->y;
-        $this->discoveredHexes[$hexKey] = new Position($event->x, $event->y);
+        $this->playerId = new PlayerId($event->playerId);
+        $hexKey = $event->x . ',' . $event->y;
+        $this->discoveredHexes[$hexKey] = true;
     }
 
     public function isHexVisible(int $x, int $y): bool
     {
-        $hexKey = $x . ':' . $y;
-        return isset($this->visibleHexes[$hexKey]);
+        return isset($this->visibleHexes[$x . ',' . $y]);
     }
 
     public function isHexDiscovered(int $x, int $y): bool
     {
-        $hexKey = $x . ':' . $y;
-        return isset($this->discoveredHexes[$hexKey]);
+        return isset($this->discoveredHexes[$x . ',' . $y]);
     }
 
     public function getVisibleHexes(): array
     {
-        return array_values($this->visibleHexes);
+        return array_map(function ($key) {
+            [$x, $y] = explode(',', $key);
+            return new Position((int)$x, (int)$y);
+        }, array_keys($this->visibleHexes));
     }
 
     public function getDiscoveredHexes(): array
     {
-        return array_values($this->discoveredHexes);
+        return array_map(function ($key) {
+            [$x, $y] = explode(',', $key);
+            return new Position((int)$x, (int)$y);
+        }, array_keys($this->discoveredHexes));
     }
-} 
+}

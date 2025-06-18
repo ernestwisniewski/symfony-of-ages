@@ -6,7 +6,6 @@ final readonly class UnitWasMoved
     public function __construct(
         public string $unitId,
         public string $ownerId,
-        public string $gameId,
         public int    $fromX,
         public int    $fromY,
         public int    $toX,

@@ -4,6 +4,8 @@ namespace App\Application\Api\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Application\Exception\InvalidOperationException;
+use App\Application\Exception\ResourceNotFoundException;
 use App\Application\Game\Command\CreateGameCommand;
 use App\Application\Game\Command\JoinGameCommand;
 use App\Application\Game\Command\StartGameCommand;
@@ -16,8 +18,6 @@ use App\UI\Api\Resource\GameResource;
 use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\CommandBus;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class GameStateProcessor implements ProcessorInterface
@@ -36,7 +36,7 @@ final readonly class GameStateProcessor implements ProcessorInterface
             '/games' => $this->createGame($data, $userId),
             '/games/{gameId}/start' => $this->startGame($uriVariables['gameId']),
             '/games/{gameId}/join' => $this->joinGame($uriVariables['gameId'], $data, $userId),
-            default => throw new BadRequestHttpException('Unsupported operation'),
+            default => throw InvalidOperationException::unsupportedOperation($operation->getUriTemplate()),
         };
     }
 
@@ -59,7 +59,7 @@ final readonly class GameStateProcessor implements ProcessorInterface
                 startedAt: Timestamp::now()
             ));
         } catch (AggregateNotFoundException $e) {
-            throw new NotFoundHttpException("Game with ID $gameId not found");
+            throw ResourceNotFoundException::gameNotFound($gameId);
         }
     }
 
@@ -73,7 +73,7 @@ final readonly class GameStateProcessor implements ProcessorInterface
                 joinedAt: Timestamp::now()
             ));
         } catch (AggregateNotFoundException $e) {
-            throw new NotFoundHttpException("Game with ID $gameId not found");
+            throw ResourceNotFoundException::gameNotFound($gameId);
         }
     }
 }

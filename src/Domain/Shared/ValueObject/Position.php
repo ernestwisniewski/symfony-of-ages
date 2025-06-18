@@ -2,14 +2,22 @@
 
 namespace App\Domain\Shared\ValueObject;
 
-use DomainException;
+use App\Domain\Shared\Exception\DomainException;
+
+class InvalidPositionException extends DomainException
+{
+    public static function negative(int $x, int $y): self
+    {
+        return new self("Invalid position: ($x, $y)");
+    }
+}
 
 final readonly class Position
 {
     public function __construct(public int $x, public int $y)
     {
         if ($x < 0 || $y < 0) {
-            throw new DomainException("Invalid position");
+            throw InvalidPositionException::negative($x, $y);
         }
     }
 

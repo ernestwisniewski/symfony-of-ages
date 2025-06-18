@@ -6,7 +6,6 @@ use App\Application\Unit\Command\AttackUnitCommand;
 use App\Application\Unit\Command\CreateUnitCommand;
 use App\Application\Unit\Command\DestroyUnitCommand;
 use App\Application\Unit\Command\MoveUnitCommand;
-use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Position;
 use App\Domain\Unit\Event\UnitWasAttacked;
@@ -34,7 +33,6 @@ class Unit
     #[Identifier]
     private UnitId $unitId;
     private PlayerId $ownerId;
-    private GameId $gameId;
     private UnitType $type;
     private Position $position;
     private Health $health;
@@ -51,7 +49,6 @@ class Unit
             new UnitWasCreated(
                 unitId: (string)$command->unitId,
                 ownerId: (string)$command->ownerId,
-                gameId: (string)$command->gameId,
                 type: $command->type->value,
                 x: $command->position->x,
                 y: $command->position->y,
@@ -81,7 +78,6 @@ class Unit
             new UnitWasMoved(
                 unitId: (string)$this->unitId,
                 ownerId: (string)$this->ownerId,
-                gameId: (string)$this->gameId,
                 fromX: $this->position->x,
                 fromY: $this->position->y,
                 toX: $command->toPosition->x,
@@ -151,7 +147,6 @@ class Unit
     {
         $this->unitId = new UnitId($event->unitId);
         $this->ownerId = new PlayerId($event->ownerId);
-        $this->gameId = new GameId($event->gameId);
         $this->type = UnitType::from($event->type);
         $this->position = new Position($event->x, $event->y);
         $this->health = new Health($event->currentHealth, $event->maxHealth);

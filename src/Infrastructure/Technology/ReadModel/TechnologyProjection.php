@@ -105,7 +105,6 @@ final readonly class TechnologyProjection
         $playerTechnology = new PlayerTechnologyEntity(
             $event->playerId,
             $event->technologyId,
-            $event->gameId,
             $event->discoveredAt
         );
         $this->entityManager->persist($playerTechnology);

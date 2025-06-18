@@ -21,24 +21,21 @@ use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 final readonly class VisibilityProjection
 {
     public function __construct(
-        private EntityManagerInterface $entityManager,
+        private EntityManagerInterface     $entityManager,
         private PlayerVisibilityRepository $repository,
-        private ObjectMapperInterface $objectMapper
-    ) {
+        private ObjectMapperInterface      $objectMapper
+    )
+    {
     }
 
     #[QueryHandler]
     public function getPlayerVisibility(GetPlayerVisibilityQuery $query): array
     {
-        $entities = $this->repository->findByPlayerAndGame(
-            (string)$query->playerId,
-            (string)$query->gameId
-        );
-        
+        $entities = $this->repository->findByPlayerId((string)$query->playerId);
+
         return array_map(
             fn(PlayerVisibilityEntity $entity) => new PlayerVisibilityView(
                 $entity->playerId,
-                $entity->gameId,
                 $entity->x,
                 $entity->y,
                 $entity->state,
@@ -52,11 +49,10 @@ final readonly class VisibilityProjection
     public function getGameVisibility(GetGameVisibilityQuery $query): array
     {
         $entities = $this->repository->findByGameId((string)$query->gameId);
-        
+
         return array_map(
             fn(PlayerVisibilityEntity $entity) => new PlayerVisibilityView(
                 $entity->playerId,
-                $entity->gameId,
                 $entity->x,
                 $entity->y,
                 $entity->state,
@@ -71,13 +67,12 @@ final readonly class VisibilityProjection
     {
         $visibility = new PlayerVisibilityEntity(
             $event->playerId,
-            $event->gameId,
             $event->x,
             $event->y,
             $event->state,
             new DateTimeImmutable($event->updatedAt)
         );
-        
+
         $this->entityManager->persist($visibility);
         $this->entityManager->flush();
     }
@@ -87,14 +82,13 @@ final readonly class VisibilityProjection
     {
         $visibility = new PlayerVisibilityEntity(
             $event->playerId,
-            $event->gameId,
             $event->x,
             $event->y,
             'discovered',
             new DateTimeImmutable($event->revealedAt)
         );
-        
+
         $this->entityManager->persist($visibility);
         $this->entityManager->flush();
     }
-} 
+}

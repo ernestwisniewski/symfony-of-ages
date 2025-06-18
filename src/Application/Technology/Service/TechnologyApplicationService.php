@@ -7,7 +7,6 @@ use App\Application\Technology\Query\GetAllTechnologiesQuery;
 use App\Application\Technology\Query\GetAvailableTechnologiesQuery;
 use App\Application\Technology\Query\GetTechnologyDetailsQuery;
 use App\Application\Technology\Query\GetTechnologyQuery;
-use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Shared\ValueObject\Timestamp;
 use App\Domain\Technology\ValueObject\TechnologyId;
@@ -23,13 +22,12 @@ final readonly class TechnologyApplicationService
     {
     }
 
-    public function discoverTechnology(PlayerId $playerId, string $technologyType, GameId $gameId): array
+    public function discoverTechnology(PlayerId $playerId, string $technologyType): array
     {
         $technologyId = new TechnologyId($technologyType);
         $this->commandBus->send(new DiscoverTechnologyCommand(
             $playerId,
             $technologyId,
-            $gameId,
             Timestamp::now()
         ));
         return ['success' => true, 'message' => 'Technology discovered successfully'];

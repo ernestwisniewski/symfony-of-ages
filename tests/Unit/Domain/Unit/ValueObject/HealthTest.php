@@ -3,7 +3,7 @@
 namespace Tests\Unit\Domain\Unit\ValueObject;
 
 use App\Domain\Unit\ValueObject\Health;
-use DomainException;
+use App\Domain\Unit\ValueObject\InvalidHealthException;
 use PHPUnit\Framework\TestCase;
 
 class HealthTest extends TestCase
@@ -27,24 +27,24 @@ class HealthTest extends TestCase
 
     public function testThrowsExceptionForNegativeCurrent(): void
     {
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Health cannot be negative');
+        $this->expectException(InvalidHealthException::class);
+        $this->expectExceptionMessage('Health cannot be negative: -10');
 
         new Health(-10, 100);
     }
 
     public function testThrowsExceptionForZeroMaximum(): void
     {
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Maximum health must be positive');
+        $this->expectException(InvalidHealthException::class);
+        $this->expectExceptionMessage('Maximum health must be positive: 0');
 
         new Health(50, 0);
     }
 
     public function testThrowsExceptionWhenCurrentExceedsMaximum(): void
     {
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Current health cannot exceed maximum');
+        $this->expectException(InvalidHealthException::class);
+        $this->expectExceptionMessage('Current health (150) cannot exceed maximum (100)');
 
         new Health(150, 100);
     }
@@ -106,8 +106,8 @@ class HealthTest extends TestCase
     {
         $health = new Health(100, 100);
 
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Damage cannot be negative');
+        $this->expectException(InvalidHealthException::class);
+        $this->expectExceptionMessage('Damage cannot be negative: -10');
 
         $health->takeDamage(-10);
     }
@@ -134,8 +134,8 @@ class HealthTest extends TestCase
     {
         $health = new Health(50, 100);
 
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Healing cannot be negative');
+        $this->expectException(InvalidHealthException::class);
+        $this->expectExceptionMessage('Healing cannot be negative: -10');
 
         $health->heal(-10);
     }

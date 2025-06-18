@@ -9,6 +9,7 @@ use App\Domain\Game\Event\PlayerEndedTurn;
 use App\Domain\Game\Event\PlayerWasJoined;
 use App\Domain\Game\ValueObject\GameId;
 use App\Domain\Game\ValueObject\GameStatus;
+use App\Infrastructure\Exception\EntityNotFoundException;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewEntity;
 use App\Infrastructure\Game\ReadModel\Doctrine\GameViewRepository;
 use App\Infrastructure\Game\ReadModel\GameViewProjection;
@@ -16,7 +17,6 @@ use App\UI\Game\ViewModel\GameView;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 class GameViewProjectionTest extends TestCase
@@ -52,7 +52,7 @@ class GameViewProjectionTest extends TestCase
         $repository = $this->createMock(GameViewRepository::class);
         $repository->method('find')->willReturn(null);
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(EntityNotFoundException::class);
         $this->expectExceptionMessage('GameViewEntity for ID 11111111-1111-1111-1111-111111111111 not found');
 
         $projection = new GameViewProjection(

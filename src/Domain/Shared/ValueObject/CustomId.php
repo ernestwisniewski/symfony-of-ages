@@ -2,14 +2,14 @@
 
 namespace App\Domain\Shared\ValueObject;
 
-use InvalidArgumentException;
+use App\Domain\Shared\Exception\DomainException;
 
 final readonly class CustomId
 {
     public function __construct(public int $id)
     {
         if ($this->id <= 0) {
-            throw new InvalidArgumentException('User ID must be a positive integer');
+            throw InvalidCustomIdException::notPositive($this->id);
         }
     }
 
@@ -21,5 +21,13 @@ final readonly class CustomId
     public function equals(CustomId $other): bool
     {
         return $this->id === $other->id;
+    }
+}
+
+class InvalidCustomIdException extends DomainException
+{
+    public static function notPositive(int $id): self
+    {
+        return new self("Custom ID must be a positive integer. Given: $id");
     }
 }

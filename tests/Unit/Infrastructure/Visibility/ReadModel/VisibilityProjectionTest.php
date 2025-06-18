@@ -35,21 +35,19 @@ class VisibilityProjectionTest extends TestCase
     public function testGetPlayerVisibility(): void
     {
         $query = new GetPlayerVisibilityQuery(
-            new PlayerId('123e4567-e89b-12d3-a456-426614174001'),
-            new GameId('123e4567-e89b-12d3-a456-426614174002')
+            new PlayerId('123e4567-e89b-12d3-a456-426614174001')
         );
 
         $entities = [
-            new PlayerVisibilityEntity('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 5, 5, 'active', new DateTimeImmutable('2024-01-01T00:00:00Z')),
-            new PlayerVisibilityEntity('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 6, 6, 'discovered', new DateTimeImmutable('2024-01-01T00:00:00Z'))
+            new PlayerVisibilityEntity('123e4567-e89b-12d3-a456-426614174001', 5, 5, 'active', new \DateTimeImmutable('2024-01-01T00:00:00Z')),
+            new PlayerVisibilityEntity('123e4567-e89b-12d3-a456-426614174001', 6, 6, 'discovered', new \DateTimeImmutable('2024-01-01T00:00:00Z'))
         ];
 
         $this->repository->expects($this->once())
-            ->method('findByPlayerAndGame')
-            ->with('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002')
+            ->method('findByPlayerId')
+            ->with('123e4567-e89b-12d3-a456-426614174001')
             ->willReturn($entities);
 
-        // The projection doesn't use object mapper, so no expectations needed
         $this->objectMapper->expects($this->never())
             ->method('map');
 
@@ -58,22 +56,7 @@ class VisibilityProjectionTest extends TestCase
         $this->assertCount(2, $result);
         $this->assertInstanceOf(PlayerVisibilityView::class, $result[0]);
         $this->assertInstanceOf(PlayerVisibilityView::class, $result[1]);
-        
-        // Check first entity
         $this->assertEquals('123e4567-e89b-12d3-a456-426614174001', $result[0]->playerId);
-        $this->assertEquals('123e4567-e89b-12d3-a456-426614174002', $result[0]->gameId);
-        $this->assertEquals(5, $result[0]->x);
-        $this->assertEquals(5, $result[0]->y);
-        $this->assertEquals('active', $result[0]->state);
-        $this->assertEquals('2024-01-01T00:00:00Z', $result[0]->updatedAt);
-        
-        // Check second entity
-        $this->assertEquals('123e4567-e89b-12d3-a456-426614174001', $result[1]->playerId);
-        $this->assertEquals('123e4567-e89b-12d3-a456-426614174002', $result[1]->gameId);
-        $this->assertEquals(6, $result[1]->x);
-        $this->assertEquals(6, $result[1]->y);
-        $this->assertEquals('discovered', $result[1]->state);
-        $this->assertEquals('2024-01-01T00:00:00Z', $result[1]->updatedAt);
     }
 
     public function testGetGameVisibility(): void
@@ -81,8 +64,8 @@ class VisibilityProjectionTest extends TestCase
         $query = new GetGameVisibilityQuery(new GameId('123e4567-e89b-12d3-a456-426614174002'));
 
         $entities = [
-            new PlayerVisibilityEntity('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 5, 5, 'active', new DateTimeImmutable('2024-01-01T00:00:00Z')),
-            new PlayerVisibilityEntity('123e4567-e89b-12d3-a456-426614174003', '123e4567-e89b-12d3-a456-426614174002', 6, 6, 'discovered', new DateTimeImmutable('2024-01-01T00:00:00Z'))
+            new PlayerVisibilityEntity('123e4567-e89b-12d3-a456-426614174001', 5, 5, 'active', new \DateTimeImmutable('2024-01-01T00:00:00Z')),
+            new PlayerVisibilityEntity('123e4567-e89b-12d3-a456-426614174003', 6, 6, 'discovered', new \DateTimeImmutable('2024-01-01T00:00:00Z'))
         ];
 
         $this->repository->expects($this->once())
@@ -90,7 +73,6 @@ class VisibilityProjectionTest extends TestCase
             ->with('123e4567-e89b-12d3-a456-426614174002')
             ->willReturn($entities);
 
-        // The projection doesn't use object mapper, so no expectations needed
         $this->objectMapper->expects($this->never())
             ->method('map');
 
@@ -99,18 +81,12 @@ class VisibilityProjectionTest extends TestCase
         $this->assertCount(2, $result);
         $this->assertInstanceOf(PlayerVisibilityView::class, $result[0]);
         $this->assertInstanceOf(PlayerVisibilityView::class, $result[1]);
-        
-        // Check first entity
         $this->assertEquals('123e4567-e89b-12d3-a456-426614174001', $result[0]->playerId);
-        $this->assertEquals('123e4567-e89b-12d3-a456-426614174002', $result[0]->gameId);
         $this->assertEquals(5, $result[0]->x);
         $this->assertEquals(5, $result[0]->y);
         $this->assertEquals('active', $result[0]->state);
         $this->assertEquals('2024-01-01T00:00:00Z', $result[0]->updatedAt);
-        
-        // Check second entity
         $this->assertEquals('123e4567-e89b-12d3-a456-426614174003', $result[1]->playerId);
-        $this->assertEquals('123e4567-e89b-12d3-a456-426614174002', $result[1]->gameId);
         $this->assertEquals(6, $result[1]->x);
         $this->assertEquals(6, $result[1]->y);
         $this->assertEquals('discovered', $result[1]->state);
@@ -121,7 +97,6 @@ class VisibilityProjectionTest extends TestCase
     {
         $event = new VisibilityUpdated(
             '123e4567-e89b-12d3-a456-426614174001',
-            '123e4567-e89b-12d3-a456-426614174002',
             5,
             5,
             'active',
@@ -132,10 +107,10 @@ class VisibilityProjectionTest extends TestCase
             ->method('persist')
             ->with($this->callback(function (PlayerVisibilityEntity $entity) {
                 return $entity->playerId === '123e4567-e89b-12d3-a456-426614174001' &&
-                       $entity->gameId === '123e4567-e89b-12d3-a456-426614174002' &&
                        $entity->x === 5 &&
                        $entity->y === 5 &&
-                       $entity->state === 'active';
+                       $entity->state === 'active' &&
+                       $entity->updatedAt->format('Y-m-d\TH:i:s\Z') === '2024-01-01T00:00:00Z';
             }));
 
         $this->entityManager->expects($this->once())
@@ -148,7 +123,6 @@ class VisibilityProjectionTest extends TestCase
     {
         $event = new VisibilityRevealed(
             '123e4567-e89b-12d3-a456-426614174001',
-            '123e4567-e89b-12d3-a456-426614174002',
             5,
             5,
             '2024-01-01T00:00:00Z'
@@ -158,10 +132,10 @@ class VisibilityProjectionTest extends TestCase
             ->method('persist')
             ->with($this->callback(function (PlayerVisibilityEntity $entity) {
                 return $entity->playerId === '123e4567-e89b-12d3-a456-426614174001' &&
-                       $entity->gameId === '123e4567-e89b-12d3-a456-426614174002' &&
                        $entity->x === 5 &&
                        $entity->y === 5 &&
-                       $entity->state === 'discovered';
+                       $entity->state === 'discovered' &&
+                       $entity->updatedAt->format('Y-m-d\TH:i:s\Z') === '2024-01-01T00:00:00Z';
             }));
 
         $this->entityManager->expects($this->once())
@@ -173,13 +147,12 @@ class VisibilityProjectionTest extends TestCase
     public function testGetPlayerVisibilityWithEmptyResult(): void
     {
         $query = new GetPlayerVisibilityQuery(
-            new PlayerId('123e4567-e89b-12d3-a456-426614174001'),
-            new GameId('123e4567-e89b-12d3-a456-426614174002')
+            new PlayerId('123e4567-e89b-12d3-a456-426614174001')
         );
 
         $this->repository->expects($this->once())
-            ->method('findByPlayerAndGame')
-            ->with('123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002')
+            ->method('findByPlayerId')
+            ->with('123e4567-e89b-12d3-a456-426614174001')
             ->willReturn([]);
 
         $this->objectMapper->expects($this->never())
