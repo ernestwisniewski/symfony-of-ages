@@ -122,6 +122,8 @@ class UnitTest extends TestCase
         $this->assertEquals([
             new UnitWasMoved(
                 unitId: $unitId,
+                ownerId: $ownerId,
+                gameId: $gameId,
                 fromX: $fromPosition->x,
                 fromY: $fromPosition->y,
                 toX: $toPosition->x,
@@ -378,6 +380,8 @@ class UnitTest extends TestCase
                 ),
                 new UnitWasMoved(
                     $unitId,
+                    $ownerId,
+                    $gameId,
                     $initialPosition->x,
                     $initialPosition->y,
                     $newPosition->x,

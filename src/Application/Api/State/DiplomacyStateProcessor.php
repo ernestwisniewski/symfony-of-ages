@@ -29,13 +29,17 @@ final readonly class DiplomacyStateProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
-        match ($operation->getUriTemplate()) {
-            '/games/{gameId}/diplomacy/propose' => $this->proposeDiplomacy($uriVariables['gameId'], $data),
-            '/diplomacy/{diplomacyId}/accept' => $this->acceptDiplomacy($uriVariables['diplomacyId']),
-            '/diplomacy/{diplomacyId}/decline' => $this->declineDiplomacy($uriVariables['diplomacyId']),
-            '/diplomacy/{diplomacyId}/end' => $this->endDiplomacy($uriVariables['diplomacyId']),
-            default => null,
-        };
+        try {
+            match ($operation->getUriTemplate()) {
+                '/games/{gameId}/diplomacy/propose' => $this->proposeDiplomacy($uriVariables['gameId'], $data),
+                '/diplomacy/{diplomacyId}/accept' => $this->acceptDiplomacy($uriVariables['diplomacyId']),
+                '/diplomacy/{diplomacyId}/decline' => $this->declineDiplomacy($uriVariables['diplomacyId']),
+                '/diplomacy/{diplomacyId}/end' => $this->endDiplomacy($uriVariables['diplomacyId']),
+                default => null,
+            };
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
     }
 
     private function getCurrentPlayerId(string $gameId): PlayerId

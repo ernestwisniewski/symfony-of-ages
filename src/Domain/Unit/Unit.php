@@ -80,6 +80,8 @@ class Unit
         return [
             new UnitWasMoved(
                 unitId: (string)$this->unitId,
+                ownerId: (string)$this->ownerId,
+                gameId: (string)$this->gameId,
                 fromX: $this->position->x,
                 fromY: $this->position->y,
                 toX: $command->toPosition->x,

@@ -11,6 +11,7 @@ use App\Domain\Diplomacy\Event\DiplomacyAccepted;
 use App\Domain\Diplomacy\Event\DiplomacyDeclined;
 use App\Domain\Diplomacy\Event\DiplomacyEnded;
 use App\Domain\Diplomacy\Event\DiplomacyProposed;
+use App\Domain\Diplomacy\Policy\DiplomacyPolicy;
 use App\Domain\Diplomacy\ValueObject\AgreementType;
 use App\Domain\Diplomacy\ValueObject\DiplomacyId;
 use App\Domain\Game\ValueObject\GameId;
@@ -40,6 +41,7 @@ class DiplomacyAgreementTest extends TestCase
 
     public function testProposeDiplomacy(): void
     {
+        $policy = new DiplomacyPolicy();
         $command = new ProposeDiplomacyCommand(
             $this->diplomacyId,
             $this->initiatorId,
@@ -49,7 +51,7 @@ class DiplomacyAgreementTest extends TestCase
             $this->proposedAt
         );
 
-        $events = DiplomacyAgreement::propose($command);
+        $events = DiplomacyAgreement::propose($command, $policy);
 
         $this->assertCount(1, $events);
         $this->assertInstanceOf(DiplomacyProposed::class, $events[0]);
@@ -65,7 +67,8 @@ class DiplomacyAgreementTest extends TestCase
 
     public function testAcceptDiplomacy(): void
     {
-        $acceptedBy = new PlayerId(Uuid::v4()->toRfc4122());
+        $policy = new DiplomacyPolicy();
+        $acceptedBy = $this->targetId;
         $acceptedAt = Timestamp::now();
 
         $command = new AcceptDiplomacyCommand(
@@ -75,7 +78,7 @@ class DiplomacyAgreementTest extends TestCase
         );
 
         $diplomacy = $this->createDiplomacyInProposedState();
-        $events = $diplomacy->accept($command);
+        $events = $diplomacy->accept($command, $policy);
 
         $this->assertCount(1, $events);
         $this->assertInstanceOf(DiplomacyAccepted::class, $events[0]);
@@ -88,7 +91,8 @@ class DiplomacyAgreementTest extends TestCase
 
     public function testDeclineDiplomacy(): void
     {
-        $declinedBy = new PlayerId(Uuid::v4()->toRfc4122());
+        $policy = new DiplomacyPolicy();
+        $declinedBy = $this->targetId;
         $declinedAt = Timestamp::now();
 
         $command = new DeclineDiplomacyCommand(
@@ -98,7 +102,7 @@ class DiplomacyAgreementTest extends TestCase
         );
 
         $diplomacy = $this->createDiplomacyInProposedState();
-        $events = $diplomacy->decline($command);
+        $events = $diplomacy->decline($command, $policy);
 
         $this->assertCount(1, $events);
         $this->assertInstanceOf(DiplomacyDeclined::class, $events[0]);
@@ -111,7 +115,8 @@ class DiplomacyAgreementTest extends TestCase
 
     public function testEndDiplomacy(): void
     {
-        $endedBy = new PlayerId(Uuid::v4()->toRfc4122());
+        $policy = new DiplomacyPolicy();
+        $endedBy = $this->initiatorId;
         $endedAt = Timestamp::now();
 
         $command = new EndDiplomacyCommand(
@@ -121,7 +126,7 @@ class DiplomacyAgreementTest extends TestCase
         );
 
         $diplomacy = $this->createDiplomacyInAcceptedState();
-        $events = $diplomacy->end($command);
+        $events = $diplomacy->end($command, $policy);
 
         $this->assertCount(1, $events);
         $this->assertInstanceOf(DiplomacyEnded::class, $events[0]);

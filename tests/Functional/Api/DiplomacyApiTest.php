@@ -316,16 +316,18 @@ class DiplomacyApiTest extends BaseFunctionalTestCase
     // Helper to get diplomacy ID from the database
     private function getDiplomacyId(string $gameId, string $initiatorId, string $targetId): string
     {
-        // This would query the diplomacy view repository to get the actual diplomacy ID
-        // For now, return a deterministic UUID based on the parameters
-        $hash = md5($gameId . $initiatorId . $targetId);
-        return sprintf(
-            '%s-%s-%s-%s-%s',
-            substr($hash, 0, 8),
-            substr($hash, 8, 4),
-            substr($hash, 12, 4),
-            substr($hash, 16, 4),
-            substr($hash, 20, 12)
-        );
+        // Query the diplomacy view repository to get the actual diplomacy ID
+        $container = static::getContainer();
+        $repository = $container->get('App\Infrastructure\Diplomacy\ReadModel\Doctrine\DiplomacyViewRepository');
+        
+        $diplomacies = $repository->findByGameId($gameId);
+        
+        foreach ($diplomacies as $diplomacy) {
+            if ($diplomacy->initiatorId === $initiatorId && $diplomacy->targetId === $targetId) {
+                return $diplomacy->diplomacyId;
+            }
+        }
+        
+        throw new \RuntimeException('Diplomacy not found in database');
     }
 }
