@@ -2,20 +2,20 @@
 
 namespace App\Domain\Technology\ValueObject;
 
-use Symfony\Component\Uid\Uuid;
+use App\Domain\Technology\ValueObject\TechnologyType;
 
 final class TechnologyId
 {
-    private Uuid $uuid;
-
     public function __construct(public string $id)
     {
-        $this->uuid = Uuid::fromString($this->id);
+        if (!TechnologyType::tryFrom($this->id)) {
+            throw new \InvalidArgumentException('Invalid technology ID: ' . $this->id);
+        }
     }
 
     public function __toString(): string
     {
-        return $this->uuid->toRfc4122();
+        return $this->id;
     }
 
     public function isEqual(TechnologyId $other): bool

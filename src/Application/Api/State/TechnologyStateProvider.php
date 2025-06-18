@@ -6,7 +6,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Application\Technology\Query\GetAllTechnologiesQuery;
 use App\Application\Technology\Query\GetTechnologyDetailsQuery;
-use App\Application\Technology\Query\GetTechnologyTreeQuery;
+use App\Application\Technology\Query\GetTechnologyQuery;
 use App\Domain\Player\ValueObject\PlayerId;
 use App\Domain\Technology\ValueObject\TechnologyId;
 use App\UI\Api\Resource\TechnologyResource;
@@ -61,7 +61,7 @@ final readonly class TechnologyStateProvider implements ProviderInterface
     private function getPlayerTechnologies(string $playerId): array
     {
         try {
-            $technologyTreeView = $this->queryBus->send(new GetTechnologyTreeQuery(new PlayerId($playerId)));
+            $technologyTreeView = $this->queryBus->send(new GetTechnologyQuery(new PlayerId($playerId)));
         } catch (RuntimeException $e) {
             throw new NotFoundHttpException("Technology tree for player $playerId not found");
         }

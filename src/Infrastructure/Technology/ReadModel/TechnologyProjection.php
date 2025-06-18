@@ -5,14 +5,13 @@ namespace App\Infrastructure\Technology\ReadModel;
 use App\Application\Technology\Query\GetAllTechnologiesQuery;
 use App\Application\Technology\Query\GetAvailableTechnologiesQuery;
 use App\Application\Technology\Query\GetTechnologyDetailsQuery;
-use App\Application\Technology\Query\GetTechnologyTreeQuery;
+use App\Application\Technology\Query\GetTechnologyQuery;
 use App\Domain\Technology\Event\TechnologyWasDiscovered;
-use App\Domain\Technology\TechnologyTree;
+use App\Domain\Technology\Technology;
+use App\Domain\Technology\ValueObject\TechnologyType;
 use App\Infrastructure\Technology\ReadModel\Doctrine\PlayerTechnologyEntity;
 use App\Infrastructure\Technology\ReadModel\Doctrine\PlayerTechnologyRepository;
-use App\Infrastructure\Technology\Repository\TechnologyDefinitionRepository;
 use App\UI\Technology\ViewModel\PlayerTechnologyView;
-use App\UI\Technology\ViewModel\TechnologyTreeView;
 use App\UI\Technology\ViewModel\TechnologyView;
 use Doctrine\ORM\EntityManagerInterface;
 use Ecotone\EventSourcing\Attribute\Projection;
@@ -20,23 +19,22 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
-#[Projection("technology_projection", TechnologyTree::class)]
+#[Projection("technology_projection", Technology::class)]
 final readonly class TechnologyProjection
 {
     public function __construct(
-        private EntityManagerInterface         $entityManager,
-        private PlayerTechnologyRepository     $playerTechnologyRepository,
-        private TechnologyDefinitionRepository $technologyDefinitionRepository,
-        private ObjectMapperInterface          $objectMapper
+        private EntityManagerInterface     $entityManager,
+        private PlayerTechnologyRepository $playerTechnologyRepository,
+        private ObjectMapperInterface      $objectMapper
     )
     {
     }
 
     #[QueryHandler]
-    public function getTechnologyTree(GetTechnologyTreeQuery $query): TechnologyTreeView
+    public function getTechnologyTree(GetTechnologyQuery $query): TechnologyView
     {
         $playerTechnologies = $this->getPlayerTechnologies((string)$query->playerId);
-        $allTechnologies = $this->technologyDefinitionRepository->findAll();
+        $allTechnologies = $this->getAllTechnologyTypes();
         $unlockedTechnologyIds = array_map(
             fn(PlayerTechnologyView $pt) => $pt->technologyId,
             $playerTechnologies
@@ -46,11 +44,11 @@ final readonly class TechnologyProjection
             $unlockedTechnologyIds,
             100
         );
-        $technologyTreeView = new TechnologyTreeView();
+        $technologyTreeView = new TechnologyView();
         $technologyTreeView->playerId = (string)$query->playerId;
         $technologyTreeView->unlockedTechnologies = $unlockedTechnologyIds;
         $technologyTreeView->availableTechnologies = array_map(
-            fn($tech) => (string)$tech->id,
+            fn($tech) => $tech['id'],
             $availableTechnologies
         );
         $technologyTreeView->sciencePoints = 100;
@@ -61,7 +59,7 @@ final readonly class TechnologyProjection
     public function getAvailableTechnologies(GetAvailableTechnologiesQuery $query): array
     {
         $playerTechnologies = $this->getPlayerTechnologies((string)$query->playerId);
-        $allTechnologies = $this->technologyDefinitionRepository->findAll();
+        $allTechnologies = $this->getAllTechnologyTypes();
         $unlockedTechnologyIds = array_map(
             fn(PlayerTechnologyView $pt) => $pt->technologyId,
             $playerTechnologies
@@ -80,7 +78,7 @@ final readonly class TechnologyProjection
     #[QueryHandler]
     public function getAllTechnologies(GetAllTechnologiesQuery $query): array
     {
-        $allTechnologies = $this->technologyDefinitionRepository->findAll();
+        $allTechnologies = $this->getAllTechnologyTypes();
         return array_map(
             fn($technology) => $this->createTechnologyView($technology, []),
             $allTechnologies
@@ -90,10 +88,11 @@ final readonly class TechnologyProjection
     #[QueryHandler]
     public function getTechnologyDetails(GetTechnologyDetailsQuery $query): ?TechnologyView
     {
-        $technology = $this->technologyDefinitionRepository->findById($query->technologyId);
-        if (!$technology) {
+        $technologyType = TechnologyType::tryFrom((string)$query->technologyId);
+        if (!$technologyType) {
             return null;
         }
+        $technology = $this->createTechnologyFromType($technologyType);
         return $this->createTechnologyView($technology, []);
     }
 
@@ -131,15 +130,35 @@ final readonly class TechnologyProjection
         );
     }
 
+    private function getAllTechnologyTypes(): array
+    {
+        $technologies = [];
+        foreach (TechnologyType::cases() as $type) {
+            $technologies[] = $this->createTechnologyFromType($type);
+        }
+        return $technologies;
+    }
+
+    private function createTechnologyFromType(TechnologyType $type): array
+    {
+        return [
+            'id' => $type->value,
+            'name' => $type->getDisplayName(),
+            'description' => $type->getDescription(),
+            'cost' => $type->getCost(),
+            'prerequisites' => $type->getPrerequisites(),
+        ];
+    }
+
     private function getAvailableTechnologiesForPlayer(array $allTechnologies, array $unlockedTechnologyIds, int $availableSciencePoints): array
     {
         return array_filter(
             $allTechnologies,
             function ($technology) use ($unlockedTechnologyIds, $availableSciencePoints) {
-                if (in_array((string)$technology->id, $unlockedTechnologyIds, true)) {
+                if (in_array($technology['id'], $unlockedTechnologyIds, true)) {
                     return false;
                 }
-                if ($technology->cost > $availableSciencePoints) {
+                if ($technology['cost'] > $availableSciencePoints) {
                     return false;
                 }
                 return true;
@@ -147,20 +166,17 @@ final readonly class TechnologyProjection
         );
     }
 
-    private function createTechnologyView($technology, array $unlockedTechnologyIds): TechnologyView
+    private function createTechnologyView(array $technology, array $unlockedTechnologyIds): TechnologyView
     {
         $technologyView = new TechnologyView();
-        $technologyView->id = (string)$technology->id;
-        $technologyView->name = $technology->name;
-        $technologyView->description = $technology->description;
-        $technologyView->cost = $technology->cost;
-        $technologyView->prerequisites = $technology->getPrerequisitesIds();
-        $technologyView->effects = array_map(fn($effect) => [
-            'name' => $effect->getName(),
-            'description' => $effect->getDescription()
-        ], $technology->getEffects());
-        $technologyView->isUnlocked = in_array((string)$technology->id, $unlockedTechnologyIds, true);
-        $technologyView->isAvailable = !$technologyView->isUnlocked && $technology->cost <= 100;
+        $technologyView->id = $technology['id'];
+        $technologyView->name = $technology['name'];
+        $technologyView->description = $technology['description'];
+        $technologyView->cost = $technology['cost'];
+        $technologyView->prerequisites = $technology['prerequisites'];
+        $technologyView->effects = [];
+        $technologyView->isUnlocked = in_array($technology['id'], $unlockedTechnologyIds, true);
+        $technologyView->isAvailable = !$technologyView->isUnlocked && $technology['cost'] <= 100;
         return $technologyView;
     }
 }

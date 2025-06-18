@@ -2,19 +2,15 @@
 
 namespace App\Application\Technology\Event\Handler;
 
-use App\Domain\Technology\Effect\BonusEffect;
-use App\Domain\Technology\Effect\UnlockUnitEffect;
 use App\Domain\Technology\Event\TechnologyWasDiscovered;
-use App\Domain\Technology\Repository\TechnologyRepository;
-use App\Domain\Technology\ValueObject\TechnologyId;
+use App\Domain\Technology\ValueObject\TechnologyType;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\CommandBus;
 
 final readonly class ApplyTechnologyEffectHandler
 {
     public function __construct(
-        private TechnologyRepository $technologyRepository,
-        private CommandBus           $commandBus
+        private CommandBus $commandBus
     )
     {
     }
@@ -25,35 +21,88 @@ final readonly class ApplyTechnologyEffectHandler
         if (empty($event->technologyId)) {
             return;
         }
-        $technology = $this->technologyRepository->findBy(new TechnologyId($event->technologyId));
-        if (!$technology) {
+        
+        $technologyType = TechnologyType::tryFrom($event->technologyId);
+        if (!$technologyType) {
             return;
         }
-        foreach ($technology->getEffects() as $effect) {
-            $this->applyEffect($effect, $event);
-        }
+        
+        // For now, we'll just log that the technology was discovered
+        // In the future, you can add specific effects based on the technology type
+        $this->applyTechnologyEffects($technologyType, $event);
     }
 
-    private function applyEffect($effect, TechnologyWasDiscovered $event): void
+    private function applyTechnologyEffects(TechnologyType $technologyType, TechnologyWasDiscovered $event): void
     {
         $context = [
             'playerId' => $event->playerId,
             'gameId' => $event->gameId,
-            'technologyId' => $event->technologyId
+            'technologyId' => $event->technologyId,
+            'technologyType' => $technologyType
         ];
-        $effect->apply($context);
-        if ($effect instanceof UnlockUnitEffect) {
-            $this->handleUnlockUnitEffect($effect, $event);
-        } elseif ($effect instanceof BonusEffect) {
-            $this->handleBonusEffect($effect, $event);
-        }
+        
+        // Apply specific effects based on technology type
+        match ($technologyType) {
+            TechnologyType::AGRICULTURE => $this->applyAgricultureEffects($context),
+            TechnologyType::MINING => $this->applyMiningEffects($context),
+            TechnologyType::WRITING => $this->applyWritingEffects($context),
+            TechnologyType::IRON_WORKING => $this->applyIronWorkingEffects($context),
+            TechnologyType::MATHEMATICS => $this->applyMathematicsEffects($context),
+            TechnologyType::ARCHITECTURE => $this->applyArchitectureEffects($context),
+            TechnologyType::MILITARY_TACTICS => $this->applyMilitaryTacticsEffects($context),
+            TechnologyType::NAVIGATION => $this->applyNavigationEffects($context),
+            TechnologyType::PHILOSOPHY => $this->applyPhilosophyEffects($context),
+            TechnologyType::ENGINEERING => $this->applyEngineeringEffects($context),
+        };
     }
 
-    private function handleUnlockUnitEffect($effect, TechnologyWasDiscovered $event): void
+    private function applyAgricultureEffects(array $context): void
     {
+        // Apply agriculture-specific effects
     }
 
-    private function handleBonusEffect($effect, TechnologyWasDiscovered $event): void
+    private function applyMiningEffects(array $context): void
     {
+        // Apply mining-specific effects
+    }
+
+    private function applyWritingEffects(array $context): void
+    {
+        // Apply writing-specific effects
+    }
+
+    private function applyIronWorkingEffects(array $context): void
+    {
+        // Apply iron working-specific effects
+    }
+
+    private function applyMathematicsEffects(array $context): void
+    {
+        // Apply mathematics-specific effects
+    }
+
+    private function applyArchitectureEffects(array $context): void
+    {
+        // Apply architecture-specific effects
+    }
+
+    private function applyMilitaryTacticsEffects(array $context): void
+    {
+        // Apply military tactics-specific effects
+    }
+
+    private function applyNavigationEffects(array $context): void
+    {
+        // Apply navigation-specific effects
+    }
+
+    private function applyPhilosophyEffects(array $context): void
+    {
+        // Apply philosophy-specific effects
+    }
+
+    private function applyEngineeringEffects(array $context): void
+    {
+        // Apply engineering-specific effects
     }
 }

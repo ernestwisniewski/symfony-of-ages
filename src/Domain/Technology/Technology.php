@@ -2,77 +2,141 @@
 
 namespace App\Domain\Technology;
 
-use App\Domain\Shared\ValueObject\ValidationConstants;
+use App\Application\Technology\Command\CreateTechnologyCommand;
+use App\Application\Technology\Command\DiscoverTechnologyCommand;
+use App\Domain\Game\ValueObject\GameId;
+use App\Domain\Player\ValueObject\PlayerId;
+use App\Domain\Technology\Event\TechnologyWasDiscovered;
+use App\Domain\Technology\Exception\InsufficientResourcesException;
+use App\Domain\Technology\Exception\PrerequisiteNotMetException;
+use App\Domain\Technology\Exception\TechnologyAlreadyDiscoveredException;
+use App\Domain\Technology\Policy\TechnologyPolicy;
 use App\Domain\Technology\ValueObject\TechnologyId;
-use DomainException;
+use App\Domain\Technology\ValueObject\TechnologyType;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingHandler;
+use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Modelling\WithAggregateVersioning;
 
+#[EventSourcingAggregate]
 class Technology
 {
-    public TechnologyId $id;
-    public string $name;
-    public string $description;
-    public int $cost;
-    public array $prerequisites = [];
-    public array $effects = [];
+    use WithAggregateVersioning;
 
-    public static function create(
-        TechnologyId $id,
-        string       $name,
-        string       $description,
-        int          $cost,
-        array        $prerequisites = [],
-        array        $effects = []
-    ): self
+    #[Identifier]
+    private PlayerId $playerId;
+    private GameId $gameId;
+    private array $unlockedTechnologies = [];
+    private int $sciencePoints = 0;
+
+    public function __construct()
     {
-        $technology = new self();
-        $technology->id = $id;
-        $technology->name = $name;
-        $technology->description = $description;
-        $technology->cost = $cost;
-        $technology->prerequisites = $prerequisites;
-        $technology->effects = $effects;
-        $technology->validate();
-        return $technology;
     }
 
-    private function validate(): void
+    #[CommandHandler]
+    public static function create(CreateTechnologyCommand $command): array
     {
-        if (trim($this->name) === '' || mb_strlen($this->name) > ValidationConstants::MAX_TECHNOLOGY_NAME_LENGTH) {
-            throw new DomainException('Invalid technology name.');
+        return [
+            new TechnologyWasDiscovered(
+                technologyId: '',
+                playerId: (string)$command->playerId,
+                gameId: (string)$command->gameId,
+                discoveredAt: $command->createdAt->format()
+            )
+        ];
+    }
+
+    #[CommandHandler]
+    public function discoverTechnology(
+        DiscoverTechnologyCommand $command,
+        TechnologyPolicy         $prerequisitesPolicy
+    ): array
+    {
+        if ($this->hasTechnology($command->technologyId)) {
+            throw TechnologyAlreadyDiscoveredException::create($command->technologyId);
         }
-        if (trim($this->description) === '' || mb_strlen($this->description) > ValidationConstants::MAX_TECHNOLOGY_DESCRIPTION_LENGTH) {
-            throw new DomainException('Invalid technology description.');
+        
+        $technology = $this->getTechnologyDefinition($command->technologyId);
+        $missingPrerequisites = $prerequisitesPolicy->getMissingPrerequisites($technology, $this->unlockedTechnologies);
+        if (!empty($missingPrerequisites)) {
+            throw PrerequisiteNotMetException::create($command->technologyId, $missingPrerequisites);
         }
-        if ($this->cost < ValidationConstants::MIN_TECHNOLOGY_COST) {
-            throw new DomainException('Technology cost cannot be negative.');
+        
+        $availableSciencePoints = 100;
+        if ($availableSciencePoints < $technology['cost']) {
+            throw InsufficientResourcesException::create($command->technologyId, $technology['cost'], $availableSciencePoints);
         }
-        if ($this->cost > ValidationConstants::MAX_TECHNOLOGY_COST) {
-            throw new DomainException('Technology cost cannot exceed ' . ValidationConstants::MAX_TECHNOLOGY_COST);
+        
+        return [
+            new TechnologyWasDiscovered(
+                technologyId: (string)$command->technologyId,
+                playerId: (string)$this->playerId,
+                gameId: (string)$this->gameId,
+                discoveredAt: $command->discoveredAt->format()
+            )
+        ];
+    }
+
+    #[EventSourcingHandler]
+    public function whenTechnologyWasDiscovered(TechnologyWasDiscovered $event): void
+    {
+        if (empty($event->technologyId)) {
+            $this->playerId = new PlayerId($event->playerId);
+            $this->gameId = new GameId($event->gameId);
+            $this->unlockedTechnologies = [];
+            $this->sciencePoints = 0;
+        } else {
+            $this->unlockedTechnologies[] = new TechnologyId($event->technologyId);
         }
     }
 
-    public function hasPrerequisites(): bool
+    public function hasTechnology(TechnologyId $technologyId): bool
     {
-        return !empty($this->prerequisites);
+        return array_any(
+            $this->unlockedTechnologies,
+            fn(TechnologyId $id) => $id->isEqual($technologyId)
+        );
     }
 
-    public function getPrerequisitesIds(): array
+    public function getUnlockedTechnologies(): array
     {
-        return array_map(fn(TechnologyId $id) => (string)$id, $this->prerequisites);
+        return $this->unlockedTechnologies;
     }
 
-    public function hasEffects(): bool
+    public function getUnlockedTechnologyIds(): array
     {
-        return !empty($this->effects);
+        return array_map(fn(TechnologyId $id) => (string)$id, $this->unlockedTechnologies);
     }
 
-    public function getEffects(): array
+    public function getPlayerId(): PlayerId
     {
-        return $this->effects;
+        return $this->playerId;
     }
 
-    public function __toString(): string
+    public function getGameId(): GameId
     {
-        return $this->name;
+        return $this->gameId;
+    }
+
+    public function getSciencePoints(): int
+    {
+        return $this->sciencePoints;
+    }
+
+    private function getTechnologyDefinition(TechnologyId $technologyId): array
+    {
+        $technologyType = TechnologyType::tryFrom((string)$technologyId);
+        if (!$technologyType) {
+            throw new \InvalidArgumentException('Invalid technology ID: ' . (string)$technologyId);
+        }
+        
+        return [
+            'id' => (string)$technologyId,
+            'name' => $technologyType->getDisplayName(),
+            'description' => $technologyType->getDescription(),
+            'cost' => $technologyType->getCost(),
+            'prerequisites' => $technologyType->getPrerequisites(),
+        ];
     }
 }
